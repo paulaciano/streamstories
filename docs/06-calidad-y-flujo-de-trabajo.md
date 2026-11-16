@@ -46,7 +46,9 @@ flowchart LR
     A[checkout] --> B[JDK 25 + caché Maven] --> C[verificación de formato] --> D["build + tests<br/>(unitarios, integración, Modulith)"] --> E[reporte de cobertura]
 ```
 
-La rama `main` está protegida: solo acepta merges desde un PR con la CI en verde.
+- La rama `main` está protegida: solo acepta merges desde un PR con la CI en verde.
+- Las actions se fijan por SHA de commit (con la versión como comentario), y Dependabot las mantiene actualizadas. Así se evita que un tag modificado ejecute código inesperado ([referencia](https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)).
+- Los tests de integración necesitan Docker. Si no está disponible en la máquina local, se omiten (`@Testcontainers(disabledWithoutDocker = true)`); en la CI siempre corren.
 
 ## 6.4 Flujo de trabajo con Git
 

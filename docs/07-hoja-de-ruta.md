@@ -17,7 +17,7 @@ flowchart LR
 - `README.md`, `LICENSE`, `.editorconfig`, `.env.example`.
 - `compose.yaml` con PostgreSQL, Flyway configurado y `ddl-auto=validate`.
 - `application.yaml` con perfiles, virtual threads activados y `open-in-view` desactivado.
-- Módulo `shared`: manejo global de errores con `ProblemDetail` y auditoría JPA.
+- Módulo `shared`: manejo global de errores con `ProblemDetail` y configuración de OpenAPI.
 - springdoc-openapi (Swagger UI) y Actuator limitado a `health` e `info`.
 - Spring Modulith con `ModularityTests` y la base de Testcontainers.
 - CI en GitHub Actions, Spotless, Dependabot y plantilla de PR.
@@ -43,6 +43,8 @@ flowchart LR
 | Como admin, quiero retirar contenido | Retiro y vuelvo a ofrecer películas, series y episodios. El borrado solo se permite si el contenido no tiene actividad (C9 a C12). |
 | Como usuario, quiero explorar el catálogo | `/catalog` devuelve películas y series disponibles, mezcladas, filtrables y paginadas. |
 | Como usuario, quiero ver una serie | Veo el detalle con sus temporadas y sus episodios disponibles. |
+
+**Base técnica:** entidad base con identificador UUID y auditoría (`createdAt`, `updatedAt`), que se incorpora junto con las primeras entidades.
 
 **Datos de ejemplo:** el perfil `dev` carga un catálogo de prueba para explorar la API desde el primer momento.
 

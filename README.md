@@ -2,6 +2,7 @@
 
 **API REST para una plataforma de catálogo audiovisual bajo demanda:** películas, series con temporadas y episodios, géneros, progreso de reproducción, puntuaciones y recomendaciones personalizadas.
 
+[![CI](https://github.com/paulaciano/streamstories/actions/workflows/ci.yml/badge.svg)](https://github.com/paulaciano/streamstories/actions/workflows/ci.yml)
 ![Java 25](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
@@ -41,6 +42,26 @@ flowchart LR
 
 **Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 5 · Testcontainers · GitHub Actions.
 
+## Cómo ejecutarlo
+
+**Requisitos:** [JDK 25](https://adoptium.net/temurin/releases/?version=25) y [Docker](https://docs.docker.com/get-started/get-docker/).
+
+```bash
+git clone https://github.com/paulaciano/streamstories.git
+cd streamstories
+./mvnw spring-boot:run
+```
+
+Spring Boot levanta PostgreSQL automáticamente con Docker Compose. Con la aplicación en marcha:
+
+| | URL |
+|---|---|
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Especificación OpenAPI | http://localhost:8080/v3/api-docs |
+| Estado de salud | http://localhost:8080/actuator/health |
+
+**Tests:** `./mvnw verify` ejecuta el formato, los tests unitarios y de integración (con [Testcontainers](https://testcontainers.com/)) y la verificación de módulos. Para formatear el código: `./mvnw spotless:apply`.
+
 ## Documentación
 
 La documentación completa está en [`docs/`](docs/README.md):
@@ -66,9 +87,6 @@ El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
 | 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ⏳ |
 | 3 · Inteligencia | Recomendaciones personalizadas | ⏳ |
 | 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ⏳ |
-
-Las instrucciones para ejecutar el proyecto en local se agregan al completar la fase 0.
-
 ## Licencia
 
 Distribuido bajo la [licencia MIT](LICENSE).
