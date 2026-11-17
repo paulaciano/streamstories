@@ -1,8 +1,5 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
-import com.amillioncodelines.streamstories.catalog.application.AvailabilityCommand;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.EpisodeView;
-import com.amillioncodelines.streamstories.catalog.application.EpisodeCommand;
 import com.amillioncodelines.streamstories.catalog.application.SeriesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,20 +32,20 @@ class EpisodeController {
     @Operation(
             summary = "Detalle de un episodio",
             description = "`playable` indica si el episodio y su serie están disponibles.")
-    EpisodeView get(@PathVariable UUID id, Authentication authentication) {
-        return series.getEpisode(id, Audiences.of(authentication));
+    EpisodeResponse get(@PathVariable UUID id, Authentication authentication) {
+        return EpisodeResponse.from(series.getEpisode(id, Audiences.of(authentication)));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Reemplaza los datos de un episodio (ADMIN)")
-    EpisodeView replace(@PathVariable UUID id, @Valid @RequestBody EpisodeCommand command) {
-        return series.replaceEpisode(id, command);
+    EpisodeResponse replace(@PathVariable UUID id, @Valid @RequestBody EpisodeRequest request) {
+        return EpisodeResponse.from(series.replaceEpisode(id, request.toCommand()));
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Retira un episodio o lo vuelve a ofrecer (ADMIN)")
-    EpisodeView changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityCommand command) {
-        return series.changeEpisodeAvailability(id, command);
+    EpisodeResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
+        return EpisodeResponse.from(series.changeEpisodeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")

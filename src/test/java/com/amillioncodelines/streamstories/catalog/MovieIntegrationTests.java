@@ -7,6 +7,7 @@ import com.amillioncodelines.streamstories.support.ApiClient;
 import com.amillioncodelines.streamstories.support.ApiClient.Session;
 import com.amillioncodelines.streamstories.support.CatalogApi;
 import com.amillioncodelines.streamstories.support.IntegrationTest;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,22 @@ class MovieIntegrationTests {
         assertThat(result).hasStatusOk();
         assertThat(result).bodyJson().extractingPath("$.title").isEqualTo("New title");
         assertThat(result).bodyJson().extractingPath("$.genres[*].id").asArray().containsExactly(comedy);
+    }
+
+    @Test
+    void shouldUpdateTheModificationDateWhenOnlyTheGenresChange() {
+        Session admin = api.adminSession();
+        String drama = catalog.createGenre(admin, "Drama " + token());
+        String comedy = catalog.createGenre(admin, "Comedy " + token());
+        String json = CatalogApi.movieJson("Same data", 2000, drama);
+        MvcTestResult created = catalog.send(admin, "POST", "/api/v1/movies", json);
+        String id = ApiClient.read(created, "$.id");
+        Instant createdAt = Instant.parse(ApiClient.read(created, "$.updatedAt"));
+
+        MvcTestResult replaced = catalog.send(admin, "PUT", "/api/v1/movies/" + id, json.replace(drama, comedy));
+
+        assertThat(replaced).hasStatusOk();
+        assertThat(Instant.parse(ApiClient.read(replaced, "$.updatedAt"))).isAfter(createdAt);
     }
 
     @Test

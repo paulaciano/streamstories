@@ -2,6 +2,7 @@ package com.amillioncodelines.streamstories.catalog.application;
 
 import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.MovieView;
+import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
 import com.amillioncodelines.streamstories.catalog.domain.MediaItemSpecifications;
 import com.amillioncodelines.streamstories.catalog.domain.MediaType;
@@ -58,9 +59,9 @@ public class MovieService {
     }
 
     @Transactional
-    public MovieView changeAvailability(UUID id, AvailabilityCommand command) {
+    public MovieView changeAvailability(UUID id, Availability availability) {
         Movie movie = find(id);
-        movie.changeAvailability(command.availability());
+        movie.changeAvailability(availability);
         return MovieView.of(movies.saveAndFlush(movie), Audience.ADMIN);
     }
 

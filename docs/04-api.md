@@ -245,7 +245,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `forbidden` | 403 | El rol no alcanza para la operación. |
 | `account-inactive` | 403 | La cuenta está desactivada. La respuesta indica si hay una solicitud de reactivación pendiente. |
 | `not-found` | 404 | El recurso no existe. |
-| `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso o violación de una constraint de la base. |
+| `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso, violación de una constraint de la base o modificación concurrente del mismo recurso. |
 | `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 

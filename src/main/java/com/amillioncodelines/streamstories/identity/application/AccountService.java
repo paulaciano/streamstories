@@ -4,6 +4,7 @@ import com.amillioncodelines.streamstories.identity.domain.AccountStatus;
 import com.amillioncodelines.streamstories.identity.domain.ReactivationRequestRepository;
 import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import com.amillioncodelines.streamstories.identity.domain.RefreshTokenRepository;
+import com.amillioncodelines.streamstories.identity.domain.RevocationReason;
 import com.amillioncodelines.streamstories.identity.domain.Role;
 import com.amillioncodelines.streamstories.identity.domain.User;
 import com.amillioncodelines.streamstories.identity.domain.UserRepository;
@@ -91,7 +92,7 @@ public class AccountService {
             ensureNotLastActiveAdmin(user);
         }
         user.deactivate();
-        refreshTokens.revokeAllForUser(user.getId(), clock.instant());
+        refreshTokens.revokeAllForUser(user.getId(), clock.instant(), RevocationReason.ACCOUNT_DEACTIVATED);
     }
 
     /** Rule I9: the system can never be left without an active administrator. */

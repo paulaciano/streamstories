@@ -88,6 +88,29 @@ class SeriesIntegrationTests {
     }
 
     @Test
+    void shouldRejectNumbersAboveTheLimitInsteadOfTruncatingThem() {
+        Session admin = api.adminSession();
+        String id = catalog.createSeries(admin, "Huge " + token(), 2020);
+
+        assertThat(catalog.send(admin, "POST", "/api/v1/series/" + id + "/seasons", """
+                        {"number": 65537}
+                        """))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+        catalog.addSeason(admin, id, 1);
+        assertThat(catalog.send(
+                        admin,
+                        "POST",
+                        "/api/v1/series/" + id + "/seasons/1/episodes",
+                        CatalogApi.episodeJson(1000, "Too far")))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+        assertThat(catalog.get(admin, "/api/v1/series/" + id))
+                .bodyJson()
+                .extractingPath("$.seasons[*].number")
+                .asArray()
+                .containsExactly(1);
+    }
+
+    @Test
     void shouldHideRetiredEpisodesFromViewersButKeepThemReachableById() {
         Session admin = api.adminSession();
         String id = catalog.createSeries(admin, "Partial " + token(), 2020);

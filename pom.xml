@@ -45,6 +45,8 @@
         <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
         <palantir-java-format.version>2.103.0</palantir-java-format.version>
         <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
+        <!-- ./mvnw spring-boot:run uses the dev profile; override with -Dspring-boot.run.profiles=... -->
+        <spring-boot.run.profiles>dev</spring-boot.run.profiles>
     </properties>
 
     <dependencyManagement>

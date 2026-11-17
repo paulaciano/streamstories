@@ -1,9 +1,6 @@
 spring:
   application:
     name: streamstories
-  profiles:
-    # Local runs use the dev profile unless SPRING_PROFILES_ACTIVE says otherwise.
-    default: dev
   threads:
     virtual:
       enabled: true
@@ -14,6 +11,10 @@ spring:
     properties:
       # Lazy collections (such as the genres of each title in a page) load in batches instead of one query per row.
       hibernate.default_batch_fetch_size: 50
+  web:
+    # Validation messages are always in Spanish, like the rest of the problem details.
+    locale: es
+    locale-resolver: fixed
   jackson:
     deserialization:
       fail-on-unknown-properties: true

@@ -132,6 +132,12 @@ src/test/java/com/amillioncodelines/streamstories/
 | `application` | Orquesta los casos de uso, define las transacciones (`@Transactional`) y aplica las reglas | Nada que dependa de HTTP |
 | `domain` | Entidades con comportamiento e invariantes, y repositorios | Depender de otras capas |
 
+**Tipos que cruzan las capas:**
+
+- `api` define sus propios `record` de request (con Bean Validation) y de response, y los convierte desde y hacia `application`.
+- `application` recibe valores simples o *commands* (`record` sin anotaciones de validación) y devuelve *views* de solo lectura. Nunca devuelve entidades.
+- `api` puede usar enums y objetos de valor del dominio (`Role`, `Availability`, `CatalogFilter`), pero nunca entidades ni repositorios.
+
 ## 2.6 Decisiones transversales
 
 | Tema | Decisión |
@@ -144,7 +150,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Identificadores** | `UUID` en todas las entidades expuestas, preferentemente ordenables en el tiempo (v7). No permiten adivinar recursos ajenos ni revelan volúmenes. |
 | **Fechas** | `Instant` en Java y `timestamptz` en PostgreSQL, siempre en UTC. |
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |
-| **Configuración** | `application.yaml` con perfiles: `dev` (el perfil por defecto al correr localmente), `test` (lo activa Maven al ejecutar los tests) y `prod`. Los secretos se reciben solo por variables de entorno; solo `dev` y `test` traen valores propios, que no sirven fuera de esos entornos. |
+| **Configuración** | `application.yaml` con perfiles: `dev` (lo activa `./mvnw spring-boot:run`), `test` (lo activa Maven al ejecutar los tests) y `prod`. Los secretos se reciben solo por variables de entorno; solo `dev` y `test` traen valores propios, que no sirven fuera de esos entornos. La aplicación empaquetada no activa ningún perfil por defecto, así que sin la clave JWT no arranca. |
 | **Virtual threads** | Activados (`spring.threads.virtual.enabled=true`): dan alta concurrencia con código bloqueante simple ([JEP 444](https://openjdk.org/jeps/444)). |
 | **Logs** | Formato estructurado JSON ([ECS](https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.structured)) en el perfil `prod`. Nunca se loguean contraseñas ni tokens. |
 

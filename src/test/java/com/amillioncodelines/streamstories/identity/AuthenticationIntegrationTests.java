@@ -142,6 +142,24 @@ class AuthenticationIntegrationTests {
     }
 
     @Test
+    void shouldNotEndOtherSessionsWhenALoggedOutTokenIsPresentedAgain() {
+        var laptop = api.newUserSession();
+        var phone = api.loginAs(laptop.email(), DEFAULT_PASSWORD);
+        mvc.post()
+                .uri("/api/v1/auth/logout")
+                .header(HttpHeaders.AUTHORIZATION, laptop.bearer())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"refreshToken": "%s"}
+                        """.formatted(laptop.refreshToken()))
+                .exchange();
+
+        assertThat(api.refresh(laptop.refreshToken())).hasStatus(HttpStatus.UNAUTHORIZED);
+
+        assertThat(api.refresh(phone.refreshToken())).hasStatusOk();
+    }
+
+    @Test
     void shouldRejectUnknownRefreshTokens() {
         assertThat(api.refresh("unknown-token"))
                 .hasStatus(HttpStatus.UNAUTHORIZED)

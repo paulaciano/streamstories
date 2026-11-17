@@ -31,7 +31,9 @@ public abstract class BaseEntity {
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) {
             return false;
         }
-        return id != null && id.equals(((BaseEntity) other).id);
+        // getId() instead of the field: on a lazy proxy the field is null and only the getter is intercepted.
+        UUID thisId = getId();
+        return thisId != null && thisId.equals(((BaseEntity) other).getId());
     }
 
     @Override

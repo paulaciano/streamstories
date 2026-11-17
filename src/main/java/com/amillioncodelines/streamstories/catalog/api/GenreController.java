@@ -1,7 +1,5 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.GenreView;
-import com.amillioncodelines.streamstories.catalog.application.GenreCommand;
 import com.amillioncodelines.streamstories.catalog.application.GenreService;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
 import com.amillioncodelines.streamstories.shared.web.Pageables;
@@ -42,28 +40,29 @@ class GenreController {
 
     @GetMapping
     @Operation(summary = "Lista de géneros")
-    PageResponse<GenreView> list(@ParameterObject Pageable pageable) {
-        return PageResponse.of(genres.list(Pageables.restrictSort(pageable, SORTABLE, DEFAULT_SORT)), genre -> genre);
+    PageResponse<GenreResponse> list(@ParameterObject Pageable pageable) {
+        return PageResponse.of(
+                genres.list(Pageables.restrictSort(pageable, SORTABLE, DEFAULT_SORT)), GenreResponse::from);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Detalle de un género")
-    GenreView get(@PathVariable UUID id) {
-        return genres.get(id);
+    GenreResponse get(@PathVariable UUID id) {
+        return GenreResponse.from(genres.get(id));
     }
 
     @PostMapping
     @Operation(summary = "Crea un género (ADMIN). El slug se genera a partir del nombre.")
-    ResponseEntity<GenreView> create(@Valid @RequestBody GenreCommand command) {
-        GenreView genre = genres.create(command);
+    ResponseEntity<GenreResponse> create(@Valid @RequestBody GenreRequest request) {
+        GenreResponse genre = GenreResponse.from(genres.create(request.name()));
         return ResponseEntity.created(URI.create("/api/v1/genres/" + genre.id()))
                 .body(genre);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Cambia el nombre de un género (ADMIN)")
-    GenreView rename(@PathVariable UUID id, @Valid @RequestBody GenreCommand command) {
-        return genres.rename(id, command);
+    GenreResponse rename(@PathVariable UUID id, @Valid @RequestBody GenreRequest request) {
+        return GenreResponse.from(genres.rename(id, request.name()));
     }
 
     @DeleteMapping("/{id}")

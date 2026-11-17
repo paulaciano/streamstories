@@ -1,8 +1,5 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
-import com.amillioncodelines.streamstories.catalog.application.AvailabilityCommand;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.MovieView;
-import com.amillioncodelines.streamstories.catalog.application.MovieCommand;
 import com.amillioncodelines.streamstories.catalog.application.MovieService;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
@@ -43,7 +40,7 @@ class MovieController {
 
     @GetMapping
     @Operation(summary = "Lista películas, filtrables por género y texto")
-    PageResponse<MovieView> list(
+    PageResponse<MovieResponse> list(
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String q,
             @Parameter(description = "Solo para ADMIN") @RequestParam(required = false) Availability availability,
@@ -51,35 +48,35 @@ class MovieController {
             Authentication authentication) {
         var filter = new CatalogFilter(genre, null, q, availability);
         var page = movies.list(filter, Audiences.of(authentication), TitleSorting.restrict(pageable));
-        return PageResponse.of(page, movie -> movie);
+        return PageResponse.of(page, MovieResponse::from);
     }
 
     @GetMapping("/{id}")
     @Operation(
             summary = "Detalle de una película",
             description = "Una película retirada sigue accesible por id, sin URL de video para un USER.")
-    MovieView get(@PathVariable UUID id, Authentication authentication) {
-        return movies.get(id, Audiences.of(authentication));
+    MovieResponse get(@PathVariable UUID id, Authentication authentication) {
+        return MovieResponse.from(movies.get(id, Audiences.of(authentication)));
     }
 
     @PostMapping
     @Operation(summary = "Crea una película (ADMIN)")
-    ResponseEntity<MovieView> create(@Valid @RequestBody MovieCommand command) {
-        MovieView movie = movies.create(command);
+    ResponseEntity<MovieResponse> create(@Valid @RequestBody MovieRequest request) {
+        MovieResponse movie = MovieResponse.from(movies.create(request.toCommand()));
         return ResponseEntity.created(URI.create("/api/v1/movies/" + movie.id()))
                 .body(movie);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Reemplaza los datos de una película, incluidos sus géneros (ADMIN)")
-    MovieView replace(@PathVariable UUID id, @Valid @RequestBody MovieCommand command) {
-        return movies.replace(id, command);
+    MovieResponse replace(@PathVariable UUID id, @Valid @RequestBody MovieRequest request) {
+        return MovieResponse.from(movies.replace(id, request.toCommand()));
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Retira una película o la vuelve a ofrecer (ADMIN)")
-    MovieView changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityCommand command) {
-        return movies.changeAvailability(id, command);
+    MovieResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
+        return MovieResponse.from(movies.changeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")

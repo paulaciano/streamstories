@@ -26,6 +26,11 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
             + " and u.status = com.amillioncodelines.streamstories.identity.domain.AccountStatus.ACTIVE")
     List<User> lockActiveAdmins();
 
+    /** Locks one user, to serialize concurrent operations on the same account. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select u from User u where u.id = :id")
+    Optional<User> lockById(UUID id);
+
     /** Lightweight lookup used on every authenticated request. */
     @Query("select new com.amillioncodelines.streamstories.identity.domain.AccountSnapshot(u.id, u.role, u.status)"
             + " from User u where u.id = :id")

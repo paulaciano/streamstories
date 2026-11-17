@@ -1,14 +1,5 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
-import com.amillioncodelines.streamstories.catalog.application.AvailabilityCommand;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.EpisodeView;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeasonView;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesSummaryView;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesView;
-import com.amillioncodelines.streamstories.catalog.application.EpisodeCommand;
-import com.amillioncodelines.streamstories.catalog.application.SeasonCommand;
-import com.amillioncodelines.streamstories.catalog.application.SeasonUpdateCommand;
-import com.amillioncodelines.streamstories.catalog.application.SeriesCommand;
 import com.amillioncodelines.streamstories.catalog.application.SeriesService;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
@@ -49,7 +40,7 @@ class SeriesController {
 
     @GetMapping
     @Operation(summary = "Lista series, filtrables por género y texto")
-    PageResponse<SeriesSummaryView> list(
+    PageResponse<SeriesSummaryResponse> list(
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String q,
             @Parameter(description = "Solo para ADMIN") @RequestParam(required = false) Availability availability,
@@ -57,33 +48,33 @@ class SeriesController {
             Authentication authentication) {
         var filter = new CatalogFilter(genre, null, q, availability);
         var page = series.list(filter, Audiences.of(authentication), TitleSorting.restrict(pageable));
-        return PageResponse.of(page, item -> item);
+        return PageResponse.of(page, SeriesSummaryResponse::from);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Detalle de una serie con el resumen de sus temporadas")
-    SeriesView get(@PathVariable UUID id, Authentication authentication) {
-        return series.get(id, Audiences.of(authentication));
+    SeriesResponse get(@PathVariable UUID id, Authentication authentication) {
+        return SeriesResponse.from(series.get(id, Audiences.of(authentication)));
     }
 
     @PostMapping
     @Operation(summary = "Crea una serie (ADMIN)")
-    ResponseEntity<SeriesView> create(@Valid @RequestBody SeriesCommand command) {
-        SeriesView created = series.create(command);
+    ResponseEntity<SeriesResponse> create(@Valid @RequestBody SeriesRequest request) {
+        SeriesResponse created = SeriesResponse.from(series.create(request.toCommand()));
         return ResponseEntity.created(URI.create("/api/v1/series/" + created.id()))
                 .body(created);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Reemplaza los datos de una serie, incluidos sus géneros (ADMIN)")
-    SeriesView replace(@PathVariable UUID id, @Valid @RequestBody SeriesCommand command) {
-        return series.replace(id, command);
+    SeriesResponse replace(@PathVariable UUID id, @Valid @RequestBody SeriesRequest request) {
+        return SeriesResponse.from(series.replace(id, request.toCommand()));
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Retira una serie completa o la vuelve a ofrecer (ADMIN)")
-    SeriesView changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityCommand command) {
-        return series.changeAvailability(id, command);
+    SeriesResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
+        return SeriesResponse.from(series.changeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")
@@ -95,23 +86,23 @@ class SeriesController {
 
     @GetMapping("/{id}/seasons/{number}")
     @Operation(summary = "Una temporada con sus episodios")
-    SeasonView getSeason(@PathVariable UUID id, @PathVariable int number, Authentication authentication) {
-        return series.getSeason(id, number, Audiences.of(authentication));
+    SeasonResponse getSeason(@PathVariable UUID id, @PathVariable int number, Authentication authentication) {
+        return SeasonResponse.from(series.getSeason(id, number, Audiences.of(authentication)));
     }
 
     @PostMapping("/{id}/seasons")
     @Operation(summary = "Agrega una temporada (ADMIN)")
-    ResponseEntity<SeasonView> addSeason(@PathVariable UUID id, @Valid @RequestBody SeasonCommand command) {
-        SeasonView season = series.addSeason(id, command);
+    ResponseEntity<SeasonResponse> addSeason(@PathVariable UUID id, @Valid @RequestBody SeasonRequest request) {
+        SeasonResponse season = SeasonResponse.from(series.addSeason(id, request.number(), request.title()));
         return ResponseEntity.created(URI.create("/api/v1/series/%s/seasons/%d".formatted(id, season.number())))
                 .body(season);
     }
 
     @PutMapping("/{id}/seasons/{number}")
-    @Operation(summary = "Modifica una temporada (ADMIN)")
-    SeasonView updateSeason(
-            @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody SeasonUpdateCommand command) {
-        return series.updateSeason(id, number, command);
+    @Operation(summary = "Modifica el título de una temporada (ADMIN)")
+    SeasonResponse updateSeason(
+            @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody SeasonUpdateRequest request) {
+        return SeasonResponse.from(series.updateSeason(id, number, request.title()));
     }
 
     @DeleteMapping("/{id}/seasons/{number}")
@@ -123,9 +114,9 @@ class SeriesController {
 
     @PostMapping("/{id}/seasons/{number}/episodes")
     @Operation(summary = "Agrega un episodio a una temporada (ADMIN)")
-    ResponseEntity<EpisodeView> addEpisode(
-            @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody EpisodeCommand command) {
-        EpisodeView episode = series.addEpisode(id, number, command);
+    ResponseEntity<EpisodeResponse> addEpisode(
+            @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody EpisodeRequest request) {
+        EpisodeResponse episode = EpisodeResponse.from(series.addEpisode(id, number, request.toCommand()));
         return ResponseEntity.created(URI.create("/api/v1/episodes/" + episode.id()))
                 .body(episode);
     }

@@ -27,7 +27,9 @@ import org.springframework.stereotype.Component;
 @Component
 class TokenIssuer {
 
+    /** Informative for clients; authorization always uses the current role stored in the database. */
     static final String ROLE_CLAIM = "role";
+
     private static final int REFRESH_TOKEN_BYTES = 32;
 
     private final JwtEncoder jwtEncoder;

@@ -4,6 +4,7 @@ import com.amillioncodelines.streamstories.identity.domain.ReactivationRequestRe
 import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import com.amillioncodelines.streamstories.identity.domain.RefreshToken;
 import com.amillioncodelines.streamstories.identity.domain.RefreshTokenRepository;
+import com.amillioncodelines.streamstories.identity.domain.RevocationReason;
 import com.amillioncodelines.streamstories.identity.domain.User;
 import com.amillioncodelines.streamstories.identity.domain.UserRepository;
 import com.amillioncodelines.streamstories.shared.error.ConflictException;
@@ -50,8 +51,12 @@ public class AuthenticationService {
         this.clock = clock;
     }
 
-    /** Creates an active {@code USER} account (rules I1, I2 and I8). */
-    @Transactional
+    /**
+     * Creates an active {@code USER} account (rules I1, I2 and I8).
+     *
+     * <p>Not transactional on purpose: hashing the password takes about 100 ms and must not hold a database connection.
+     * Two concurrent registrations with the same email are still caught by the unique constraint.
+     */
     public UserView register(String email, String password, String displayName) {
         if (CredentialsVerifier.exceedsMaxLength(password)) {
             throw new InvalidRequestException(
@@ -61,15 +66,18 @@ public class AuthenticationService {
         if (users.existsByEmail(normalizedEmail)) {
             throw new ConflictException("Ya existe una cuenta con ese email.");
         }
-        User user = users.saveAndFlush(User.register(normalizedEmail, passwordEncoder.encode(password), displayName));
+        String passwordHash = passwordEncoder.encode(password);
+        User user = users.saveAndFlush(User.register(normalizedEmail, passwordHash, displayName));
         return UserView.of(user);
     }
 
     /**
      * Issues a token pair for valid credentials of an active account. For an inactive account, the
      * {@code account-inactive} problem is only returned once the credentials are known to be correct.
+     *
+     * <p>Not transactional on purpose, so the password check does not hold a database connection; each repository
+     * call runs in its own short transaction.
      */
-    @Transactional
     public IssuedTokens login(String email, String password) {
         User user = credentials.verify(email, password);
         if (!user.isActive()) {
@@ -80,10 +88,13 @@ public class AuthenticationService {
     }
 
     /**
-     * Exchanges a valid refresh token for a new pair and revokes the old one. Presenting a token that was already
-     * revoked is treated as theft: every refresh token of the user is revoked.
+     * Exchanges a valid refresh token for a new pair and revokes the old one.
      *
-     * <p>The transaction must commit even when the request is rejected, so the revocation of a reused token family is
+     * <p>Presenting a token that was already <em>rotated</em> is treated as theft: every refresh token of the user is
+     * revoked. Tokens that are expired, or were revoked by a logout or a deactivation, are just rejected, so a stale
+     * client cannot end the sessions of the legitimate one.
+     *
+     * <p>The transaction must commit even when the request is rejected, so the revocation of a stolen token family is
      * not rolled back.
      */
     @Transactional(noRollbackFor = UnauthorizedException.class)
@@ -94,16 +105,26 @@ public class AuthenticationService {
                 .orElseThrow(() -> new UnauthorizedException(INVALID_REFRESH_TOKEN));
         User user = token.getUser();
 
-        if (token.isRevoked() || refreshTokens.revokeIfActive(token.getId(), now) == 0) {
-            int revoked = refreshTokens.revokeAllForUser(user.getId(), now);
-            log.warn(
-                    "Reuse of a revoked refresh token detected; revoked {} token(s) of user {}", revoked, user.getId());
+        if (token.isRevoked()) {
+            if (token.wasRotated()) {
+                revokeStolenFamily(user, now);
+            }
             throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
         if (token.isExpired(now) || !user.isActive()) {
             throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
         }
+        if (refreshTokens.revokeIfActive(token.getId(), now, RevocationReason.ROTATED) == 0) {
+            // Another request revoked it between the read and the update: the same token was presented twice.
+            revokeStolenFamily(user, now);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+        }
         return tokenIssuer.issueFor(user);
+    }
+
+    private void revokeStolenFamily(User user, Instant now) {
+        int revoked = refreshTokens.revokeAllForUser(user.getId(), now, RevocationReason.REUSE_DETECTED);
+        log.warn("Reuse of a rotated refresh token detected; revoked {} token(s) of user {}", revoked, user.getId());
     }
 
     /** Revokes the given refresh token if it belongs to the user. Unknown or foreign tokens are silently ignored. */
@@ -112,6 +133,7 @@ public class AuthenticationService {
         refreshTokens
                 .findByTokenHash(TokenIssuer.hash(refreshToken))
                 .filter(token -> token.getUser().getId().equals(userId))
-                .ifPresent(token -> refreshTokens.revokeIfActive(token.getId(), clock.instant()));
+                .ifPresent(
+                        token -> refreshTokens.revokeIfActive(token.getId(), clock.instant(), RevocationReason.LOGOUT));
     }
 }

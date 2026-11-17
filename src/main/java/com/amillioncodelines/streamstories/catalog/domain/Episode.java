@@ -50,8 +50,8 @@ public class Episode extends BaseEntity {
     }
 
     final void update(int newNumber, EpisodeDetails details) {
-        if (newNumber < 1) {
-            throw new IllegalArgumentException("Episode numbers start at 1");
+        if (newNumber < 1 || newNumber > Season.MAX_NUMBER) {
+            throw new IllegalArgumentException("Episode numbers go from 1 to " + Season.MAX_NUMBER);
         }
         if (details.durationSeconds() <= 0) {
             throw new IllegalArgumentException("durationSeconds must be positive");

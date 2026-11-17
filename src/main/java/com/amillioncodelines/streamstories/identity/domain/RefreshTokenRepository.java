@@ -16,12 +16,17 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     /**
      * Revokes a token only if it is still valid. Returns {@code 0} when another request revoked it first, which lets
      * the caller detect concurrent reuse.
+     *
+     * <p>The persistence context is not cleared, so entities loaded earlier in the transaction stay managed. Callers
+     * must not rely on the in-memory state of the revoked token afterwards.
      */
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update RefreshToken t set t.revokedAt = :now where t.id = :id and t.revokedAt is null")
-    int revokeIfActive(UUID id, Instant now);
+    @Modifying(flushAutomatically = true)
+    @Query("update RefreshToken t set t.revokedAt = :now, t.revocationReason = :reason"
+            + " where t.id = :id and t.revokedAt is null")
+    int revokeIfActive(UUID id, Instant now, RevocationReason reason);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update RefreshToken t set t.revokedAt = :now where t.user.id = :userId and t.revokedAt is null")
-    int revokeAllForUser(UUID userId, Instant now);
+    @Modifying(flushAutomatically = true)
+    @Query("update RefreshToken t set t.revokedAt = :now, t.revocationReason = :reason"
+            + " where t.user.id = :userId and t.revokedAt is null")
+    int revokeAllForUser(UUID userId, Instant now, RevocationReason reason);
 }

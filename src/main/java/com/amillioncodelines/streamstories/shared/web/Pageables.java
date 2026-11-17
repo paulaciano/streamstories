@@ -9,10 +9,13 @@ import org.springframework.data.domain.Sort;
 /** Helpers to keep client-controlled pagination within the documented limits. */
 public final class Pageables {
 
+    private static final Sort TIE_BREAKER = Sort.by("id");
+
     private Pageables() {}
 
     /**
      * Validates that every sort property is in the allowed list and applies a default sort when none was requested.
+     * The identifier is always added as the last criterion, so pages are stable when values tie.
      *
      * @throws InvalidRequestException if the request sorts by a property that is not allowed
      */
@@ -28,6 +31,6 @@ public final class Pageables {
             }
         }
         Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : defaultSort;
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
     }
 }

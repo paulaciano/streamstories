@@ -113,6 +113,30 @@ class AccountLifecycleIntegrationTests {
     }
 
     @Test
+    void shouldFilterReactivationRequestsByStatus() {
+        Session user = api.newUserSession();
+        deactivateOwnAccount(user);
+        String requestId = ApiClient.read(api.requestReactivation(user.email(), DEFAULT_PASSWORD), "$.id");
+        Session admin = api.adminSession();
+        resolve(admin, requestId, "reject");
+
+        assertThat(mvc.get()
+                        .uri("/api/v1/admin/reactivation-requests?size=100")
+                        .header(HttpHeaders.AUTHORIZATION, admin.bearer()))
+                .bodyJson()
+                .extractingPath("$.content[*].id")
+                .asArray()
+                .doesNotContain(requestId);
+        assertThat(mvc.get()
+                        .uri("/api/v1/admin/reactivation-requests?status=REJECTED&size=100")
+                        .header(HttpHeaders.AUTHORIZATION, admin.bearer()))
+                .bodyJson()
+                .extractingPath("$.content[*].id")
+                .asArray()
+                .contains(requestId);
+    }
+
+    @Test
     void shouldRejectReactivationRequestsForActiveAccounts() {
         Session user = api.newUserSession();
 
