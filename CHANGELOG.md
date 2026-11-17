@@ -6,6 +6,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-11-17
+
 ### Added
 
 - Documentación del producto, la arquitectura y las decisiones de diseño (ADR).
@@ -19,3 +21,6 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
   - Tests de integración con Testcontainers.
   - CI con GitHub Actions, formato automático con Spotless y cobertura con JaCoCo.
   - Dependabot, plantilla de pull request y EditorConfig.
+
+[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/paulaciano/streamstories/releases/tag/v0.0.1
