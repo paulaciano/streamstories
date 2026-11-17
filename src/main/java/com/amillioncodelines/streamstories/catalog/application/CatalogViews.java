@@ -102,10 +102,7 @@ public final class CatalogViews {
         }
     }
 
-    /**
-     * @param episodeCount episodes the audience can see: only available ones for viewers
-     */
-    public record SeasonSummaryView(int number, String title, int episodeCount) {}
+    public record SeasonSummaryView(int number, String title, Availability availability, int episodeCount) {}
 
     public record SeriesView(
             UUID id,
@@ -121,10 +118,12 @@ public final class CatalogViews {
 
         static SeriesView of(Series series, Audience audience) {
             List<SeasonSummaryView> seasons = series.getSeasons().stream()
+                    .filter(season -> audience.seesRetiredContent() || season.isAvailable())
                     .map(season -> new SeasonSummaryView(
                             season.getNumber(),
                             season.getTitle(),
-                            visibleEpisodes(season, audience).size()))
+                            season.getAvailability(),
+                            season.getEpisodes().size()))
                     .toList();
             return new SeriesView(
                     series.getId(),
@@ -140,26 +139,28 @@ public final class CatalogViews {
         }
     }
 
-    public record EpisodeSummaryView(
-            UUID id, int number, String title, int durationSeconds, Availability availability) {}
+    public record EpisodeSummaryView(UUID id, int number, String title, int durationSeconds) {}
 
-    public record SeasonView(UUID seriesId, int number, String title, List<EpisodeSummaryView> episodes) {
+    /** A season is reachable by its number even when retired, flagged as such (rule C9). */
+    public record SeasonView(
+            UUID seriesId, int number, String title, Availability availability, List<EpisodeSummaryView> episodes) {
 
-        static SeasonView of(Season season, Audience audience) {
-            List<EpisodeSummaryView> episodes = visibleEpisodes(season, audience).stream()
+        static SeasonView of(Season season) {
+            List<EpisodeSummaryView> episodes = season.getEpisodes().stream()
                     .map(episode -> new EpisodeSummaryView(
-                            episode.getId(),
-                            episode.getNumber(),
-                            episode.getTitle(),
-                            episode.getDurationSeconds(),
-                            episode.getAvailability()))
+                            episode.getId(), episode.getNumber(), episode.getTitle(), episode.getDurationSeconds()))
                     .toList();
-            return new SeasonView(season.getSeries().getId(), season.getNumber(), season.getTitle(), episodes);
+            return new SeasonView(
+                    season.getSeries().getId(),
+                    season.getNumber(),
+                    season.getTitle(),
+                    season.getAvailability(),
+                    episodes);
         }
     }
 
     /**
-     * @param playable whether the episode and its series are both available
+     * @param playable whether the episode's season and series are both available
      */
     public record EpisodeView(
             UUID id,
@@ -171,7 +172,6 @@ public final class CatalogViews {
             String synopsis,
             int durationSeconds,
             String videoUrl,
-            Availability availability,
             boolean playable) {
 
         static EpisodeView of(Episode episode, Audience audience) {
@@ -187,15 +187,8 @@ public final class CatalogViews {
                     episode.getSynopsis(),
                     episode.getDurationSeconds(),
                     showVideo ? episode.getVideoUrl() : null,
-                    episode.getAvailability(),
                     episode.isPlayable());
         }
-    }
-
-    private static List<Episode> visibleEpisodes(Season season, Audience audience) {
-        return season.getEpisodes().stream()
-                .filter(episode -> audience.seesRetiredContent() || episode.isAvailable())
-                .toList();
     }
 
     private static List<GenreView> genreViews(MediaItem item) {

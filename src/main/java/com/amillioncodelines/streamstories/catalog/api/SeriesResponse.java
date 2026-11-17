@@ -18,14 +18,13 @@ record SeriesResponse(
         Instant createdAt,
         Instant updatedAt) {
 
-    /**
-     * @param episodeCount episodes visible to the caller: only available ones for a viewer
-     */
-    record SeasonSummary(int number, String title, int episodeCount) {}
+    /** Viewers only see available seasons; administrators see every season. */
+    record SeasonSummary(int number, String title, Availability availability, int episodeCount) {}
 
     static SeriesResponse from(SeriesView series) {
         List<SeasonSummary> seasons = series.seasons().stream()
-                .map(season -> new SeasonSummary(season.number(), season.title(), season.episodeCount()))
+                .map(season -> new SeasonSummary(
+                        season.number(), season.title(), season.availability(), season.episodeCount()))
                 .toList();
         return new SeriesResponse(
                 series.id(),

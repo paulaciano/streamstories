@@ -89,6 +89,7 @@ erDiagram
         uuid series_id FK
         smallint number "único por serie"
         varchar title "opcional"
+        varchar availability "AVAILABLE | RETIRED"
     }
     EPISODE {
         uuid id PK
@@ -98,7 +99,6 @@ erDiagram
         text synopsis
         int duration_seconds
         varchar video_url
-        varchar availability "AVAILABLE | RETIRED"
     }
 
     WATCH_PROGRESS {
@@ -170,11 +170,11 @@ Además hay dos índices únicos parciales: `(user_id, movie_id)` y `(user_id, e
 
 ### Disponibilidad en lugar de borrado
 
-El contenido que deja de ofrecerse no se borra: cambia su `availability` a `RETIRED` ([ADR-0009](adr/0009-retiro-de-contenido.md)). La disponibilidad está en `media_item` (películas y series completas) y en `episode` (episodios sueltos).
+El contenido que deja de ofrecerse no se borra: cambia su `availability` a `RETIRED` ([ADR-0011](adr/0011-retiro-por-temporada.md)). La disponibilidad está en `media_item` (películas y series completas) y en `season` (temporadas completas). Los episodios no se retiran sueltos.
 
 Un contenido es **reproducible** si:
-- **Película:** `movie.availability = AVAILABLE`.
-- **Episodio:** `episode.availability = AVAILABLE` **y** su serie tiene `availability = AVAILABLE`.
+- **Película:** su `availability` es `AVAILABLE`.
+- **Episodio:** su temporada **y** su serie tienen `availability = AVAILABLE`.
 
 ### Usuario y cuenta son la misma entidad
 
@@ -202,7 +202,7 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C6 | Películas y episodios tienen una duración mayor que 0. | `CHECK` + validación |
 | C7 | Una serie puede existir sin temporadas, por ejemplo mientras se carga. | — |
 | C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |
-| C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID, indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
+| C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID (una temporada, por su número), indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
 | C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
 | C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada, por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
 | C12 | Un contenido retirado puede volver a estar disponible. | — |

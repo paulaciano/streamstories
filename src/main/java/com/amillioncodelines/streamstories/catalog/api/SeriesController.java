@@ -86,8 +86,8 @@ class SeriesController {
 
     @GetMapping("/{id}/seasons/{number}")
     @Operation(summary = "Una temporada con sus episodios")
-    SeasonResponse getSeason(@PathVariable UUID id, @PathVariable int number, Authentication authentication) {
-        return SeasonResponse.from(series.getSeason(id, number, Audiences.of(authentication)));
+    SeasonResponse getSeason(@PathVariable UUID id, @PathVariable int number) {
+        return SeasonResponse.from(series.getSeason(id, number));
     }
 
     @PostMapping("/{id}/seasons")
@@ -103,6 +103,13 @@ class SeriesController {
     SeasonResponse updateSeason(
             @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody SeasonUpdateRequest request) {
         return SeasonResponse.from(series.updateSeason(id, number, request.title()));
+    }
+
+    @PatchMapping("/{id}/seasons/{number}")
+    @Operation(summary = "Retira una temporada completa o la vuelve a ofrecer (ADMIN)")
+    SeasonResponse changeSeasonAvailability(
+            @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody AvailabilityRequest request) {
+        return SeasonResponse.from(series.changeSeasonAvailability(id, number, request.availability()));
     }
 
     @DeleteMapping("/{id}/seasons/{number}")

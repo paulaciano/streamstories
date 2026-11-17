@@ -67,10 +67,10 @@ class AuthorizationIntegrationTests {
                 Arguments.of(HttpMethod.DELETE, "/api/v1/series/" + ID),
                 Arguments.of(HttpMethod.POST, "/api/v1/series/" + ID + "/seasons"),
                 Arguments.of(HttpMethod.PUT, "/api/v1/series/" + ID + "/seasons/1"),
+                Arguments.of(HttpMethod.PATCH, "/api/v1/series/" + ID + "/seasons/1"),
                 Arguments.of(HttpMethod.DELETE, "/api/v1/series/" + ID + "/seasons/1"),
                 Arguments.of(HttpMethod.POST, "/api/v1/series/" + ID + "/seasons/1/episodes"),
                 Arguments.of(HttpMethod.PUT, "/api/v1/episodes/" + ID),
-                Arguments.of(HttpMethod.PATCH, "/api/v1/episodes/" + ID),
                 Arguments.of(HttpMethod.DELETE, "/api/v1/episodes/" + ID));
     }
 

@@ -94,9 +94,10 @@ public class SeriesService {
 
     // Seasons
 
+    /** Retired seasons are still reachable by number, flagged as such (rule C9). */
     @Transactional(readOnly = true)
-    public SeasonView getSeason(UUID seriesId, int number, Audience audience) {
-        return SeasonView.of(findSeason(findSeries(seriesId), number), audience);
+    public SeasonView getSeason(UUID seriesId, int number) {
+        return SeasonView.of(findSeason(findSeries(seriesId), number));
     }
 
     /** Season numbers are unique within the series and start at 1 (rule C4). */
@@ -106,14 +107,22 @@ public class SeriesService {
         Season season = series.addSeason(number, title);
         // The series is managed: flushing persists the new season itself. A merge (save) would persist a copy.
         seriesRepository.flush();
-        return SeasonView.of(season, Audience.ADMIN);
+        return SeasonView.of(season);
     }
 
     @Transactional
     public SeasonView updateSeason(UUID seriesId, int number, String title) {
         Season season = findSeason(findSeries(seriesId), number);
         season.rename(title);
-        return SeasonView.of(season, Audience.ADMIN);
+        return SeasonView.of(season);
+    }
+
+    /** Retiring a season makes all its episodes unplayable, without touching them or their activity. */
+    @Transactional
+    public SeasonView changeSeasonAvailability(UUID seriesId, int number, Availability availability) {
+        Season season = findSeason(findSeries(seriesId), number);
+        season.changeAvailability(availability);
+        return SeasonView.of(season);
     }
 
     /** Only an empty season can be deleted. */
@@ -145,13 +154,6 @@ public class SeriesService {
         Episode episode = findEpisode(id);
         episode.getSeason().updateEpisode(episode, command.number(), details(command));
         episodes.flush();
-        return EpisodeView.of(episode, Audience.ADMIN);
-    }
-
-    @Transactional
-    public EpisodeView changeEpisodeAvailability(UUID id, Availability availability) {
-        Episode episode = findEpisode(id);
-        episode.changeAvailability(availability);
         return EpisodeView.of(episode, Audience.ADMIN);
     }
 

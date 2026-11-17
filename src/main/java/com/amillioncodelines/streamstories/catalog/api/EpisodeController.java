@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +30,7 @@ class EpisodeController {
     @GetMapping("/{id}")
     @Operation(
             summary = "Detalle de un episodio",
-            description = "`playable` indica si el episodio y su serie están disponibles.")
+            description = "`playable` indica si la temporada y la serie del episodio están disponibles.")
     EpisodeResponse get(@PathVariable UUID id, Authentication authentication) {
         return EpisodeResponse.from(series.getEpisode(id, Audiences.of(authentication)));
     }
@@ -40,12 +39,6 @@ class EpisodeController {
     @Operation(summary = "Reemplaza los datos de un episodio (ADMIN)")
     EpisodeResponse replace(@PathVariable UUID id, @Valid @RequestBody EpisodeRequest request) {
         return EpisodeResponse.from(series.replaceEpisode(id, request.toCommand()));
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Retira un episodio o lo vuelve a ofrecer (ADMIN)")
-    EpisodeResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
-        return EpisodeResponse.from(series.changeEpisodeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")
