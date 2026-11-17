@@ -6,8 +6,6 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
-## [0.0.1] - 2026-11-17
-
 ### Added
 
 - Cuentas y autenticación (fase 1):
@@ -22,6 +20,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 ### Changed
 
 - Los errores de autenticación, autorización y constraints de la base también responden con Problem Details.
+
+## [0.0.1] - 2026-11-17
 
 ### Added
 
