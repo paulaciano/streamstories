@@ -7,10 +7,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Exercises the global error handling through a probe controller that triggers each error type. */
 @WebMvcTest(GlobalExceptionHandlerTests.ProbeController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandlerTests.ProbeController.class)
 class GlobalExceptionHandlerTests {
 
@@ -108,6 +114,46 @@ class GlobalExceptionHandlerTests {
         assertThat(result).bodyText().doesNotContain("secret-internal-detail");
     }
 
+    @Test
+    void shouldMapAuthenticationFailuresTo401WithBearerChallenge() {
+        assertThat(mvc.get().uri("/probe/unauthenticated"))
+                .hasStatus(HttpStatus.UNAUTHORIZED)
+                .hasHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:unauthorized");
+    }
+
+    @Test
+    void shouldMapAccessDeniedTo403() {
+        assertThat(mvc.get().uri("/probe/forbidden"))
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:forbidden");
+    }
+
+    @Test
+    void shouldMapDatabaseConstraintViolationsTo409WithoutLeakingDetails() {
+        MvcTestResult result = mvc.get().uri("/probe/constraint").exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.CONFLICT)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:conflict");
+        assertThat(result).bodyText().doesNotContain("uk_secret_constraint");
+    }
+
+    @Test
+    void shouldReportInvalidParameterValuesAsValidationErrors() {
+        assertThat(mvc.get().uri("/probe/items/not-a-number"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.detail")
+                .isEqualTo("El parámetro 'number' tiene un valor inválido.");
+    }
+
     record ProbeRequest(@NotBlank String title, @Positive int durationSeconds) {}
 
     @RestController
@@ -123,8 +169,16 @@ class GlobalExceptionHandlerTests {
             switch (id) {
                 case "conflict" -> throw new ConflictException("Already exists");
                 case "boom" -> throw new IllegalStateException("secret-internal-detail");
+                case "unauthenticated" -> throw new BadCredentialsException("bad token");
+                case "forbidden" -> throw new AccessDeniedException("denied");
+                case "constraint" -> throw new DataIntegrityViolationException("uk_secret_constraint");
                 default -> throw new ResourceNotFoundException("Movie %s not found".formatted(id));
             }
+        }
+
+        @GetMapping("/probe/items/{number}")
+        int item(@PathVariable int number) {
+            return number;
         }
     }
 }

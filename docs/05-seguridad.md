@@ -63,7 +63,7 @@ Mientras la cuenta está inactiva:
 - el usuario puede crear una solicitud de reactivación con `POST /auth/reactivation-requests`, enviando sus credenciales. Si ya hay una pendiente, se devuelve esa misma;
 - un `ADMIN` revisa las solicitudes pendientes y las aprueba o las rechaza. Al aprobar una, la cuenta vuelve a `ACTIVE` y el usuario puede iniciar sesión normalmente.
 
-**Efecto inmediato de la desactivación.** Un access token emitido antes de desactivar la cuenta sigue siendo criptográficamente válido hasta que vence (como máximo 15 minutos). Para que la desactivación se aplique en el momento, un filtro verifica en cada request que el usuario siga `ACTIVE`. Es una consulta liviana que se puede cachear unos segundos.
+**Efecto inmediato de los cambios de cuenta.** Un access token emitido antes de desactivar la cuenta sigue siendo criptográficamente válido hasta que vence (como máximo 15 minutos). Para que la desactivación se aplique en el momento, un filtro verifica en cada request que el usuario siga `ACTIVE`. El mismo filtro toma el rol **actual** de la base de datos, no el del token, así que promover o degradar a un usuario también tiene efecto inmediato. Es una consulta liviana por request, que se puede cachear unos segundos si hiciera falta.
 
 ## 5.3 Autorización
 
@@ -82,14 +82,14 @@ Mientras la cuenta está inactiva:
 
 | Área | Práctica |
 |------|----------|
-| Contraseñas | Hash con BCrypt a través de [`DelegatingPasswordEncoder`](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html), que permite migrar de algoritmo. Longitud mínima: 8 caracteres. |
-| Secretos | La clave de firma JWT y las credenciales de la base se reciben solo por variables de entorno. Los archivos `.env` no se versionan. |
+| Contraseñas | Hash con BCrypt a través de [`DelegatingPasswordEncoder`](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html), que permite migrar de algoritmo. Longitud: de 8 caracteres a 72 bytes, el máximo que BCrypt procesa. |
+| Secretos | La clave de firma JWT (`STREAMSTORIES_SECURITY_JWT_SECRET`, al menos 32 caracteres) y las credenciales de la base se reciben solo por variables de entorno. Fuera del perfil de desarrollo no hay valores por defecto: si falta la clave, la aplicación no arranca. Los archivos `.env` no se versionan. |
 | Fuerza bruta | Límite de intentos de login (fase 4). |
 | CORS | Desactivado por defecto. Se habilita con una lista explícita de orígenes si hace falta. |
 | CSRF | Desactivado: la autenticación va por header `Bearer`, no por cookies de sesión ([referencia](https://docs.spring.io/spring-security/reference/features/exploits/csrf.html#csrf-when)). |
 | Actuator | Solo se exponen `health` e `info`. |
 | Headers | Se usan los [headers de seguridad por defecto](https://docs.spring.io/spring-security/reference/features/exploits/headers.html) de Spring Security. |
-| Errores | No incluyen stack traces ni revelan si un email existe. |
+| Errores | No incluyen stack traces ni revelan si un email existe. Si el email no existe, igual se verifica la contraseña contra un hash de relleno, para que el tiempo de respuesta tampoco lo delate. |
 | Dependencias | [Dependabot](https://docs.github.com/code-security/dependabot) mantiene las actualizaciones y las alertas de vulnerabilidades. |
 | Logs | Nunca se loguean contraseñas, tokens ni el header `Authorization`. |
 

@@ -2,24 +2,21 @@ package com.amillioncodelines.streamstories;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.amillioncodelines.streamstories.support.TestcontainersConfiguration;
+import com.amillioncodelines.streamstories.support.ApiClient;
+import com.amillioncodelines.streamstories.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Import(TestcontainersConfiguration.class)
-@Testcontainers(disabledWithoutDocker = true)
+@IntegrationTest
 class StreamstoriesApplicationTests {
 
     @Autowired
     MockMvcTester mvc;
+
+    @Autowired
+    ApiClient api;
 
     @Test
     void shouldReportHealthyWhenDatabaseIsReachable() {
@@ -31,7 +28,7 @@ class StreamstoriesApplicationTests {
     }
 
     @Test
-    void shouldServeOpenApiSpecification() {
+    void shouldServeOpenApiSpecificationWithoutAuthentication() {
         assertThat(mvc.get().uri("/v3/api-docs"))
                 .hasStatusOk()
                 .bodyJson()
@@ -41,13 +38,26 @@ class StreamstoriesApplicationTests {
 
     @Test
     void shouldNotExposeSensitiveActuatorEndpoints() {
-        assertThat(mvc.get().uri("/actuator/env")).hasStatus(HttpStatus.NOT_FOUND);
-        assertThat(mvc.get().uri("/actuator/beans")).hasStatus(HttpStatus.NOT_FOUND);
+        var admin = api.adminSession();
+        assertThat(mvc.get().uri("/actuator/env").header("Authorization", admin.bearer()))
+                .hasStatus(HttpStatus.NOT_FOUND);
+        assertThat(mvc.get().uri("/actuator/beans").header("Authorization", admin.bearer()))
+                .hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void shouldAnswerUnknownRoutesWithProblemDetails() {
+    void shouldRequireAuthenticationForUnknownRoutes() {
         assertThat(mvc.get().uri("/api/v1/does-not-exist"))
+                .hasStatus(HttpStatus.UNAUTHORIZED)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:unauthorized");
+    }
+
+    @Test
+    void shouldAnswerUnknownRoutesWithProblemDetailsWhenAuthenticated() {
+        var user = api.newUserSession();
+        assertThat(mvc.get().uri("/api/v1/does-not-exist").header("Authorization", user.bearer()))
                 .hasStatus(HttpStatus.NOT_FOUND)
                 .bodyJson()
                 .extractingPath("$.type")

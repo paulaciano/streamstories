@@ -6,6 +6,21 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+### Added
+
+- Cuentas y autenticación (fase 1):
+  - Registro, inicio de sesión con access token JWT y refresh token con rotación y detección de reutilización.
+  - Desactivación de la propia cuenta, con efecto inmediato aunque el access token siga vigente.
+  - Solicitudes de reactivación que resuelve un administrador.
+  - Administración de usuarios: listado con filtros, cambio de estado y de rol, protección del último administrador activo.
+  - Creación del administrador inicial a partir de variables de entorno.
+- Entidad base con identificador UUIDv7 y auditoría de fechas de creación y modificación.
+- Respuesta paginada uniforme y validación de los campos de orden permitidos.
+
+### Changed
+
+- Los errores de autenticación, autorización y constraints de la base también responden con Problem Details.
+
 ## [0.0.1] - 2026-11-17
 
 ### Added
