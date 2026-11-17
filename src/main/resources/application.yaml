@@ -11,6 +11,9 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+    properties:
+      # Lazy collections (such as the genres of each title in a page) load in batches instead of one query per row.
+      hibernate.default_batch_fetch_size: 50
   jackson:
     deserialization:
       fail-on-unknown-properties: true

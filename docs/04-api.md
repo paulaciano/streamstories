@@ -82,20 +82,22 @@ Todas las rutas son relativas a `/api/v1`.
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
 | `GET` | `/catalog` | 👤 | **Catálogo mixto** de películas y series. Filtros: `genre`, `type`, `q`. |
-| `GET` | `/genres` | 👤 | Lista de géneros. |
-| `POST` `PUT` `DELETE` | `/genres[/{id}]` | 🛠️ | ABM de géneros. |
+| `GET` | `/genres`, `/genres/{id}` | 👤 | Lista y detalle de géneros. |
+| `POST` `PUT` `DELETE` | `/genres[/{id}]` | 🛠️ | ABM de géneros. El `slug` se genera a partir del nombre (`Ciencia Ficción` → `ciencia-ficcion`). |
 | `GET` | `/movies`, `/movies/{id}` | 👤 | Listar y ver películas. |
 | `POST` `PUT` | `/movies[/{id}]` | 🛠️ | Crear y modificar películas, incluidos sus `genreIds`. |
 | `PATCH` | `/movies/{id}` | 🛠️ | Cambia la `availability` (retirar o volver a ofrecer). |
 | `DELETE` | `/movies/{id}` | 🛠️ | Borra la película. Solo si no tiene actividad (C11). |
 | `GET` | `/series`, `/series/{id}` | 👤 | Listar series y ver el detalle de una, con el resumen de sus temporadas. |
-| `POST` `PUT` `PATCH` `DELETE` | `/series[/{id}]` | 🛠️ | ABM de series. `PATCH` cambia la `availability`. |
+| `POST` `PUT` `PATCH` `DELETE` | `/series[/{id}]` | 🛠️ | ABM de series. `PATCH` cambia la `availability`. `DELETE` borra también temporadas y episodios, solo si nada tiene actividad. |
 | `GET` | `/series/{id}/seasons/{number}` | 👤 | Una temporada con sus episodios. |
 | `POST` | `/series/{id}/seasons` | 🛠️ | Agrega una temporada. |
-| `PUT` `DELETE` | `/series/{id}/seasons/{number}` | 🛠️ | Modifica o borra una temporada. |
-| `GET` | `/episodes/{id}` | 👤 | Detalle de un episodio. |
+| `PUT` `DELETE` | `/series/{id}/seasons/{number}` | 🛠️ | Modifica el título o borra una temporada. Solo se borra si no tiene episodios. |
+| `GET` | `/episodes/{id}` | 👤 | Detalle de un episodio, con `playable`: si el episodio y su serie están disponibles. |
 | `POST` | `/series/{id}/seasons/{number}/episodes` | 🛠️ | Agrega un episodio. |
 | `PUT` `PATCH` `DELETE` | `/episodes/{id}` | 🛠️ | Modifica, retira o borra un episodio. |
+
+Para un `USER`, el contenido que no se puede reproducir (retirado, o un episodio de una serie retirada) se muestra con `videoUrl: null`. Un `ADMIN` siempre ve la URL.
 
 ### Fase 2: actividad
 
