@@ -39,7 +39,7 @@ flowchart TB
 
 ## 6.3 Integración continua
 
-[GitHub Actions](https://docs.github.com/actions) ejecuta el pipeline en cada push y en cada pull request a `main`:
+[GitHub Actions](https://docs.github.com/actions) ejecuta el pipeline en cada push a `main` y en cada pull request:
 
 ```mermaid
 flowchart LR
