@@ -41,7 +41,7 @@ La API **no sirve video**. Guarda la URL y la duración de cada contenido reprod
 | Documentación de la API | [springdoc-openapi](https://springdoc.org/) | Genera la especificación OpenAPI 3 y Swagger UI a partir del código. |
 | Modularidad | [Spring Modulith](https://docs.spring.io/spring-modulith/reference/) | Verifica en un test que ningún módulo viole sus límites. |
 | Observabilidad | [Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/index.html) | Health checks e información de la aplicación. |
-| Testing | [JUnit 5](https://junit.org/junit5/docs/current/user-guide/), [AssertJ](https://assertj.github.io/doc/), [Mockito](https://site.mockito.org/), [Testcontainers](https://testcontainers.com/) | Tests de integración contra un PostgreSQL real. |
+| Testing | [JUnit 6](https://docs.junit.org/current/user-guide/), [AssertJ](https://assertj.github.io/doc/), [Mockito](https://site.mockito.org/), [Testcontainers](https://testcontainers.com/) | Tests de integración contra un PostgreSQL real. |
 | Build | [Maven Wrapper](https://maven.apache.org/tools/wrapper/) | Compila sin necesidad de instalar Maven. |
 | Entorno local | [Docker Compose](https://docs.docker.com/compose/) + [soporte de Spring Boot](https://docs.spring.io/spring-boot/reference/features/dev-services.html) | PostgreSQL se levanta solo al iniciar la aplicación. |
 | CI | [GitHub Actions](https://docs.github.com/actions) | Build, tests y verificaciones en cada push y PR. |
@@ -83,7 +83,7 @@ flowchart TB
 3. Un módulo usa a otro **solo a través de su API pública**, formada por los tipos del paquete raíz del módulo. Nunca accede a entidades ni a repositorios internos de otro módulo.
 4. Spring Modulith verifica estas reglas en un test (`ModularityTests`), y el build falla si alguna se rompe.
 
-Ejemplo: para registrar el progreso de un episodio, `activity` no usa `EpisodeRepository`. Llama a `CatalogQueries.findPlayable(id)`, una interfaz pública de `catalog` que devuelve un DTO de solo lectura con la duración y la disponibilidad del contenido.
+Ejemplo (fase 2): para registrar el progreso de un episodio, `activity` no va a usar `EpisodeRepository`. Va a llamar a `CatalogQueries.findPlayable(id)`, una interfaz pública de `catalog` que devuelve un DTO de solo lectura con la duración y la disponibilidad del contenido.
 
 Cuando `catalog` necesita saber algo de la actividad, se invierte la dependencia. Para no borrar contenido con actividad (regla C11), `catalog` publica la interfaz `ContentActivity`, que `activity` implementa. Así `catalog` sigue sin depender de nadie.
 
@@ -95,33 +95,33 @@ El código se organiza **por funcionalidad** (*package by feature*), no por capa
 src/main/java/com/amillioncodelines/streamstories/
 ├── StreamstoriesApplication.java
 ├── catalog/
-│   ├── CatalogQueries.java          ← API pública del módulo (interfaz + DTO)
-│   ├── PlayableView.java
+│   ├── ContentActivity.java         ← API pública: interfaz que implementan los módulos con actividad
+│   ├── ContentKind.java
 │   ├── api/                         ← entrada HTTP: controllers, DTO request/response
-│   ├── application/                 ← casos de uso, transacciones, reglas de negocio
-│   └── domain/                      ← entidades JPA, enums, repositorios
+│   ├── application/                 ← casos de uso, transacciones, commands y views
+│   └── domain/                      ← entidades JPA, enums, repositorios, consultas
 ├── identity/
-│   ├── CurrentUser.java             ← API pública: usuario autenticado
-│   ├── api/  application/  domain/
-│   └── security/                    ← SecurityFilterChain, emisión y validación de JWT
-├── activity/
-├── recommendation/
+│   ├── api/  application/  domain/  ← application también emite los tokens (TokenIssuer)
+│   └── security/                    ← SecurityFilterChain, validación del JWT, filtro de cuenta activa
+├── activity/                        ← fase 2
+├── recommendation/                  ← fase 3
 └── shared/
     ├── error/                       ← @RestControllerAdvice → ProblemDetail
+    ├── openapi/                     ← metadatos de la especificación y esquema de seguridad
     ├── persistence/                 ← entidad base auditada, configuración JPA
     ├── web/                         ← paginación (PageResponse, orden permitido)
     └── time/                        ← reloj de la aplicación (Clock), reemplazable en tests
 
 src/main/resources/
 ├── application.yaml                 ← configuración común
-├── application-dev.yaml             ← perfil de desarrollo local (datos de ejemplo)
+├── application-dev.yaml             ← perfil de desarrollo local
 ├── application-prod.yaml            ← perfil productivo (logs estructurados)
-└── db/migration/                    ← migraciones Flyway (V1__…, V2__…)
+└── db/migration/                    ← migraciones Flyway (V1__…, V2__…, …)
 
 src/test/java/com/amillioncodelines/streamstories/
 ├── ModularityTests.java             ← verificación de Spring Modulith
 ├── catalog/ …                       ← misma estructura que main
-└── support/                         ← configuración compartida de Testcontainers
+└── support/                         ← @IntegrationTest, Testcontainers y clientes de la API para tests
 ```
 
 **Responsabilidades por capa:**
@@ -140,7 +140,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Errores** | Un `@RestControllerAdvice` global convierte las excepciones en [Problem Details (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457). Ver [API](04-api.md#47-errores). |
 | **Transacciones** | `@Transactional` solo en la capa `application`. Las lecturas usan `readOnly = true`. |
 | **Open Session in View** | Desactivado (`spring.jpa.open-in-view=false`). Evita consultas ocultas durante la serialización. |
-| **Consultas N+1** | Los detalles usan `@EntityGraph` o `JOIN FETCH`. En los listados paginados, las colecciones (como los géneros de cada título) se cargan en lotes (`hibernate.default_batch_fetch_size`), porque un `JOIN FETCH` de colecciones obligaría a Hibernate a paginar en memoria. |
+| **Consultas N+1** | Las consultas que necesitan asociaciones las traen en la misma consulta con `@EntityGraph` o `JOIN FETCH` (por ejemplo, un episodio con su temporada y su serie). Las colecciones, como los géneros de cada título de una página, se cargan en lotes (`hibernate.default_batch_fetch_size`), porque un `JOIN FETCH` de colecciones obligaría a Hibernate a paginar en memoria. |
 | **Identificadores** | `UUID` en todas las entidades expuestas, preferentemente ordenables en el tiempo (v7). No permiten adivinar recursos ajenos ni revelan volúmenes. |
 | **Fechas** | `Instant` en Java y `timestamptz` en PostgreSQL, siempre en UTC. |
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |

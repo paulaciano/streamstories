@@ -2,31 +2,33 @@
 
 ## 6.1 Estrategia de testing
 
-Seguimos la pirámide de tests, con una condición importante: **los tests de integración usan un PostgreSQL real** a través de [Testcontainers](https://testcontainers.com/). Así se prueban el mismo SQL, las mismas constraints y los mismos índices que corren en producción.
+La base de la estrategia son los **tests de integración contra un PostgreSQL real** a través de [Testcontainers](https://testcontainers.com/). Así se prueban el mismo SQL, las mismas constraints y la misma cadena de seguridad que corren en producción. Los tests unitarios cubren las reglas que no necesitan Spring, y los tests de *slice* se reservan para piezas que conviene aislar.
 
 ```mermaid
 flowchart TB
-    e2e["<b>Integración completa</b><br/>@SpringBootTest + Testcontainers<br/>flujos HTTP de punta a punta"]
-    slice["<b>Tests de slice</b><br/>@WebMvcTest (controllers + seguridad)<br/>@DataJpaTest (repositorios + migraciones)"]
-    unit["<b>Unitarios</b><br/>JUnit 5 + AssertJ + Mockito<br/>reglas de dominio y servicios"]
+    e2e["<b>Integración</b><br/>@SpringBootTest + MockMvcTester + Testcontainers<br/>contrato HTTP, autorización, constraints, flujos completos"]
+    unit["<b>Unitarios</b><br/>JUnit 6 + AssertJ + Mockito<br/>reglas de dominio y servicios"]
+    slice["<b>Slice</b><br/>@WebMvcTest<br/>mapeo de errores aislado"]
     arch["<b>Arquitectura</b><br/>Spring Modulith: límites entre módulos"]
-    e2e --- slice --- unit
-    arch -.- slice
+    e2e --- unit
+    e2e --- slice
+    arch -.- unit
 ```
 
 | Nivel | Qué prueba | Ejemplo |
 |-------|------------|---------|
-| Unitario | Reglas de negocio puras, sin Spring | "se marca completo al 90 % y se conserva la posición", "Seguir viendo pasa al episodio siguiente solo si el actual está completo" |
-| [`@WebMvcTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.spring-mvc-tests) | Contrato HTTP, validación, mapeo de errores y **autorización** | `POST /movies` sin token → 401, con `USER` → 403, inválido → 400 con `ProblemDetail` |
-| [`@DataJpaTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.autoconfigured-spring-data-jpa) | Consultas, constraints y migraciones | Un número de temporada duplicado viola la constraint |
-| Integración | Flujos completos de la aplicación | desactivar → solicitar reactivación → un admin aprueba → el historial sigue intacto |
+| Integración | Contrato HTTP, validación, **autorización** de cada endpoint, constraints de la base y flujos completos | `POST /movies` sin token → 401, con `USER` → 403, inválido → 400 con `ProblemDetail`. Desactivar → solicitar la reactivación → un admin aprueba → se puede volver a iniciar sesión. |
+| Unitario | Reglas de negocio puras, sin Spring | "un episodio no se puede reproducir si su serie está retirada", "solo reutilizar un refresh token rotado revoca toda la familia" |
+| [`@WebMvcTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.spring-mvc-tests) | Piezas web que conviene probar aisladas | Cada tipo de excepción se convierte en el `ProblemDetail` correcto |
 | Arquitectura | Que no haya ciclos ni accesos a internos de otro módulo | [`ApplicationModules.of(...).verify()`](https://docs.spring.io/spring-modulith/reference/verification.html) |
+
+Las consultas complejas que lleguen en fases siguientes (por ejemplo, "Seguir viendo" o las recomendaciones) pueden sumar tests [`@DataJpaTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.autoconfigured-spring-data-jpa) específicos.
 
 **Convenciones:**
 
 - El nombre de cada test describe un comportamiento: `shouldKeepExactPositionWhenMarkingAsCompleted()`.
 - Estructura *given / when / then*.
-- Un contenedor de PostgreSQL compartido por toda la suite, con [`@ServiceConnection`](https://docs.spring.io/spring-boot/reference/testing/testcontainers.html#testing.testcontainers.service-connections).
+- Un contenedor de PostgreSQL compartido por toda la suite, con [`@ServiceConnection`](https://docs.spring.io/spring-boot/reference/testing/testcontainers.html#testing.testcontainers.service-connections). Como los tests comparten la base, cada uno crea sus propios datos (por ejemplo, usuarios con emails únicos) y no depende de un estado inicial vacío.
 - La cobertura se mide con [JaCoCo](https://www.jacoco.org/jacoco/) y se publica en CI. Es una guía, no una meta: lo que se busca es probar comportamiento, no cubrir líneas.
 
 ## 6.2 Estilo y análisis estático

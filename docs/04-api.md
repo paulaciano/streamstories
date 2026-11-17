@@ -51,7 +51,7 @@ GET /api/v1/catalog?genre=sci-fi&type=MOVIE&q=matrix&page=0&size=20&sort=title,a
 }
 ```
 
-- `size` va de 1 a 100 y vale 20 por defecto.
+- `size` vale 20 por defecto y como máximo 100: un valor mayor se reduce a 100.
 - `sort` solo acepta los campos de una lista permitida.
 - Los endpoints de catálogo aceptan el filtro `availability`, pero solo para `ADMIN`. Un `USER` siempre ve únicamente el contenido disponible.
 
@@ -68,7 +68,7 @@ Todas las rutas son relativas a `/api/v1`.
 | `POST` | `/auth/login` | 🔓 | Recibe email y contraseña y devuelve un access token y un refresh token. Si la cuenta está inactiva, responde `403` (`account-inactive`). |
 | `POST` | `/auth/refresh` | 🔓 | Cambia un refresh token por un par nuevo (con rotación). |
 | `POST` | `/auth/logout` | 👤 | Revoca el refresh token enviado. |
-| `POST` | `/auth/reactivation-requests` | 🔓 | Con las credenciales de una cuenta inactiva, crea una solicitud de reactivación o devuelve la pendiente. Responde `202`. |
+| `POST` | `/auth/reactivation-requests` | 🔓 | Con las credenciales de una cuenta inactiva, crea una solicitud de reactivación o devuelve la pendiente. Responde `202`, o `409` si la cuenta ya está activa. |
 | `GET` | `/me` | 👤 | Datos del usuario actual. |
 | `POST` | `/me/deactivate` | 👤 | Desactiva la propia cuenta y revoca sus tokens. Responde `204`. |
 | `GET` | `/admin/users` | 🛠️ | Usuarios, filtrables por `status` y `role`. |
@@ -228,7 +228,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
   "type": "urn:streamstories:problem:validation-error",
   "title": "Datos inválidos",
   "status": 400,
-  "detail": "La solicitud contiene 2 errores de validación.",
+  "detail": "La solicitud contiene 2 error(es) de validación.",
   "instance": "/api/v1/movies",
   "errors": [
     { "field": "title", "message": "no debe estar vacío" },
@@ -246,7 +246,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `account-inactive` | 403 | La cuenta está desactivada. La respuesta indica si hay una solicitud de reactivación pendiente. |
 | `not-found` | 404 | El recurso no existe. |
 | `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso o violación de una constraint de la base. |
-| `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
+| `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado (fase 2). |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 
 Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "credenciales inválidas", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
