@@ -88,6 +88,7 @@ streamstories/
 ├── src/
 ├── .editorconfig
 ├── .env.example             ← variables de entorno necesarias, sin valores reales
+├── .gitattributes           ← finales de línea de mvnw (LF) y mvnw.cmd (CRLF)
 ├── .gitignore
 ├── CHANGELOG.md
 ├── compose.yaml             ← PostgreSQL para desarrollo local
