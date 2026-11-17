@@ -54,16 +54,19 @@ class SeriesTests {
     }
 
     @Test
-    void shouldMakeEpisodesUnplayableWhenTheEpisodeOrItsSeriesIsRetired() {
-        Episode pilot = series.addSeason(1, null).addEpisode(1, PILOT);
+    void shouldMakeEpisodesUnplayableWhenTheirSeasonOrSeriesIsRetired() {
+        Season season = series.addSeason(1, null);
+        Episode pilot = season.addEpisode(1, PILOT);
         assertThat(pilot.isPlayable()).isTrue();
 
         series.changeAvailability(Availability.RETIRED);
         assertThat(pilot.isPlayable()).isFalse();
-        assertThat(pilot.isAvailable()).isTrue();
 
         series.changeAvailability(Availability.AVAILABLE);
-        pilot.changeAvailability(Availability.RETIRED);
+        season.changeAvailability(Availability.RETIRED);
         assertThat(pilot.isPlayable()).isFalse();
+
+        season.changeAvailability(Availability.AVAILABLE);
+        assertThat(pilot.isPlayable()).isTrue();
     }
 }

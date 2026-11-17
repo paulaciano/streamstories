@@ -1,6 +1,6 @@
 # ADR-0009: El contenido se retira, no se borra
 
-- **Estado:** Aceptado
+- **Estado:** Reemplazado por [ADR-0011](0011-retiro-por-temporada.md)
 - **Fecha:** 2026-11-16
 
 ## Contexto

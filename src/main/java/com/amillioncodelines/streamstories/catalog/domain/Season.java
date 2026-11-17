@@ -5,6 +5,8 @@ import com.amillioncodelines.streamstories.shared.persistence.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -13,11 +15,12 @@ import jakarta.persistence.OrderBy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/** A numbered season of a series, starting at 1. */
+/** A numbered season of a series, starting at 1. It can be retired as a whole, together with its episodes. */
 @Entity
 public class Season extends BaseEntity {
 
@@ -33,6 +36,10 @@ public class Season extends BaseEntity {
     private int number;
 
     private String title;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Availability availability = Availability.AVAILABLE;
 
     @OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("number")
@@ -51,6 +58,19 @@ public class Season extends BaseEntity {
 
     public void rename(String newTitle) {
         this.title = newTitle;
+    }
+
+    /** Retires the whole season or offers it again. Episodes are never retired one by one. */
+    public void changeAvailability(Availability newAvailability) {
+        this.availability = Objects.requireNonNull(newAvailability);
+    }
+
+    public boolean isAvailable() {
+        return availability == Availability.AVAILABLE;
+    }
+
+    public Availability getAvailability() {
+        return availability;
     }
 
     /** Episode numbers are unique within the season (rule C5). */

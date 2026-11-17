@@ -40,9 +40,9 @@ flowchart LR
 | Como admin, quiero resolver reactivaciones | Veo las solicitudes pendientes y las apruebo o rechazo. Al aprobar, la cuenta queda activa. |
 | Como admin, quiero gestionar usuarios | Listo usuarios y cambio su estado o rol. No puedo dejar el sistema sin un admin activo. |
 | Como admin, quiero gestionar el catálogo | ABM de géneros, películas, series, temporadas y episodios, cumpliendo las reglas C1 a C8. |
-| Como admin, quiero retirar contenido | Retiro y vuelvo a ofrecer películas, series y episodios. El borrado solo se permite si el contenido no tiene actividad (C9 a C12). |
+| Como admin, quiero retirar contenido | Retiro y vuelvo a ofrecer películas, series y temporadas completas. El borrado solo se permite si el contenido no tiene actividad (C9 a C12). |
 | Como usuario, quiero explorar el catálogo | `/catalog` devuelve películas y series disponibles, mezcladas, filtrables y paginadas. |
-| Como usuario, quiero ver una serie | Veo el detalle con sus temporadas y sus episodios disponibles. |
+| Como usuario, quiero ver una serie | Veo el detalle con sus temporadas disponibles y sus episodios. |
 
 **Base técnica:** entidad base con identificador UUID y auditoría (`createdAt`, `updatedAt`), que se incorpora junto con las primeras entidades.
 

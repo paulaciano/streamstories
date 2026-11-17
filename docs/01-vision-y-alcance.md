@@ -46,7 +46,7 @@ El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
 
 **Géneros (`Genre`):** cada película o serie puede tener **varios** géneros a la vez (por ejemplo, *Action* + *Sci-Fi*). Al explorar un género aparecen películas y series juntas.
 
-**Retiro de contenido:** el contenido no se borra cuando deja de ofrecerse. Se **retira**: ya no se puede reproducir ni se recomienda, pero se conservan todos sus datos y la actividad de los usuarios asociada a él ([ADR-0009](adr/0009-retiro-de-contenido.md)).
+**Retiro de contenido:** el contenido no se borra cuando deja de ofrecerse. Se **retira**: ya no se puede reproducir ni se recomienda, pero se conservan todos sus datos y la actividad de los usuarios asociada a él Se retiran películas, series o temporadas completas ([ADR-0011](adr/0011-retiro-por-temporada.md))..
 
 > **Dos conceptos de diseño.** El sistema distingue:
 > - **Título** (`MediaItem`): lo que se *explora, clasifica y califica*. Es una película o una serie.

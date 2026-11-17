@@ -19,5 +19,6 @@ Un **ADR** ([*Architecture Decision Record*](https://adr.github.io/)) documenta 
 | [0006](0006-migraciones-flyway.md) | Esquema de base de datos versionado con Flyway | Aceptado |
 | [0007](0007-modelo-herencia-y-progreso.md) | Herencia `JOINED` para títulos y FK excluyentes para el progreso | Aceptado |
 | [0008](0008-documentacion-markdown-mermaid.md) | Documentación en Markdown con diagramas Mermaid | Aceptado |
-| [0009](0009-retiro-de-contenido.md) | El contenido se retira, no se borra | Aceptado |
+| [0009](0009-retiro-de-contenido.md) | El contenido se retira, no se borra | Reemplazado por ADR-0011 |
 | [0010](0010-reactivacion-aprobada-por-admin.md) | La reactivación de cuentas requiere aprobación de un admin | Aceptado |
+| [0011](0011-retiro-por-temporada.md) | El contenido se retira por película, serie o temporada completa | Aceptado |

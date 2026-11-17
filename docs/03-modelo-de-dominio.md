@@ -89,6 +89,7 @@ erDiagram
         uuid series_id FK
         smallint number "único por serie"
         varchar title "opcional"
+        varchar availability "AVAILABLE | RETIRED"
     }
     EPISODE {
         uuid id PK
@@ -98,7 +99,6 @@ erDiagram
         text synopsis
         int duration_seconds
         varchar video_url
-        varchar availability "AVAILABLE | RETIRED"
     }
 
     WATCH_PROGRESS {
@@ -170,11 +170,11 @@ Además hay dos índices únicos parciales: `(user_id, movie_id)` y `(user_id, e
 
 ### Disponibilidad en lugar de borrado
 
-El contenido que deja de ofrecerse no se borra: cambia su `availability` a `RETIRED` ([ADR-0009](adr/0009-retiro-de-contenido.md)). La disponibilidad está en `media_item` (películas y series completas) y en `episode` (episodios sueltos).
+El contenido que deja de ofrecerse no se borra: cambia su `availability` a `RETIRED` ([ADR-0011](adr/0011-retiro-por-temporada.md)). La disponibilidad está en `media_item` (películas y series completas) y en `season` (temporadas completas). Los episodios no se retiran sueltos.
 
 Un contenido es **reproducible** si:
-- **Película:** `movie.availability = AVAILABLE`.
-- **Episodio:** `episode.availability = AVAILABLE` **y** su serie tiene `availability = AVAILABLE`.
+- **Película:** su `availability` es `AVAILABLE`.
+- **Episodio:** su temporada **y** su serie tienen `availability = AVAILABLE`.
 
 ### Usuario y cuenta son la misma entidad
 

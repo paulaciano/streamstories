@@ -3,12 +3,9 @@ package com.amillioncodelines.streamstories.catalog.domain;
 import com.amillioncodelines.streamstories.shared.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.util.Objects;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -38,10 +35,6 @@ public class Episode extends BaseEntity {
     @Column(nullable = false)
     private String videoUrl;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Availability availability = Availability.AVAILABLE;
-
     protected Episode() {}
 
     Episode(Season season, int number, EpisodeDetails details) {
@@ -63,17 +56,12 @@ public class Episode extends BaseEntity {
         this.videoUrl = details.videoUrl();
     }
 
-    public void changeAvailability(Availability newAvailability) {
-        this.availability = Objects.requireNonNull(newAvailability);
-    }
-
-    public boolean isAvailable() {
-        return availability == Availability.AVAILABLE;
-    }
-
-    /** An episode is playable only if both the episode and its series are available. */
+    /**
+     * An episode is playable only if both its season and its series are available. Episodes have no availability of
+     * their own: the smallest unit that can be retired is the season.
+     */
     public boolean isPlayable() {
-        return isAvailable() && season.getSeries().isAvailable();
+        return season.isAvailable() && season.getSeries().isAvailable();
     }
 
     public Season getSeason() {
@@ -98,9 +86,5 @@ public class Episode extends BaseEntity {
 
     public String getVideoUrl() {
         return videoUrl;
-    }
-
-    public Availability getAvailability() {
-        return availability;
     }
 }

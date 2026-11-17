@@ -111,36 +111,67 @@ class SeriesIntegrationTests {
     }
 
     @Test
-    void shouldHideRetiredEpisodesFromViewersButKeepThemReachableById() {
+    void shouldHideRetiredSeasonsFromViewersButKeepThemReachable() {
         Session admin = api.adminSession();
         String id = catalog.createSeries(admin, "Partial " + token(), 2020);
         catalog.addSeason(admin, id, 1);
+        catalog.addSeason(admin, id, 2);
         catalog.addEpisode(admin, id, 1, 1);
-        String retired = catalog.addEpisode(admin, id, 1, 2);
+        String retired = catalog.addEpisode(admin, id, 2, 1);
         Session user = api.newUserSession();
 
-        catalog.changeAvailability(admin, "/api/v1/episodes/" + retired, "RETIRED");
-
-        assertThat(catalog.get(user, "/api/v1/series/" + id + "/seasons/1"))
+        assertThat(catalog.changeAvailability(admin, "/api/v1/series/" + id + "/seasons/2", "RETIRED"))
+                .hasStatusOk()
                 .bodyJson()
-                .extractingPath("$.episodes[*].number")
-                .asArray()
-                .containsExactly(1);
+                .extractingPath("$.availability")
+                .isEqualTo("RETIRED");
+
         assertThat(catalog.get(user, "/api/v1/series/" + id))
                 .bodyJson()
-                .extractingPath("$.seasons[0].episodeCount")
-                .isEqualTo(1);
-        assertThat(catalog.get(admin, "/api/v1/series/" + id + "/seasons/1"))
-                .bodyJson()
-                .extractingPath("$.episodes[*].number")
+                .extractingPath("$.seasons[*].number")
                 .asArray()
-                .containsExactly(1, 2);
+                .containsExactly(1);
+        assertThat(catalog.get(admin, "/api/v1/series/" + id))
+                .bodyJson()
+                .extractingPath("$.seasons[*].availability")
+                .asArray()
+                .containsExactly("AVAILABLE", "RETIRED");
+
+        MvcTestResult season = catalog.get(user, "/api/v1/series/" + id + "/seasons/2");
+        assertThat(season).hasStatusOk();
+        assertThat(season).bodyJson().extractingPath("$.availability").isEqualTo("RETIRED");
 
         MvcTestResult episode = catalog.get(user, "/api/v1/episodes/" + retired);
         assertThat(episode).hasStatusOk();
-        assertThat(episode).bodyJson().extractingPath("$.availability").isEqualTo("RETIRED");
         assertThat(episode).bodyJson().extractingPath("$.playable").isEqualTo(false);
         assertThat(episode).bodyJson().extractingPath("$.videoUrl").isNull();
+    }
+
+    @Test
+    void shouldOfferARetiredSeasonAgain() {
+        Session admin = api.adminSession();
+        String id = catalog.createSeries(admin, "Back " + token(), 2020);
+        catalog.addSeason(admin, id, 1);
+        String episodeId = catalog.addEpisode(admin, id, 1, 1);
+        catalog.changeAvailability(admin, "/api/v1/series/" + id + "/seasons/1", "RETIRED");
+
+        catalog.changeAvailability(admin, "/api/v1/series/" + id + "/seasons/1", "AVAILABLE");
+
+        assertThat(catalog.get(api.newUserSession(), "/api/v1/episodes/" + episodeId))
+                .bodyJson()
+                .extractingPath("$.playable")
+                .isEqualTo(true);
+    }
+
+    @Test
+    void shouldNotRetireSingleEpisodes() {
+        Session admin = api.adminSession();
+        String id = catalog.createSeries(admin, "Whole seasons " + token(), 2020);
+        catalog.addSeason(admin, id, 1);
+        String episodeId = catalog.addEpisode(admin, id, 1, 1);
+
+        assertThat(catalog.changeAvailability(admin, "/api/v1/episodes/" + episodeId, "RETIRED"))
+                .hasStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @Test
@@ -160,7 +191,6 @@ class SeriesIntegrationTests {
                 .isEqualTo(0);
         assertThat(catalog.get(user, "/api/v1/series/" + id)).hasStatusOk();
         MvcTestResult episode = catalog.get(user, "/api/v1/episodes/" + episodeId);
-        assertThat(episode).bodyJson().extractingPath("$.availability").isEqualTo("AVAILABLE");
         assertThat(episode).bodyJson().extractingPath("$.playable").isEqualTo(false);
     }
 

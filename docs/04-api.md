@@ -90,14 +90,14 @@ Todas las rutas son relativas a `/api/v1`.
 | `DELETE` | `/movies/{id}` | 🛠️ | Borra la película. Solo si no tiene actividad (C11). |
 | `GET` | `/series`, `/series/{id}` | 👤 | Listar series y ver el detalle de una, con el resumen de sus temporadas. |
 | `POST` `PUT` `PATCH` `DELETE` | `/series[/{id}]` | 🛠️ | ABM de series. `PATCH` cambia la `availability`. `DELETE` borra también temporadas y episodios, solo si nada tiene actividad. |
-| `GET` | `/series/{id}/seasons/{number}` | 👤 | Una temporada con sus episodios. |
+| `GET` | `/series/{id}/seasons/{number}` | 👤 | Una temporada con sus episodios. Una temporada retirada sigue accesible, indicando su `availability`. |
 | `POST` | `/series/{id}/seasons` | 🛠️ | Agrega una temporada. |
-| `PUT` `DELETE` | `/series/{id}/seasons/{number}` | 🛠️ | Modifica el título o borra una temporada. Solo se borra si no tiene episodios. |
-| `GET` | `/episodes/{id}` | 👤 | Detalle de un episodio, con `playable`: si el episodio y su serie están disponibles. |
+| `PUT` `PATCH` `DELETE` | `/series/{id}/seasons/{number}` | 🛠️ | `PUT` modifica el título, `PATCH` cambia la `availability` (retira o vuelve a ofrecer la temporada completa) y `DELETE` la borra, solo si no tiene episodios. |
+| `GET` | `/episodes/{id}` | 👤 | Detalle de un episodio, con `playable`: si su temporada y su serie están disponibles. |
 | `POST` | `/series/{id}/seasons/{number}/episodes` | 🛠️ | Agrega un episodio. |
-| `PUT` `PATCH` `DELETE` | `/episodes/{id}` | 🛠️ | Modifica, retira o borra un episodio. |
+| `PUT` `DELETE` | `/episodes/{id}` | 🛠️ | Modifica o borra un episodio. Los episodios no se retiran sueltos: se retira la temporada. |
 
-Para un `USER`, el contenido que no se puede reproducir (retirado, o un episodio de una serie retirada) se muestra con `videoUrl: null`. Un `ADMIN` siempre ve la URL.
+Para un `USER`, el contenido que no se puede reproducir (una película retirada, o un episodio de una temporada o serie retirada) se muestra con `videoUrl: null`, y el detalle de una serie omite las temporadas retiradas. Un `ADMIN` siempre ve todo.
 
 ### Fase 2: actividad
 
@@ -182,10 +182,10 @@ HTTP/1.1 201 Created
 Location: /api/v1/movies/0193a6f2-…
 ```
 
-**Retirar un episodio (admin)**
+**Retirar una temporada completa (admin)**
 
 ```http
-PATCH /api/v1/episodes/0193a7…
+PATCH /api/v1/series/0193a6f2…/seasons/2
 { "availability": "RETIRED" }
 ```
 

@@ -40,6 +40,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ### Changed
 
+- El contenido de una serie se retira por temporada completa, no por episodio (ADR-0011, que reemplaza a ADR-0009). `PATCH /series/{id}/seasons/{number}` cambia la disponibilidad de la temporada, y `PATCH /episodes/{id}` deja de existir.
 - El catálogo tiene DTOs propios en la capa `api`, como identity.
 - Edición concurrente de títulos con bloqueo optimista.
 - Los mensajes de validación salen siempre en español.
