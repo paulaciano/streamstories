@@ -17,6 +17,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({TestcontainersConfiguration.class, ApiClient.class})
+@Import({TestcontainersConfiguration.class, ApiClient.class, CatalogApi.class})
 @Testcontainers(disabledWithoutDocker = true)
 public @interface IntegrationTest {}

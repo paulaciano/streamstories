@@ -85,6 +85,8 @@ flowchart TB
 
 Ejemplo: para registrar el progreso de un episodio, `activity` no usa `EpisodeRepository`. Llama a `CatalogQueries.findPlayable(id)`, una interfaz pública de `catalog` que devuelve un DTO de solo lectura con la duración y la disponibilidad del contenido.
 
+Cuando `catalog` necesita saber algo de la actividad, se invierte la dependencia. Para no borrar contenido con actividad (regla C11), `catalog` publica la interfaz `ContentActivity`, que `activity` implementa. Así `catalog` sigue sin depender de nadie.
+
 ## 2.5 Estructura de paquetes
 
 El código se organiza **por funcionalidad** (*package by feature*), no por capa técnica. Dentro de cada módulo se separan capas:
@@ -138,7 +140,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Errores** | Un `@RestControllerAdvice` global convierte las excepciones en [Problem Details (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457). Ver [API](04-api.md#47-errores). |
 | **Transacciones** | `@Transactional` solo en la capa `application`. Las lecturas usan `readOnly = true`. |
 | **Open Session in View** | Desactivado (`spring.jpa.open-in-view=false`). Evita consultas ocultas durante la serialización. |
-| **Consultas N+1** | Los listados usan `@EntityGraph` o `JOIN FETCH` para no disparar una consulta por elemento. |
+| **Consultas N+1** | Los detalles usan `@EntityGraph` o `JOIN FETCH`. En los listados paginados, las colecciones (como los géneros de cada título) se cargan en lotes (`hibernate.default_batch_fetch_size`), porque un `JOIN FETCH` de colecciones obligaría a Hibernate a paginar en memoria. |
 | **Identificadores** | `UUID` en todas las entidades expuestas, preferentemente ordenables en el tiempo (v7). No permiten adivinar recursos ajenos ni revelan volúmenes. |
 | **Fechas** | `Instant` en Java y `timestamptz` en PostgreSQL, siempre en UTC. |
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |

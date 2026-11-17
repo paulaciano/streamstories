@@ -204,7 +204,7 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |
 | C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID, indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
 | C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
-| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada, por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. | Servicio → `409 Conflict` |
+| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada, por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
 | C12 | Un contenido retirado puede volver a estar disponible. | — |
 
 ### Identidad

@@ -1,0 +1,47 @@
+package com.amillioncodelines.streamstories.catalog.api;
+
+import com.amillioncodelines.streamstories.catalog.application.CatalogService;
+import com.amillioncodelines.streamstories.catalog.application.CatalogViews.CatalogItemView;
+import com.amillioncodelines.streamstories.catalog.domain.Availability;
+import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
+import com.amillioncodelines.streamstories.catalog.domain.MediaType;
+import com.amillioncodelines.streamstories.shared.web.PageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/catalog")
+@Tag(name = "Catálogo", description = "Exploración del catálogo mixto de películas y series")
+class CatalogController {
+
+    private final CatalogService catalog;
+
+    CatalogController(CatalogService catalog) {
+        this.catalog = catalog;
+    }
+
+    @GetMapping
+    @Operation(summary = "Catálogo mixto de películas y series, filtrable y paginado")
+    PageResponse<CatalogItemView> browse(
+            @Parameter(description = "Slug del género, por ejemplo `sci-fi`") @RequestParam(required = false)
+                    String genre,
+            @RequestParam(required = false) MediaType type,
+            @Parameter(description = "Texto a buscar en el título") @RequestParam(required = false) String q,
+            @Parameter(description = "Solo para ADMIN. Un USER siempre ve únicamente el contenido disponible.")
+                    @RequestParam(required = false)
+                    Availability availability,
+            @ParameterObject Pageable pageable,
+            Authentication authentication) {
+        var filter = new CatalogFilter(genre, type, q, availability);
+        var page = catalog.browse(filter, Audiences.of(authentication), TitleSorting.restrict(pageable));
+        return PageResponse.of(page, item -> item);
+    }
+}

@@ -14,6 +14,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
   - Solicitudes de reactivación que resuelve un administrador.
   - Administración de usuarios: listado con filtros, cambio de estado y de rol, protección del último administrador activo.
   - Creación del administrador inicial a partir de variables de entorno.
+- Catálogo (fase 1):
+  - Géneros con slug generado a partir del nombre.
+  - Películas y series con géneros, y series con temporadas y episodios numerados.
+  - Catálogo mixto de películas y series con filtros por género, tipo y texto.
+  - Retiro de contenido: lo retirado no aparece en los listados de los usuarios, pero sigue accesible por id y sin URL de video.
+  - El borrado físico solo se permite sobre contenido sin actividad.
 - Entidad base con identificador UUIDv7 y auditoría de fechas de creación y modificación.
 - Respuesta paginada uniforme y validación de los campos de orden permitidos.
 
