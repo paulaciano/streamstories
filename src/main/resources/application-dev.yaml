@@ -1,0 +1,5 @@
+# Local development only. Never use these values in a deployed environment.
+streamstories:
+  security:
+    jwt:
+      secret: dev-only-secret-change-me-0123456789abcdef

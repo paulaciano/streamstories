@@ -1,6 +1,9 @@
 spring:
   application:
     name: streamstories
+  profiles:
+    # Local runs use the dev profile unless SPRING_PROFILES_ACTIVE says otherwise.
+    default: dev
   threads:
     virtual:
       enabled: true
@@ -11,6 +14,11 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
 
 management:
   endpoints:
@@ -30,3 +38,11 @@ springdoc:
   swagger-ui:
     operations-sorter: alpha
     tags-sorter: alpha
+
+streamstories:
+  security:
+    # The JWT secret has no default: set STREAMSTORIES_SECURITY_JWT_SECRET (at least 32 characters).
+    jwt:
+      issuer: streamstories
+      access-token-ttl: 15m
+    refresh-token-ttl: 7d
