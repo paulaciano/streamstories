@@ -110,7 +110,8 @@ src/main/java/com/amillioncodelines/streamstories/
 
 src/main/resources/
 ├── application.yaml                 ← configuración común
-├── application-dev.yaml             ← perfil de desarrollo local
+├── application-dev.yaml             ← perfil de desarrollo local (datos de ejemplo)
+├── application-prod.yaml            ← perfil productivo (logs estructurados)
 └── db/migration/                    ← migraciones Flyway (V1__…, V2__…)
 
 src/test/java/com/amillioncodelines/streamstories/
@@ -141,7 +142,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |
 | **Configuración** | `application.yaml` con perfiles (`dev`, `test`). Los secretos se reciben solo por variables de entorno. |
 | **Virtual threads** | Activados (`spring.threads.virtual.enabled=true`): dan alta concurrencia con código bloqueante simple ([JEP 444](https://openjdk.org/jeps/444)). |
-| **Logs** | Formato estructurado (JSON) fuera de `dev`. Nunca se loguean contraseñas ni tokens. |
+| **Logs** | Formato estructurado JSON ([ECS](https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.structured)) en el perfil `prod`. Nunca se loguean contraseñas ni tokens. |
 
 ## 2.7 Ejemplo de flujo: registrar el progreso de un episodio
 
