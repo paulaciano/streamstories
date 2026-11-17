@@ -176,6 +176,10 @@ Un contenido es **reproducible** si:
 - **Película:** su `availability` es `AVAILABLE`.
 - **Episodio:** su temporada **y** su serie tienen `availability = AVAILABLE`.
 
+### Orden alfabético en español
+
+Los títulos, los nombres de género y los títulos de temporadas y episodios usan la collation ICU `es-x-icu`. Así, el orden respeta los acentos y la ñ ("Nube", "Ñandú", "Órbita") sin depender del locale del sistema operativo donde corre PostgreSQL.
+
 ### Usuario y cuenta son la misma entidad
 
 Como una cuenta corresponde a un único espectador, `User` y `Account` son la misma entidad, con su `AccountStatus`. La tabla se llama `app_user` porque `user` es una palabra reservada en PostgreSQL.

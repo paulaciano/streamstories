@@ -33,6 +33,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - La comparación de entidades fallaba con proxies de Hibernate.
 - Los valores inválidos rechazados por la base respondían `409` en lugar de `400`, y el log incluía el detalle de PostgreSQL.
 - La paginación podía repetir u omitir elementos cuando había empates en el orden.
+- El orden alfabético ponía los títulos acentuados al final ("Órbita" después de "Vecinos"); ahora se ordena como en español.
 
 ### Security
 
