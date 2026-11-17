@@ -18,7 +18,7 @@ flowchart TB
 | Nivel | Qué prueba | Ejemplo |
 |-------|------------|---------|
 | Integración | Contrato HTTP, validación, **autorización** de cada endpoint, constraints de la base y flujos completos | `POST /movies` sin token → 401, con `USER` → 403, inválido → 400 con `ProblemDetail`. Desactivar → solicitar la reactivación → un admin aprueba → se puede volver a iniciar sesión. |
-| Unitario | Reglas de negocio puras, sin Spring | "un episodio no se puede reproducir si su serie está retirada", "solo reutilizar un refresh token rotado revoca toda la familia" |
+| Unitario | Reglas de negocio puras, sin Spring | "un episodio no se puede reproducir si su temporada o su serie están retiradas", "solo reutilizar un refresh token rotado revoca toda la familia" |
 | [`@WebMvcTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.spring-mvc-tests) | Piezas web que conviene probar aisladas | Cada tipo de excepción se convierte en el `ProblemDetail` correcto |
 | Arquitectura | Que no haya ciclos ni accesos a internos de otro módulo | [`ApplicationModules.of(...).verify()`](https://docs.spring.io/spring-modulith/reference/verification.html) |
 
