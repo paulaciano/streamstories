@@ -35,7 +35,7 @@ flowchart TB
 |-------------|-----------|
 | [Spotless](https://github.com/diffplug/spotless) + [Palantir Java Format](https://github.com/palantir/palantir-java-format) | Formato automático y uniforme. La CI falla si el código no está formateado. |
 | [EditorConfig](https://editorconfig.org/) | Indentación y finales de línea consistentes en cualquier editor. |
-| [Dependabot](https://docs.github.com/code-security/dependabot) | Actualización semanal de las dependencias de Maven y de GitHub Actions. |
+| [Dependabot](https://docs.github.com/code-security/dependabot) | Actualización semanal de las dependencias de Maven, GitHub Actions y Docker Compose. Solo propone versiones publicadas hace al menos 14 días ([`cooldown`](https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference#cooldown-)), para dar tiempo a que se detecte una versión defectuosa o comprometida. |
 
 ## 6.3 Integración continua
 
