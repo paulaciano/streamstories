@@ -114,9 +114,10 @@ src/main/java/com/amillioncodelines/streamstories/
 
 src/main/resources/
 ├── application.yaml                 ← configuración común
-├── application-dev.yaml             ← perfil de desarrollo local
+├── application-dev.yaml             ← perfil de desarrollo local (clave JWT y administrador de desarrollo)
 ├── application-prod.yaml            ← perfil productivo (logs estructurados)
-└── db/migration/                    ← migraciones Flyway (V1__…, V2__…, …)
+├── db/migration/                    ← migraciones Flyway (V1__…, V2__…, …)
+└── sample-data/catalog.json         ← catálogo de ejemplo que carga el perfil dev
 
 src/test/java/com/amillioncodelines/streamstories/
 ├── ModularityTests.java             ← verificación de Spring Modulith

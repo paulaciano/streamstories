@@ -1,6 +1,11 @@
 # Local development only: ./mvnw spring-boot:run activates this profile (see spring-boot.run.profiles in pom.xml).
 # A packaged application never enables it by default, so without STREAMSTORIES_SECURITY_JWT_SECRET it does not start.
+# The profile also loads a sample catalog (sample-data/catalog.json) when the catalog is empty.
 streamstories:
   security:
     jwt:
       secret: dev-only-secret-change-me-0123456789abcdef
+  # Created on startup only if no administrator exists yet.
+  admin:
+    email: admin@streamstories.local
+    password: dev-admin-password

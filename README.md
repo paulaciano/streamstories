@@ -52,15 +52,14 @@ cd streamstories
 ./mvnw spring-boot:run
 ```
 
-Spring Boot levanta PostgreSQL automáticamente con Docker Compose, con el perfil de desarrollo (`dev`).
+Spring Boot levanta PostgreSQL automáticamente con Docker Compose, con el perfil de desarrollo (`dev`). Ese perfil:
 
-Para tener un administrador, definí sus credenciales la primera vez que levantes la aplicación. Se crea solo si todavía no existe ninguno:
+- carga un **catálogo de ejemplo**: 8 películas y 3 series con temporadas y episodios, en 6 géneros. Incluye una película y una temporada retiradas;
+- crea un **administrador de desarrollo**: `admin@streamstories.local` con la contraseña `dev-admin-password`.
 
-```bash
-STREAMSTORIES_ADMIN_EMAIL=admin@example.com STREAMSTORIES_ADMIN_PASSWORD=una-clave-segura ./mvnw spring-boot:run
-```
+Para explorar la API, iniciá sesión con `POST /api/v1/auth/login` y usá el access token en el botón *Authorize* de Swagger UI. Para ver el catálogo como usuario, registrá una cuenta con `POST /api/v1/auth/register`.
 
-Para otros entornos, las variables necesarias están en [`.env.example`](.env.example).
+Los datos de ejemplo y el administrador se crean solo si todavía no existen. Para empezar de cero, `docker compose down -v` borra la base local. Para otros entornos, las variables necesarias están en [`.env.example`](.env.example).
 
 Con la aplicación en marcha:
 
