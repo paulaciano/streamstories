@@ -106,7 +106,9 @@ src/main/java/com/amillioncodelines/streamstories/
 ├── recommendation/
 └── shared/
     ├── error/                       ← @RestControllerAdvice → ProblemDetail
-    └── persistence/                 ← entidad base auditada, configuración JPA
+    ├── persistence/                 ← entidad base auditada, configuración JPA
+    ├── web/                         ← paginación (PageResponse, orden permitido)
+    └── time/                        ← reloj de la aplicación (Clock), reemplazable en tests
 
 src/main/resources/
 ├── application.yaml                 ← configuración común
@@ -140,7 +142,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Identificadores** | `UUID` en todas las entidades expuestas, preferentemente ordenables en el tiempo (v7). No permiten adivinar recursos ajenos ni revelan volúmenes. |
 | **Fechas** | `Instant` en Java y `timestamptz` en PostgreSQL, siempre en UTC. |
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |
-| **Configuración** | `application.yaml` con perfiles (`dev`, `test`). Los secretos se reciben solo por variables de entorno. |
+| **Configuración** | `application.yaml` con perfiles: `dev` (el perfil por defecto al correr localmente), `test` (lo activa Maven al ejecutar los tests) y `prod`. Los secretos se reciben solo por variables de entorno; solo `dev` y `test` traen valores propios, que no sirven fuera de esos entornos. |
 | **Virtual threads** | Activados (`spring.threads.virtual.enabled=true`): dan alta concurrencia con código bloqueante simple ([JEP 444](https://openjdk.org/jeps/444)). |
 | **Logs** | Formato estructurado JSON ([ECS](https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.structured)) en el perfil `prod`. Nunca se loguean contraseñas ni tokens. |
 

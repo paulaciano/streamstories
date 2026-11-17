@@ -70,9 +70,9 @@ Todas las rutas son relativas a `/api/v1`.
 | `POST` | `/auth/logout` | 👤 | Revoca el refresh token enviado. |
 | `POST` | `/auth/reactivation-requests` | 🔓 | Con las credenciales de una cuenta inactiva, crea una solicitud de reactivación o devuelve la pendiente. Responde `202`. |
 | `GET` | `/me` | 👤 | Datos del usuario actual. |
-| `POST` | `/me/deactivate` | 👤 | Desactiva la propia cuenta y revoca sus tokens. |
+| `POST` | `/me/deactivate` | 👤 | Desactiva la propia cuenta y revoca sus tokens. Responde `204`. |
 | `GET` | `/admin/users` | 🛠️ | Usuarios, filtrables por `status` y `role`. |
-| `PATCH` | `/admin/users/{id}` | 🛠️ | Cambia el `status` o el `role` de un usuario. |
+| `PATCH` | `/admin/users/{id}` | 🛠️ | Cambia el `status` o el `role` de un usuario. Si reactiva la cuenta, también aprueba la solicitud pendiente, si la hay. |
 | `GET` | `/admin/reactivation-requests` | 🛠️ | Solicitudes de reactivación, filtrables por `status` (por defecto, `PENDING`). |
 | `POST` | `/admin/reactivation-requests/{id}/approve` | 🛠️ | Aprueba la solicitud y reactiva la cuenta. |
 | `POST` | `/admin/reactivation-requests/{id}/reject` | 🛠️ | Rechaza la solicitud. La cuenta sigue inactiva. |
@@ -126,6 +126,36 @@ A partir de la fase 2, el detalle de un título (`GET /movies/{id}`, `GET /serie
 | `POST` `PUT` `DELETE` | `/franchises[/{id}]` | 🛠️ | ABM de sagas. |
 
 ## 4.5 Ejemplos
+
+**Iniciar sesión**
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "ana@example.com", "password": "••••••••" }
+```
+
+```json
+{
+  "accessToken": "eyJ...",
+  "refreshToken": "q3Jx…",
+  "tokenType": "Bearer",
+  "expiresIn": 900
+}
+```
+
+Si la cuenta está inactiva y las credenciales son correctas:
+
+```json
+{
+  "type": "urn:streamstories:problem:account-inactive",
+  "title": "Cuenta inactiva",
+  "status": 403,
+  "detail": "La cuenta está inactiva. Solo un administrador puede reactivarla.",
+  "reactivationRequestPending": false
+}
+```
 
 **Crear una película (admin)**
 
@@ -213,7 +243,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `forbidden` | 403 | El rol no alcanza para la operación. |
 | `account-inactive` | 403 | La cuenta está desactivada. La respuesta indica si hay una solicitud de reactivación pendiente. |
 | `not-found` | 404 | El recurso no existe. |
-| `conflict` | 409 | Duplicado (email, número de temporada…) o recurso en uso. |
+| `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso o violación de una constraint de la base. |
 | `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 

@@ -52,7 +52,17 @@ cd streamstories
 ./mvnw spring-boot:run
 ```
 
-Spring Boot levanta PostgreSQL automáticamente con Docker Compose. Con la aplicación en marcha:
+Spring Boot levanta PostgreSQL automáticamente con Docker Compose, con el perfil de desarrollo (`dev`).
+
+Para tener un administrador, definí sus credenciales la primera vez que levantes la aplicación. Se crea solo si todavía no existe ninguno:
+
+```bash
+STREAMSTORIES_ADMIN_EMAIL=admin@example.com STREAMSTORIES_ADMIN_PASSWORD=una-clave-segura ./mvnw spring-boot:run
+```
+
+Para otros entornos, las variables necesarias están en [`.env.example`](.env.example).
+
+Con la aplicación en marcha:
 
 | | URL |
 |---|---|
