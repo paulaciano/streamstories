@@ -16,9 +16,9 @@
 |---|---|
 | 🎬 **Catálogo** | Películas y series (con temporadas y episodios), clasificadas en varios géneros a la vez. Se puede explorar un catálogo mixto filtrado por género, tipo o texto. |
 | 👤 **Cuentas** | Registro, inicio de sesión con JWT, roles `USER` y `ADMIN`. Las cuentas se pueden desactivar, y su reactivación la aprueba un administrador. |
-| ▶️ **Seguir viendo** | Guarda la posición exacta de reproducción de cada película o episodio. Un contenido cuenta como visto al llegar al 90 %, y recién entonces se pasa al episodio siguiente. |
-| ⭐ **Puntuaciones** | Calificaciones de 1 a 5 para películas y series, con promedio general. |
-| 💡 **Recomendaciones** | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
+| ▶️ **Seguir viendo** *(fase 2)* | Guarda la posición exacta de reproducción de cada película o episodio. Un contenido cuenta como visto al llegar al 90 %, y recién entonces se pasa al episodio siguiente. |
+| ⭐ **Puntuaciones** *(fase 2)* | Calificaciones de 1 a 5 para películas y series, con promedio general. |
+| 💡 **Recomendaciones** *(fase 3)* | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
 | 🗄️ **Retiro de contenido** | El contenido que deja de ofrecerse se retira sin borrarse, así no se pierde la actividad de los usuarios. |
 
 La API gestiona el catálogo y la actividad. La reproducción del video ocurre en el cliente, a partir de la URL de cada contenido ([ADR-0004](docs/adr/0004-video-como-metadato.md)).
@@ -40,7 +40,7 @@ flowchart LR
     reco --> catalog
 ```
 
-**Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 5 · Testcontainers · GitHub Actions.
+**Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 6 · Testcontainers · GitHub Actions.
 
 ## Cómo ejecutarlo
 

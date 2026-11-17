@@ -40,11 +40,3 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-
-### Asistentes de IA (configuración local) ###
-.claude/
-CLAUDE.md
-CLAUDE.local.md
-
-### Notas y material internos (no se publican) ###
-.internal/

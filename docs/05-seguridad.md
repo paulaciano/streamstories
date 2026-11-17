@@ -76,7 +76,7 @@ Mientras la cuenta está inactiva:
 | `USER` | Leer el catálogo disponible y gestionar **su propia** actividad, puntuaciones y cuenta. |
 | `ADMIN` | Todo lo de `USER`, más gestionar el catálogo, los usuarios y las solicitudes de reactivación. |
 
-- Las reglas por ruta y método se declaran en el `SecurityFilterChain`. Los casos más finos se resuelven con `@PreAuthorize` en los servicios.
+- Las reglas por ruta y método se declaran en el `SecurityFilterChain`. Si aparecen reglas más finas que la ruta (por ejemplo, según el dueño de un recurso), se resuelven en el servicio.
 - **Denegación por defecto:** todo endpoint que no esté listado explícitamente exige autenticación.
 - Los recursos del usuario se resuelven **siempre** a partir del token (`/me/...`). Esto evita el [acceso a datos ajenos manipulando identificadores (IDOR)](https://owasp.org/www-community/attacks/Insecure_Direct_Object_Reference).
 - Cada endpoint protegido tiene tests de autorización: sin token (401), con el rol incorrecto (403) y con el rol correcto.
@@ -92,7 +92,7 @@ Mientras la cuenta está inactiva:
 | CSRF | Desactivado: la autenticación va por header `Bearer`, no por cookies de sesión ([referencia](https://docs.spring.io/spring-security/reference/features/exploits/csrf.html#csrf-when)). |
 | Actuator | Solo se exponen `health` e `info`. |
 | Headers | Se usan los [headers de seguridad por defecto](https://docs.spring.io/spring-security/reference/features/exploits/headers.html) de Spring Security. |
-| Errores | No incluyen stack traces ni revelan si un email existe. Si el email no existe, igual se verifica la contraseña contra un hash de relleno, para que el tiempo de respuesta tampoco lo delate. |
+| Errores | No incluyen stack traces. El login y la solicitud de reactivación no revelan si un email existe: si no existe, igual se verifica la contraseña contra un hash de relleno, para que el tiempo de respuesta tampoco lo delate. El registro sí informa un email duplicado (`409`), porque es inevitable para que el usuario sepa por qué falla. |
 | Dependencias | [Dependabot](https://docs.github.com/code-security/dependabot) mantiene las actualizaciones y las alertas de vulnerabilidades. |
 | Logs | Nunca se loguean contraseñas, tokens ni el header `Authorization`. |
 
