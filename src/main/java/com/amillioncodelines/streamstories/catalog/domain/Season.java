@@ -21,6 +21,9 @@ import org.hibernate.type.SqlTypes;
 @Entity
 public class Season extends BaseEntity {
 
+    /** Highest season or episode number. Numbers are stored as {@code smallint}, so they must stay in that range. */
+    public static final int MAX_NUMBER = 999;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "series_id", nullable = false, updatable = false)
     private Series series;
@@ -38,8 +41,8 @@ public class Season extends BaseEntity {
     protected Season() {}
 
     Season(Series series, int number, String title) {
-        if (number < 1) {
-            throw new IllegalArgumentException("Season numbers start at 1");
+        if (number < 1 || number > MAX_NUMBER) {
+            throw new IllegalArgumentException("Season numbers go from 1 to " + MAX_NUMBER);
         }
         this.series = series;
         this.number = number;

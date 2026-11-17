@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -14,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -52,6 +54,7 @@ class GlobalExceptionHandlerTests {
                 .extractingPath("$.errors[*].field")
                 .asArray()
                 .containsExactly("durationSeconds", "title");
+        assertThat(result).bodyJson().extractingPath("$.errors[1].message").isEqualTo("no debe estar vacío");
     }
 
     @Test
@@ -134,6 +137,24 @@ class GlobalExceptionHandlerTests {
     }
 
     @Test
+    void shouldMapOutOfRangeDatabaseValuesTo400() {
+        assertThat(mvc.get().uri("/probe/out-of-range"))
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:validation-error");
+    }
+
+    @Test
+    void shouldMapConcurrentModificationsTo409() {
+        assertThat(mvc.get().uri("/probe/stale"))
+                .hasStatus(HttpStatus.CONFLICT)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:conflict");
+    }
+
+    @Test
     void shouldMapDatabaseConstraintViolationsTo409WithoutLeakingDetails() {
         MvcTestResult result = mvc.get().uri("/probe/constraint").exchange();
 
@@ -172,6 +193,10 @@ class GlobalExceptionHandlerTests {
                 case "unauthenticated" -> throw new BadCredentialsException("bad token");
                 case "forbidden" -> throw new AccessDeniedException("denied");
                 case "constraint" -> throw new DataIntegrityViolationException("uk_secret_constraint");
+                case "out-of-range" ->
+                    throw new DataIntegrityViolationException(
+                            "value too long", new SQLException("value too long", "22001"));
+                case "stale" -> throw new ObjectOptimisticLockingFailureException(Object.class, id);
                 default -> throw new ResourceNotFoundException("Movie %s not found".formatted(id));
             }
         }

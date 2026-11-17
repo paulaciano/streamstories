@@ -5,6 +5,7 @@ import com.amillioncodelines.streamstories.catalog.application.CatalogViews.Epis
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeasonView;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesSummaryView;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesView;
+import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
 import com.amillioncodelines.streamstories.catalog.domain.Episode;
 import com.amillioncodelines.streamstories.catalog.domain.EpisodeDetails;
@@ -74,9 +75,9 @@ public class SeriesService {
 
     /** Retiring a series makes all its episodes unplayable, without touching them. */
     @Transactional
-    public SeriesView changeAvailability(UUID id, AvailabilityCommand command) {
+    public SeriesView changeAvailability(UUID id, Availability availability) {
         Series series = findSeries(id);
-        series.changeAvailability(command.availability());
+        series.changeAvailability(availability);
         return SeriesView.of(seriesRepository.saveAndFlush(series), Audience.ADMIN);
     }
 
@@ -100,18 +101,18 @@ public class SeriesService {
 
     /** Season numbers are unique within the series and start at 1 (rule C4). */
     @Transactional
-    public SeasonView addSeason(UUID seriesId, SeasonCommand command) {
+    public SeasonView addSeason(UUID seriesId, int number, String title) {
         Series series = findSeries(seriesId);
-        Season season = series.addSeason(command.number(), command.title());
+        Season season = series.addSeason(number, title);
         // The series is managed: flushing persists the new season itself. A merge (save) would persist a copy.
         seriesRepository.flush();
         return SeasonView.of(season, Audience.ADMIN);
     }
 
     @Transactional
-    public SeasonView updateSeason(UUID seriesId, int number, SeasonUpdateCommand command) {
+    public SeasonView updateSeason(UUID seriesId, int number, String title) {
         Season season = findSeason(findSeries(seriesId), number);
-        season.rename(command.title());
+        season.rename(title);
         return SeasonView.of(season, Audience.ADMIN);
     }
 
@@ -148,9 +149,9 @@ public class SeriesService {
     }
 
     @Transactional
-    public EpisodeView changeEpisodeAvailability(UUID id, AvailabilityCommand command) {
+    public EpisodeView changeEpisodeAvailability(UUID id, Availability availability) {
         Episode episode = findEpisode(id);
-        episode.changeAvailability(command.availability());
+        episode.changeAvailability(availability);
         return EpisodeView.of(episode, Audience.ADMIN);
     }
 

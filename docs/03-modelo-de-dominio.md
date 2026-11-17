@@ -197,8 +197,8 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C1 | Todo título tiene `title` no vacío. | Bean Validation + `NOT NULL` |
 | C2 | Un título tiene de 0 a N géneros, sin repetir. | PK compuesta en `media_item_genre` |
 | C3 | El nombre y el slug de un género son únicos, sin distinguir mayúsculas. | Índice único sobre `lower(name)` |
-| C4 | El número de temporada es único dentro de su serie y empieza en 1. | `UNIQUE (series_id, number)` + `CHECK` |
-| C5 | El número de episodio es único dentro de su temporada y empieza en 1. | `UNIQUE (season_id, number)` + `CHECK` |
+| C4 | El número de temporada es único dentro de su serie y va de 1 a 999. | `UNIQUE (series_id, number)` + `CHECK` |
+| C5 | El número de episodio es único dentro de su temporada y va de 1 a 999. | `UNIQUE (season_id, number)` + `CHECK` |
 | C6 | Películas y episodios tienen una duración mayor que 0. | `CHECK` + validación |
 | C7 | Una serie puede existir sin temporadas, por ejemplo mientras se carga. | — |
 | C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |

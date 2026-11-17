@@ -1,11 +1,14 @@
 package com.amillioncodelines.streamstories.shared.error;
 
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -34,6 +37,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String ERRORS_PROPERTY = "errors";
+    private static final String SQL_STATE_DATA_EXCEPTION = "22";
 
     @ExceptionHandler(ProblemException.class)
     ProblemDetail handleProblem(ProblemException ex) {
@@ -42,13 +46,26 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return body;
     }
 
-    /** Safety net for races that bypass the service checks; a database constraint has the last word. */
+    /**
+     * Safety net for races that bypass the service checks; a database constraint has the last word. Invalid values
+     * (SQLState class 22) are the client's fault; integrity violations (class 23) are conflicts. The database message
+     * is never logged or returned, because it can contain the offending values, such as an email.
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        log.info(
-                "Request rejected by a database constraint: {}",
-                ex.getMostSpecificCause().getMessage());
+        String sqlState = sqlState(ex);
+        log.info("Request rejected by the database (SQLState {}, constraint {})", sqlState, constraintName(ex));
+        if (sqlState != null && sqlState.startsWith(SQL_STATE_DATA_EXCEPTION)) {
+            return problem(ProblemType.VALIDATION_ERROR, "Algún valor está fuera del rango permitido.");
+        }
         return problem(ProblemType.CONFLICT, "La operación entra en conflicto con datos existentes.");
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    ProblemDetail handleOptimisticLocking(OptimisticLockingFailureException ex) {
+        return problem(
+                ProblemType.CONFLICT,
+                "El recurso fue modificado por otra operación al mismo tiempo; hay que volver a intentarlo.");
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -124,6 +141,24 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "La solicitud contiene %d error(es) de validación.".formatted(errors.size()));
         body.setProperty(ERRORS_PROPERTY, errors);
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    private static String sqlState(Throwable ex) {
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sql && sql.getSQLState() != null) {
+                return sql.getSQLState();
+            }
+        }
+        return null;
+    }
+
+    private static String constraintName(Throwable ex) {
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException violation) {
+                return violation.getConstraintName();
+            }
+        }
+        return null;
     }
 
     private static ProblemDetail problem(ProblemType type, String detail) {

@@ -19,18 +19,18 @@ class PageablesTests {
     void shouldApplyDefaultSortWhenNoneRequested() {
         Pageable result = Pageables.restrictSort(PageRequest.of(2, 10), ALLOWED, DEFAULT_SORT);
 
-        assertThat(result.getSort()).isEqualTo(DEFAULT_SORT);
+        assertThat(result.getSort()).isEqualTo(DEFAULT_SORT.and(Sort.by("id")));
         assertThat(result.getPageNumber()).isEqualTo(2);
         assertThat(result.getPageSize()).isEqualTo(10);
     }
 
     @Test
-    void shouldKeepRequestedSortWhenAllowed() {
+    void shouldKeepRequestedSortAndBreakTiesById() {
         Sort requested = Sort.by(Sort.Direction.DESC, "releaseYear");
 
         Pageable result = Pageables.restrictSort(PageRequest.of(0, 20, requested), ALLOWED, DEFAULT_SORT);
 
-        assertThat(result.getSort()).isEqualTo(requested);
+        assertThat(result.getSort()).isEqualTo(requested.and(Sort.by("id")));
     }
 
     @Test

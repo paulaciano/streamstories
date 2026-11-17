@@ -23,8 +23,27 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Entidad base con identificador UUIDv7 y auditoría de fechas de creación y modificación.
 - Respuesta paginada uniforme y validación de los campos de orden permitidos.
 
+### Fixed
+
+- Los números de temporada y episodio fuera de rango se truncaban al guardarse; ahora se validan (de 1 a 999).
+- Reutilizar un refresh token vencido o revocado por logout cerraba todas las sesiones del usuario; ahora solo la reutilización de un token rotado se trata como robo.
+- Aprobar y rechazar a la vez la misma solicitud de reactivación podía dejar datos inconsistentes; ahora se bloquea la solicitud.
+- Dos pedidos simultáneos de reactivación devolvían `409`; ahora devuelven la misma solicitud pendiente.
+- Cambiar solo los géneros de un título no actualizaba `updatedAt`.
+- La comparación de entidades fallaba con proxies de Hibernate.
+- Los valores inválidos rechazados por la base respondían `409` en lugar de `400`, y el log incluía el detalle de PostgreSQL.
+- La paginación podía repetir u omitir elementos cuando había empates en el orden.
+
+### Security
+
+- La aplicación empaquetada ya no activa el perfil `dev` por defecto: sin `STREAMSTORIES_SECURITY_JWT_SECRET` no arranca, en lugar de usar la clave de desarrollo.
+
 ### Changed
 
+- El catálogo tiene DTOs propios en la capa `api`, como identity.
+- Edición concurrente de títulos con bloqueo optimista.
+- Los mensajes de validación salen siempre en español.
+- Login y reactivación verifican la contraseña fuera de la transacción, sin retener una conexión de la base.
 - Los errores de autenticación, autorización y constraints de la base también responden con Problem Details.
 
 ## [0.0.1] - 2026-11-17

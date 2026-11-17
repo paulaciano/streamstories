@@ -3,6 +3,8 @@ package com.amillioncodelines.streamstories.identity.domain;
 import com.amillioncodelines.streamstories.shared.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -26,6 +28,9 @@ public class RefreshToken extends BaseEntity {
 
     private Instant revokedAt;
 
+    @Enumerated(EnumType.STRING)
+    private RevocationReason revocationReason;
+
     protected RefreshToken() {}
 
     public RefreshToken(User user, String tokenHash, Instant expiresAt) {
@@ -38,19 +43,16 @@ public class RefreshToken extends BaseEntity {
         return revokedAt != null;
     }
 
+    /** A rotated token presented again means it may have been stolen. */
+    public boolean wasRotated() {
+        return revocationReason == RevocationReason.ROTATED;
+    }
+
     public boolean isExpired(Instant now) {
         return !now.isBefore(expiresAt);
     }
 
     public User getUser() {
         return user;
-    }
-
-    public Instant getExpiresAt() {
-        return expiresAt;
-    }
-
-    public Instant getRevokedAt() {
-        return revokedAt;
     }
 }

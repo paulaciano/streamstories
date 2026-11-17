@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.amillioncodelines.streamstories.identity.domain.AccountStatus;
 import com.amillioncodelines.streamstories.identity.domain.ReactivationRequestRepository;
 import com.amillioncodelines.streamstories.identity.domain.RefreshTokenRepository;
+import com.amillioncodelines.streamstories.identity.domain.RevocationReason;
 import com.amillioncodelines.streamstories.identity.domain.Role;
 import com.amillioncodelines.streamstories.identity.domain.User;
 import com.amillioncodelines.streamstories.identity.domain.UserRepository;
@@ -41,7 +42,7 @@ class AccountServiceTests {
 
         assertThatThrownBy(() -> service.deactivateOwnAccount(admin.getId())).isInstanceOf(ConflictException.class);
         assertThat(admin.isActive()).isTrue();
-        verify(refreshTokens, never()).revokeAllForUser(any(), any());
+        verify(refreshTokens, never()).revokeAllForUser(any(), any(), any());
     }
 
     @Test
@@ -66,7 +67,7 @@ class AccountServiceTests {
         UserView result = service.updateUser(admin.getId(), AccountStatus.INACTIVE, null, other.getId());
 
         assertThat(result.status()).isEqualTo(AccountStatus.INACTIVE);
-        verify(refreshTokens).revokeAllForUser(admin.getId(), clock.instant());
+        verify(refreshTokens).revokeAllForUser(admin.getId(), clock.instant(), RevocationReason.ACCOUNT_DEACTIVATED);
     }
 
     @Test
@@ -77,7 +78,7 @@ class AccountServiceTests {
         service.deactivateOwnAccount(viewer.getId());
 
         assertThat(viewer.isActive()).isFalse();
-        verify(refreshTokens).revokeAllForUser(viewer.getId(), clock.instant());
+        verify(refreshTokens).revokeAllForUser(viewer.getId(), clock.instant(), RevocationReason.ACCOUNT_DEACTIVATED);
         verify(users, never()).lockActiveAdmins();
     }
 

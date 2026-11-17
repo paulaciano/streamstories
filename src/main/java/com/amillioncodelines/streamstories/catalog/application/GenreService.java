@@ -37,24 +37,22 @@ public class GenreService {
 
     /** Names and slugs are unique ignoring case (rule C3). */
     @Transactional
-    public GenreView create(GenreCommand command) {
-        String slug = slugOf(command.name());
+    public GenreView create(String name) {
+        String slug = slugOf(name);
         if (genres.existsBySlug(slug)) {
-            throw new ConflictException(
-                    "Ya existe un género '%s'.".formatted(command.name().strip()));
+            throw new ConflictException("Ya existe un género '%s'.".formatted(name.strip()));
         }
-        return GenreView.of(genres.saveAndFlush(new Genre(command.name())));
+        return GenreView.of(genres.saveAndFlush(new Genre(name)));
     }
 
     @Transactional
-    public GenreView rename(UUID id, GenreCommand command) {
+    public GenreView rename(UUID id, String name) {
         Genre genre = find(id);
-        String slug = slugOf(command.name());
+        String slug = slugOf(name);
         if (genres.existsBySlugAndIdNot(slug, id)) {
-            throw new ConflictException(
-                    "Ya existe un género '%s'.".formatted(command.name().strip()));
+            throw new ConflictException("Ya existe un género '%s'.".formatted(name.strip()));
         }
-        genre.rename(command.name());
+        genre.rename(name);
         return GenreView.of(genres.saveAndFlush(genre));
     }
 

@@ -42,8 +42,11 @@ sequenceDiagram
 ### Renovación con rotación
 
 1. El cliente envía su refresh token a `POST /auth/refresh`.
-2. El servidor busca su hash. Si el token está vigente, no fue revocado y el usuario sigue `ACTIVE`, **revoca ese token** y emite un par nuevo.
-3. **Detección de reutilización:** si llega un refresh token que ya fue revocado, se asume que pudo ser robado y se revocan **todos** los refresh tokens del usuario.
+2. El servidor busca su hash. Si el token está vigente, no fue revocado y el usuario sigue `ACTIVE`, **revoca ese token** (motivo: rotado) y emite un par nuevo.
+3. **Detección de reutilización:** si llega un refresh token que ya había sido **rotado**, se asume que pudo ser robado y se revocan **todos** los refresh tokens del usuario.
+4. Un token vencido, o revocado por logout o por desactivación de la cuenta, solo se rechaza con `401`. Así, un cliente viejo que reintenta con un token inválido no cierra las sesiones vigentes del usuario.
+
+Cada revocación guarda su motivo (`ROTATED`, `LOGOUT`, `ACCOUNT_DEACTIVATED`, `REUSE_DETECTED`), que es lo que permite distinguir estos casos.
 
 ### Ciclo de vida de una cuenta
 

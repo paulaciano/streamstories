@@ -1,7 +1,6 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
 import com.amillioncodelines.streamstories.catalog.application.CatalogService;
-import com.amillioncodelines.streamstories.catalog.application.CatalogViews.CatalogItemView;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
 import com.amillioncodelines.streamstories.catalog.domain.MediaType;
@@ -30,7 +29,7 @@ class CatalogController {
 
     @GetMapping
     @Operation(summary = "Catálogo mixto de películas y series, filtrable y paginado")
-    PageResponse<CatalogItemView> browse(
+    PageResponse<CatalogItemResponse> browse(
             @Parameter(description = "Slug del género, por ejemplo `sci-fi`") @RequestParam(required = false)
                     String genre,
             @RequestParam(required = false) MediaType type,
@@ -42,6 +41,6 @@ class CatalogController {
             Authentication authentication) {
         var filter = new CatalogFilter(genre, type, q, availability);
         var page = catalog.browse(filter, Audiences.of(authentication), TitleSorting.restrict(pageable));
-        return PageResponse.of(page, item -> item);
+        return PageResponse.of(page, CatalogItemResponse::from);
     }
 }
