@@ -1,6 +1,7 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
 import com.amillioncodelines.streamstories.catalog.application.SeriesService;
+import com.amillioncodelines.streamstories.catalog.application.TitleRatingService;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
@@ -33,9 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 class SeriesController {
 
     private final SeriesService series;
+    private final TitleRatingService ratings;
 
-    SeriesController(SeriesService series) {
+    SeriesController(SeriesService series, TitleRatingService ratings) {
         this.series = series;
+        this.ratings = ratings;
     }
 
     @GetMapping
@@ -54,7 +57,9 @@ class SeriesController {
     @GetMapping("/{id}")
     @Operation(summary = "Detalle de una serie con el resumen de sus temporadas")
     SeriesResponse get(@PathVariable UUID id, Authentication authentication) {
-        return SeriesResponse.from(series.get(id, Audiences.of(authentication)));
+        return SeriesResponse.from(
+                series.get(id, Audiences.of(authentication)),
+                ratings.summarize(id, Audiences.viewerId(authentication)));
     }
 
     @PostMapping

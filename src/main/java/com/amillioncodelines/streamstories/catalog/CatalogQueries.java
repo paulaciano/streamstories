@@ -24,4 +24,10 @@ public interface CatalogQueries {
 
     /** Episodes by id, with their series. Ids that do not exist are left out. */
     Map<UUID, EpisodeSummary> findEpisodes(Collection<UUID> ids);
+
+    /** A movie or a series. Episode ids are not titles, so they are not found. */
+    Optional<TitleSummary> findTitle(UUID id);
+
+    /** Titles by id. Ids that do not exist are left out. */
+    Map<UUID, TitleSummary> findTitles(Collection<UUID> ids);
 }

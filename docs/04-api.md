@@ -107,13 +107,13 @@ Para un `USER`, el contenido que no se puede reproducir (una película retirada,
 | `PUT` | `/me/progress/episodes/{episodeId}` | 👤 | Lo mismo, para un episodio. |
 | `GET` | `/me/continue-watching` | 👤 | Películas sin terminar y una entrada por serie con el último episodio visto, según las reglas A5 a A7. |
 | `GET` | `/me/history` | 👤 | Historial completo y paginado: una fila por película o episodio visto, incluido el contenido retirado. |
-| `PUT` | `/me/ratings/{mediaItemId}` | 👤 | Crea o reemplaza la puntuación de un título. |
-| `DELETE` | `/me/ratings/{mediaItemId}` | 👤 | Quita la puntuación. |
-| `GET` | `/me/ratings` | 👤 | Las puntuaciones del usuario. |
+| `PUT` | `/me/ratings/{titleId}` | 👤 | Crea o reemplaza la puntuación de una película o una serie. Responde `409` si el título está retirado. |
+| `DELETE` | `/me/ratings/{titleId}` | 👤 | Quita la puntuación, aunque el título esté retirado. Si no había, responde `204` igual. |
+| `GET` | `/me/ratings` | 👤 | Las puntuaciones del usuario, de la más reciente a la más antigua. Un título retirado aparece con `available: false`. |
 
-Seguir viendo y el historial van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
+Seguir viendo, el historial y las puntuaciones van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
 
-A partir de la fase 2, el detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `averageRating` (con un decimal), `ratingCount` y la puntuación del usuario actual.
+El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratings`: el promedio con un decimal (`average`, `null` si nadie puntuó), la cantidad de puntuaciones (`count`) y la del usuario actual (`mine`, `null` si no puntuó). Los listados no lo incluyen.
 
 ### Fase 3: recomendaciones
 
@@ -241,10 +241,29 @@ PUT /api/v1/me/ratings/0193a6f2…
 { "score": 4 }
 ```
 
+```json
+{
+  "titleId": "0193a6f2…",
+  "type": "SERIES",
+  "title": "Estación Austral",
+  "coverImageUrl": "https://cdn.example.com/covers/estacion-austral.jpg",
+  "available": true,
+  "score": 4,
+  "ratedAt": "2026-11-16T21:10:42Z"
+}
+```
+
+En el detalle de la serie:
+
+```json
+"ratings": { "average": 4.3, "count": 12, "mine": 4 }
+```
+
 ## 4.6 Validación de entrada
 
 - Los DTO de entrada son `record` con anotaciones de [Bean Validation](https://beanvalidation.org/): `@NotBlank`, `@Size`, `@Positive`, `@Min(1) @Max(5)`, etc.
 - Los campos desconocidos en el JSON devuelven `400`, para que un error de tipeo no pase en silencio.
+- Un número con decimales en un campo entero (por ejemplo, `"score": 4.5`) devuelve `400`, en lugar de truncarse.
 - Las URLs (`videoUrl`, `coverImageUrl`) deben usar `https://`.
 
 ## 4.7 Errores
@@ -279,4 +298,4 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 
 Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "credenciales inválidas", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
 
-`content-unavailable` lo usan el progreso de reproducción y, desde que estén disponibles, las puntuaciones.
+`content-unavailable` lo usan el progreso de reproducción y las puntuaciones.

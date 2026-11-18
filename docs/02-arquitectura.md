@@ -85,7 +85,7 @@ flowchart TB
 
 Ejemplo: para registrar el progreso de un episodio, `activity` no usa `EpisodeRepository`. Llama a `CatalogQueries.findPlayable(kind, id)`, una interfaz pública de `catalog` que devuelve un `PlayableContent` de solo lectura, con la duración y si el contenido se puede reproducir. Del mismo modo, toma el usuario actual del token con `identity.CurrentUser`.
 
-Cuando `catalog` necesita saber algo de la actividad, se invierte la dependencia. Para no borrar contenido con actividad (regla C11), `catalog` publica la interfaz `ContentActivity`, que `activity` implementa. Así `catalog` sigue sin depender de nadie.
+Cuando `catalog` necesita saber algo de la actividad, se invierte la dependencia. Para no borrar contenido con actividad (regla C11), `catalog` publica la interfaz `ContentActivity`, que `activity` implementa. Lo mismo pasa con las puntuaciones que muestra el detalle de un título: `catalog` publica `TitleRatings` y `activity` la implementa. Así `catalog` sigue sin depender de nadie.
 
 ## 2.5 Estructura de paquetes
 
@@ -98,7 +98,9 @@ src/main/java/com/amillioncodelines/streamstories/
 │   ├── ContentActivity.java         ← API pública: interfaz que implementan los módulos con actividad
 │   ├── ContentKind.java
 │   ├── CatalogQueries.java          ← API pública: consultas de solo lectura para otros módulos
-│   ├── PlayableContent.java         ← y los resúmenes MovieSummary y EpisodeSummary
+│   ├── PlayableContent.java         ← y los resúmenes MovieSummary, EpisodeSummary y TitleSummary
+│   ├── TitleRatings.java            ← API pública: puntuaciones para el detalle, las implementa activity
+│   ├── RatingSummary.java
 │   ├── api/                         ← entrada HTTP: controllers, DTO request/response
 │   ├── application/                 ← casos de uso, transacciones, commands y views
 │   └── domain/                      ← entidades JPA, enums, repositorios, consultas
@@ -106,7 +108,7 @@ src/main/java/com/amillioncodelines/streamstories/
 │   ├── CurrentUser.java             ← API pública: el usuario actual, tomado del token
 │   ├── api/  application/  domain/  ← application también emite los tokens (TokenIssuer)
 │   └── security/                    ← SecurityFilterChain, validación del JWT, filtro de cuenta activa
-├── activity/                        ← fase 2: implementa ContentActivity (C11)
+├── activity/                        ← fase 2: implementa ContentActivity (C11) y TitleRatings
 │   └── api/  application/  domain/
 ├── recommendation/                  ← fase 3
 └── shared/

@@ -18,6 +18,8 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+      # 4.5 in an integer field is a client error, not 4.
+      accept-float-as-int: false
   data:
     web:
       pageable:

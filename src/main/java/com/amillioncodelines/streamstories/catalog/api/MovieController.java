@@ -1,6 +1,7 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
 import com.amillioncodelines.streamstories.catalog.application.MovieService;
+import com.amillioncodelines.streamstories.catalog.application.TitleRatingService;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
@@ -33,9 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 class MovieController {
 
     private final MovieService movies;
+    private final TitleRatingService ratings;
 
-    MovieController(MovieService movies) {
+    MovieController(MovieService movies, TitleRatingService ratings) {
         this.movies = movies;
+        this.ratings = ratings;
     }
 
     @GetMapping
@@ -56,7 +59,9 @@ class MovieController {
             summary = "Detalle de una película",
             description = "Una película retirada sigue accesible por id, sin URL de video para un USER.")
     MovieResponse get(@PathVariable UUID id, Authentication authentication) {
-        return MovieResponse.from(movies.get(id, Audiences.of(authentication)));
+        return MovieResponse.from(
+                movies.get(id, Audiences.of(authentication)),
+                ratings.summarize(id, Audiences.viewerId(authentication)));
     }
 
     @PostMapping

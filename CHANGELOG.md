@@ -6,12 +6,19 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
 ### Added
 
-- Progreso de reproducción (fase 2): `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
-- El contenido con progreso ya no se puede borrar, solo retirar.
+- Progreso de reproducción: `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
+- El contenido con progreso o puntuaciones ya no se puede borrar, solo retirar.
 - Seguir viendo (`GET /me/continue-watching`): las películas sin terminar y una entrada por serie con el último episodio visto, mientras quede algo por ver.
 - Historial de reproducción (`GET /me/history`), paginado e incluido el contenido retirado.
+- Puntuaciones de 1 a 5 para películas y series (`/me/ratings`). El detalle de cada título muestra el promedio, la cantidad y la puntuación propia. Un título retirado conserva sus puntuaciones, pero no acepta nuevas.
+
+### Fixed
+
+- Un número con decimales en un campo entero se truncaba (`4.5` se guardaba como `4`); ahora responde `400`.
 
 ## [0.1.0] - 2026-11-17
 
@@ -74,6 +81,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
   - CI con GitHub Actions, formato automático con Spotless y cobertura con JaCoCo.
   - Dependabot, plantilla de pull request y EditorConfig.
 
-[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/paulaciano/streamstories/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/paulaciano/streamstories/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/paulaciano/streamstories/releases/tag/v0.0.1
