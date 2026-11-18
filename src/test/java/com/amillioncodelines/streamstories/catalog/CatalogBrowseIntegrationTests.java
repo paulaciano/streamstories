@@ -69,6 +69,22 @@ class CatalogBrowseIntegrationTests {
     }
 
     @Test
+    void shouldSortTitlesAsInSpanish() {
+        Session admin = api.adminSession();
+        String tag = token();
+        String vecinos = catalog.createMovie(admin, tag + " Vecinos", 2000);
+        String orbita = catalog.createMovie(admin, tag + " Órbita", 2000);
+        String nandu = catalog.createMovie(admin, tag + " Ñandú", 2000);
+        String nube = catalog.createMovie(admin, tag + " Nube", 2000);
+
+        assertThat(catalog.get(admin, "/api/v1/catalog?sort=title&q=" + tag))
+                .bodyJson()
+                .extractingPath("$.content[*].id")
+                .asArray()
+                .containsExactly(nube, nandu, orbita, vecinos);
+    }
+
+    @Test
     void shouldTreatSearchWildcardsLiterally() {
         Session admin = api.adminSession();
         String tag = token();
