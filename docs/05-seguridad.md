@@ -101,3 +101,5 @@ Las prácticas siguen las recomendaciones de [OWASP API Security Top 10](https:/
 ## 5.5 Administrador inicial
 
 El primer `ADMIN` se crea al iniciar la aplicación si todavía no existe ninguno, con el email y la contraseña de las variables de entorno `STREAMSTORIES_ADMIN_EMAIL` y `STREAMSTORIES_ADMIN_PASSWORD`. Si esas variables no están definidas, no se crea y se registra una advertencia en el log. **No existen credenciales por defecto.**
+
+La única excepción es el perfil `dev`, que solo activa `./mvnw spring-boot:run`: define un administrador de desarrollo (`admin@streamstories.local`) para explorar la API en una base local. La aplicación empaquetada nunca activa ese perfil.

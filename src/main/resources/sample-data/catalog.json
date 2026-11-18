@@ -1,0 +1,134 @@
+{
+  "genres": ["Ciencia ficción", "Drama", "Comedia", "Suspenso", "Animación", "Documental"],
+  "movies": [
+    {
+      "title": "El último faro",
+      "synopsis": "Una guardiana de faro descubre que las luces que ve en el horizonte no pertenecen a ningún barco.",
+      "releaseYear": 2019,
+      "durationSeconds": 6420,
+      "genres": ["Drama", "Suspenso"]
+    },
+    {
+      "title": "Órbita baja",
+      "synopsis": "Tres técnicos quedan varados en una estación orbital y tienen catorce horas para volver a la Tierra.",
+      "releaseYear": 2021,
+      "durationSeconds": 7080,
+      "genres": ["Ciencia ficción"]
+    },
+    {
+      "title": "Recetas para un domingo",
+      "synopsis": "Una familia que no se habla hace años se reúne para cocinar el plato favorito de la abuela.",
+      "releaseYear": 2018,
+      "durationSeconds": 5700,
+      "genres": ["Comedia", "Drama"]
+    },
+    {
+      "title": "La ciudad que no duerme",
+      "synopsis": "Un taxista nocturno queda en medio de una investigación que nadie quiere que se resuelva.",
+      "releaseYear": 2016,
+      "durationSeconds": 6900,
+      "genres": ["Suspenso"]
+    },
+    {
+      "title": "Pequeños gigantes",
+      "synopsis": "Un grupo de hormigas emprende el viaje más largo de su vida para salvar el hormiguero.",
+      "releaseYear": 2022,
+      "durationSeconds": 5400,
+      "genres": ["Animación", "Comedia"]
+    },
+    {
+      "title": "Mareas",
+      "synopsis": "Un recorrido por las costas del sur y las comunidades que viven al ritmo del mar.",
+      "releaseYear": 2020,
+      "durationSeconds": 4980,
+      "genres": ["Documental"]
+    },
+    {
+      "title": "Señales",
+      "synopsis": "Una radioaficionada capta un mensaje que parece responder a sus propias preguntas.",
+      "releaseYear": 2023,
+      "durationSeconds": 7320,
+      "genres": ["Ciencia ficción", "Suspenso"]
+    },
+    {
+      "title": "El archivo perdido",
+      "synopsis": "Un bibliotecario encuentra cartas que cambian la historia de su pueblo. Retirada del catálogo.",
+      "releaseYear": 2015,
+      "durationSeconds": 6600,
+      "genres": ["Drama"],
+      "retired": true
+    }
+  ],
+  "series": [
+    {
+      "title": "Estación Austral",
+      "synopsis": "La vida de una base científica en la Antártida, donde cada invierno guarda un secreto.",
+      "releaseYear": 2020,
+      "genres": ["Ciencia ficción", "Drama"],
+      "seasons": [
+        {
+          "title": "El primer invierno",
+          "episodes": [
+            {"title": "Llegada", "synopsis": "El nuevo equipo llega a la base.", "durationSeconds": 2700},
+            {"title": "Tormenta blanca", "synopsis": "Una tormenta deja la base aislada.", "durationSeconds": 2820},
+            {"title": "La señal", "synopsis": "Los instrumentos registran algo imposible.", "durationSeconds": 2640},
+            {"title": "Deshielo", "synopsis": "El equipo decide qué contar y qué callar.", "durationSeconds": 3060}
+          ]
+        },
+        {
+          "title": "Bajo el hielo",
+          "episodes": [
+            {"title": "Regreso", "synopsis": "Una integrante del primer equipo vuelve a la base.", "durationSeconds": 2760},
+            {"title": "Perforación", "synopsis": "La expedición llega más hondo que nunca.", "durationSeconds": 2880},
+            {"title": "Superficie", "synopsis": "Lo que encontraron sale a la luz.", "durationSeconds": 3240}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Vecinos",
+      "synopsis": "Los habitantes de un edificio de seis pisos comparten ascensor, problemas y alguna que otra mudanza.",
+      "releaseYear": 2018,
+      "genres": ["Comedia"],
+      "seasons": [
+        {
+          "episodes": [
+            {"title": "La reunión de consorcio", "durationSeconds": 1500},
+            {"title": "El ascensor", "durationSeconds": 1440},
+            {"title": "La mudanza", "durationSeconds": 1560}
+          ]
+        },
+        {
+          "episodes": [
+            {"title": "El nuevo portero", "durationSeconds": 1500},
+            {"title": "Corte de luz", "durationSeconds": 1380},
+            {"title": "La terraza", "durationSeconds": 1620}
+          ]
+        },
+        {
+          "title": "Temporada retirada",
+          "retired": true,
+          "episodes": [
+            {"title": "Obras en el tercero", "durationSeconds": 1500},
+            {"title": "Fin de año", "durationSeconds": 1800}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rutas del vino",
+      "synopsis": "Productores de distintas regiones cuentan cómo el clima y el suelo llegan a la copa.",
+      "releaseYear": 2022,
+      "genres": ["Documental"],
+      "seasons": [
+        {
+          "episodes": [
+            {"title": "Valles de altura", "durationSeconds": 2400},
+            {"title": "Costa fría", "durationSeconds": 2340},
+            {"title": "Tierra de sol", "durationSeconds": 2460}
+          ]
+        }
+      ]
+    }
+  ]
+}
