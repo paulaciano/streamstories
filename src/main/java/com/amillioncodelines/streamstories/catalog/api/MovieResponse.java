@@ -1,7 +1,9 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
+import com.amillioncodelines.streamstories.catalog.RatingSummary;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.MovieView;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -20,9 +22,15 @@ record MovieResponse(
         Availability availability,
         List<GenreResponse> genres,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        @JsonInclude(JsonInclude.Include.NON_NULL) RatingsResponse ratings) {
 
     static MovieResponse from(MovieView movie) {
+        return from(movie, null);
+    }
+
+    /** The detail of a title also includes its ratings. */
+    static MovieResponse from(MovieView movie, RatingSummary ratings) {
         return new MovieResponse(
                 movie.id(),
                 movie.title(),
@@ -34,6 +42,7 @@ record MovieResponse(
                 movie.availability(),
                 GenreResponse.fromAll(movie.genres()),
                 movie.createdAt(),
-                movie.updatedAt());
+                movie.updatedAt(),
+                ratings == null ? null : RatingsResponse.from(ratings));
     }
 }

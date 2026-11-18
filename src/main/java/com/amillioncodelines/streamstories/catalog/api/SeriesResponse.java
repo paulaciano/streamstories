@@ -1,7 +1,9 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
+import com.amillioncodelines.streamstories.catalog.RatingSummary;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesView;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -16,12 +18,18 @@ record SeriesResponse(
         List<GenreResponse> genres,
         List<SeasonSummary> seasons,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        @JsonInclude(JsonInclude.Include.NON_NULL) RatingsResponse ratings) {
 
     /** Viewers only see available seasons; administrators see every season. */
     record SeasonSummary(int number, String title, Availability availability, int episodeCount) {}
 
     static SeriesResponse from(SeriesView series) {
+        return from(series, null);
+    }
+
+    /** The detail of a title also includes its ratings. */
+    static SeriesResponse from(SeriesView series, RatingSummary ratings) {
         List<SeasonSummary> seasons = series.seasons().stream()
                 .map(season -> new SeasonSummary(
                         season.number(), season.title(), season.availability(), season.episodeCount()))
@@ -36,6 +44,7 @@ record SeriesResponse(
                 GenreResponse.fromAll(series.genres()),
                 seasons,
                 series.createdAt(),
-                series.updatedAt());
+                series.updatedAt(),
+                ratings == null ? null : RatingsResponse.from(ratings));
     }
 }

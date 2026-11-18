@@ -5,8 +5,12 @@ import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
 import com.amillioncodelines.streamstories.catalog.MovieSummary;
 import com.amillioncodelines.streamstories.catalog.PlayableContent;
+import com.amillioncodelines.streamstories.catalog.TitleSummary;
 import com.amillioncodelines.streamstories.catalog.domain.Episode;
 import com.amillioncodelines.streamstories.catalog.domain.EpisodeRepository;
+import com.amillioncodelines.streamstories.catalog.domain.MediaItem;
+import com.amillioncodelines.streamstories.catalog.domain.MediaItemRepository;
+import com.amillioncodelines.streamstories.catalog.domain.MediaType;
 import com.amillioncodelines.streamstories.catalog.domain.MovieRepository;
 import com.amillioncodelines.streamstories.catalog.domain.Series;
 import java.util.Collection;
@@ -21,10 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 class CatalogQueryService implements CatalogQueries {
 
+    private final MediaItemRepository titles;
     private final MovieRepository movies;
     private final EpisodeRepository episodes;
 
-    CatalogQueryService(MovieRepository movies, EpisodeRepository episodes) {
+    CatalogQueryService(MediaItemRepository titles, MovieRepository movies, EpisodeRepository episodes) {
+        this.titles = titles;
         this.movies = movies;
         this.episodes = episodes;
     }
@@ -68,6 +74,25 @@ class CatalogQueryService implements CatalogQueries {
         return episodes.findWithSeasonAndSeriesByIdIn(ids).stream()
                 .map(CatalogQueryService::summary)
                 .collect(Collectors.toMap(EpisodeSummary::id, Function.identity()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<TitleSummary> findTitle(UUID id) {
+        return titles.findById(id).map(CatalogQueryService::summary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, TitleSummary> findTitles(Collection<UUID> ids) {
+        return titles.findAllById(ids).stream()
+                .map(CatalogQueryService::summary)
+                .collect(Collectors.toMap(TitleSummary::id, Function.identity()));
+    }
+
+    private static TitleSummary summary(MediaItem title) {
+        ContentKind type = title.getType() == MediaType.MOVIE ? ContentKind.MOVIE : ContentKind.SERIES;
+        return new TitleSummary(title.getId(), type, title.getTitle(), title.getCoverImageUrl(), title.isAvailable());
     }
 
     private static EpisodeSummary summary(Episode episode) {

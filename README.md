@@ -16,8 +16,8 @@
 |---|---|
 | 🎬 **Catálogo** | Películas y series (con temporadas y episodios), clasificadas en varios géneros a la vez. Se puede explorar un catálogo mixto filtrado por género, tipo o texto. |
 | 👤 **Cuentas** | Registro, inicio de sesión con JWT, roles `USER` y `ADMIN`. Las cuentas se pueden desactivar, y su reactivación la aprueba un administrador. |
-| ▶️ **Seguir viendo** *(fase 2)* | Guarda la posición exacta de reproducción de cada película o episodio, que cuenta como visto al llegar al 90 %. Muestra las películas sin terminar y cada serie con el último episodio visto. |
-| ⭐ **Puntuaciones** *(fase 2)* | Calificaciones de 1 a 5 para películas y series, con promedio general. |
+| ▶️ **Seguir viendo** | Guarda la posición exacta de reproducción de cada película o episodio, que cuenta como visto al llegar al 90 %. Muestra las películas sin terminar y cada serie con el último episodio visto. |
+| ⭐ **Puntuaciones** | Calificaciones de 1 a 5 para películas y series, con el promedio en el detalle de cada título. |
 | 💡 **Recomendaciones** *(fase 3)* | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
 | 🗄️ **Retiro de contenido** | El contenido que deja de ofrecerse se retira sin borrarse, así no se pierde la actividad de los usuarios. |
 
@@ -93,8 +93,8 @@ El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
 |------|---------|:------:|
 | 0 · Cimientos | Configuración base, CI, manejo de errores, OpenAPI | ✅ Completada |
 | 1 · MVP | Catálogo, cuentas y autenticación | ✅ Completada |
-| 2 · Interacción | Progreso de reproducción, historial y puntuaciones | 🚧 En curso |
-| 3 · Inteligencia | Recomendaciones personalizadas | ⏳ |
+| 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ✅ Completada |
+| 3 · Inteligencia | Recomendaciones personalizadas | 🚧 En curso |
 | 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ⏳ |
 
 ## Licencia
