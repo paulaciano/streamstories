@@ -83,7 +83,7 @@ flowchart TB
 3. Un módulo usa a otro **solo a través de su API pública**, formada por los tipos del paquete raíz del módulo. Nunca accede a entidades ni a repositorios internos de otro módulo.
 4. Spring Modulith verifica estas reglas en un test (`ModularityTests`), y el build falla si alguna se rompe.
 
-Ejemplo (fase 2): para registrar el progreso de un episodio, `activity` no va a usar `EpisodeRepository`. Va a llamar a `CatalogQueries.findPlayable(id)`, una interfaz pública de `catalog` que devuelve un DTO de solo lectura con la duración y la disponibilidad del contenido.
+Ejemplo: para registrar el progreso de un episodio, `activity` no usa `EpisodeRepository`. Llama a `CatalogQueries.findPlayable(kind, id)`, una interfaz pública de `catalog` que devuelve un `PlayableContent` de solo lectura, con la duración y si el contenido se puede reproducir. Del mismo modo, toma el usuario actual del token con `identity.CurrentUser`.
 
 Cuando `catalog` necesita saber algo de la actividad, se invierte la dependencia. Para no borrar contenido con actividad (regla C11), `catalog` publica la interfaz `ContentActivity`, que `activity` implementa. Así `catalog` sigue sin depender de nadie.
 
@@ -97,13 +97,17 @@ src/main/java/com/amillioncodelines/streamstories/
 ├── catalog/
 │   ├── ContentActivity.java         ← API pública: interfaz que implementan los módulos con actividad
 │   ├── ContentKind.java
+│   ├── CatalogQueries.java          ← API pública: consultas de solo lectura para otros módulos
+│   ├── PlayableContent.java
 │   ├── api/                         ← entrada HTTP: controllers, DTO request/response
 │   ├── application/                 ← casos de uso, transacciones, commands y views
 │   └── domain/                      ← entidades JPA, enums, repositorios, consultas
 ├── identity/
+│   ├── CurrentUser.java             ← API pública: el usuario actual, tomado del token
 │   ├── api/  application/  domain/  ← application también emite los tokens (TokenIssuer)
 │   └── security/                    ← SecurityFilterChain, validación del JWT, filtro de cuenta activa
-├── activity/                        ← fase 2
+├── activity/                        ← fase 2: implementa ContentActivity (C11)
+│   └── api/  application/  domain/
 ├── recommendation/                  ← fase 3
 └── shared/
     ├── error/                       ← @RestControllerAdvice → ProblemDetail
@@ -121,7 +125,8 @@ src/main/resources/
 
 src/test/java/com/amillioncodelines/streamstories/
 ├── ModularityTests.java             ← verificación de Spring Modulith
-├── catalog/ …                       ← misma estructura que main
+├── activity/ …                      ← misma estructura que main
+├── catalog/ …
 └── support/                         ← @IntegrationTest, Testcontainers y clientes de la API para tests
 ```
 

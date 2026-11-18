@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.identity.api;
 
+import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.identity.application.ReactivationService;
 import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
@@ -45,12 +46,12 @@ class AdminReactivationController {
     @PostMapping("/{id}/approve")
     @Operation(summary = "Aprueba la solicitud y reactiva la cuenta")
     AdminReactivationResponse approve(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        return AdminReactivationResponse.from(reactivation.approve(id, Principals.userId(jwt)));
+        return AdminReactivationResponse.from(reactivation.approve(id, CurrentUser.id(jwt)));
     }
 
     @PostMapping("/{id}/reject")
     @Operation(summary = "Rechaza la solicitud; la cuenta sigue inactiva")
     AdminReactivationResponse reject(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        return AdminReactivationResponse.from(reactivation.reject(id, Principals.userId(jwt)));
+        return AdminReactivationResponse.from(reactivation.reject(id, CurrentUser.id(jwt)));
     }
 }

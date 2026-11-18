@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.identity.api;
 
+import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.identity.application.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +27,7 @@ class MeController {
     @GetMapping
     @Operation(summary = "Datos del usuario actual")
     UserResponse me(@AuthenticationPrincipal Jwt jwt) {
-        return UserResponse.from(accounts.currentUser(Principals.userId(jwt)));
+        return UserResponse.from(accounts.currentUser(CurrentUser.id(jwt)));
     }
 
     @PostMapping("/deactivate")
@@ -35,6 +36,6 @@ class MeController {
             summary = "Desactiva la propia cuenta",
             description = "Se pierde el acceso de inmediato y se revocan los tokens. La actividad se conserva.")
     void deactivate(@AuthenticationPrincipal Jwt jwt) {
-        accounts.deactivateOwnAccount(Principals.userId(jwt));
+        accounts.deactivateOwnAccount(CurrentUser.id(jwt));
     }
 }

@@ -208,7 +208,7 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |
 | C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID (una temporada, por su número), indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
 | C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
-| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada, por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
+| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada (progreso o puntuaciones), por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
 | C12 | Un contenido retirado puede volver a estar disponible. | — |
 
 ### Identidad
@@ -230,17 +230,17 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | # | Regla |
 |---|-------|
 | A1 | Hay un único registro de progreso por (usuario, contenido reproducible). Cada reporte de progreso actualiza ese registro (upsert) y su fecha. |
-| A2 | `0 ≤ position_seconds ≤ duration_seconds`. Un valor mayor se recorta a la duración. |
-| A3 | Siempre se guarda la **posición exacta** reportada. El contenido se marca `completed` cuando la posición alcanza el **90 %** de la duración, y sigue completo aunque luego se reporte una posición menor (por ejemplo, al volver a verlo). |
-| A4 | No se puede reportar progreso sobre contenido no reproducible (retirado): la API responde `409`. |
+| A2 | `0 ≤ position_seconds ≤ duration_seconds`. Un valor mayor se recorta a la duración. Si después cambia la duración del contenido, el progreso guardado no se recalcula: lo completo sigue completo y la posición se recorta al mostrarla. |
+| A3 | Siempre se guarda la **posición exacta** reportada, y solo la última: no se guarda cada vez que se vio. El contenido se marca `completed` cuando la posición alcanza el **90 %** de la duración, y sigue completo aunque luego se reporte una posición menor (por ejemplo, al volver a verlo). |
+| A4 | No se puede reportar progreso sobre contenido no reproducible (retirado): la API responde `409`. El progreso ya guardado se conserva. |
 | A5 | **Seguir viendo**, para películas: aparecen las no completadas, con su posición guardada. |
-| A6 | **Seguir viendo**, para series: aparece **una entrada por serie**, basada en el episodio visto más recientemente. Si ese episodio **no está completo**, la entrada es ese mismo episodio en su posición guardada. Si está completo, la entrada es el **siguiente episodio reproducible** desde el inicio, que puede ser de la temporada siguiente. Si no hay siguiente, la serie no aparece. |
-| A7 | Seguir viendo está ordenado por `last_watched_at` descendente y excluye el contenido retirado. |
-| A8 | El historial muestra todo el progreso registrado, incluido el de contenido retirado, que aparece marcado como tal. |
+| A6 | **Seguir viendo**, para series: aparece **una entrada por serie**, con el episodio visto más recientemente, su posición y si está completo. No se calcula el episodio siguiente: desde la serie, el usuario elige por dónde seguir. La serie deja de aparecer cuando ese episodio es el último de la serie y está completo. |
+| A7 | Seguir viendo está ordenado por `last_watched_at` descendente y excluye las películas y las series retiradas. Una serie disponible aparece aunque el último episodio visto esté en una temporada retirada. |
+| A8 | El historial muestra todo el progreso registrado: una fila por película o episodio, con la fecha de la última vez que se vio. Incluye el contenido retirado, que aparece marcado como tal. |
 | A9 | Hay una única puntuación por (usuario, título), y volver a puntuar la reemplaza. |
 | A10 | La puntuación es un **entero de 1 a 5**. Solo se califican títulos (películas y series), nunca episodios sueltos. |
-| A11 | El promedio de un título se calcula sobre todas sus puntuaciones y se expresa con un decimal (por ejemplo, `4.3`). |
-| A12 | Se puede calificar un título que no se vio. No se pueden crear puntuaciones nuevas sobre títulos retirados, pero las existentes se conservan y siguen contando para el promedio. |
+| A11 | El promedio de un título se calcula sobre todas sus puntuaciones, incluidas las de cuentas desactivadas, y se expresa con un decimal (por ejemplo, `4.3`). |
+| A12 | Se puede calificar un título que no se vio. Sobre un título retirado no se puede crear ni cambiar una puntuación, pero sí borrarla. Las existentes se conservan y siguen contando para el promedio. |
 
 ## 3.5 Motor de recomendaciones (fase 3)
 
