@@ -10,6 +10,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 - Progreso de reproducción (fase 2): `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
 - El contenido con progreso ya no se puede borrar, solo retirar.
+- Seguir viendo (`GET /me/continue-watching`): las películas sin terminar y una entrada por serie con el último episodio visto, mientras quede algo por ver.
+- Historial de reproducción (`GET /me/history`), paginado e incluido el contenido retirado.
 
 ## [0.1.0] - 2026-11-17
 

@@ -1,8 +1,11 @@
 package com.amillioncodelines.streamstories.activity.domain;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -54,4 +57,17 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
     boolean existsByMovieId(UUID movieId);
 
     boolean existsByEpisodeId(UUID episodeId);
+
+    Page<WatchProgress> findByUserId(UUID userId, Pageable pageable);
+
+    /**
+     * What "continue watching" starts from: movies not completed and every episode, most recently watched first.
+     * Completed episodes are kept because a series can still continue after them.
+     */
+    @Query("""
+            select p from WatchProgress p
+            where p.userId = :userId and (p.episodeId is not null or p.completed = false)
+            order by p.lastWatchedAt desc, p.id desc
+            """)
+    List<WatchProgress> findContinueWatchingCandidates(@Param("userId") UUID userId);
 }

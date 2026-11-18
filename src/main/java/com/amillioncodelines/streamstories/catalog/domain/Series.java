@@ -56,6 +56,24 @@ public class Series extends MediaItem {
         return seasons.stream().filter(season -> season.getNumber() == number).findFirst();
     }
 
+    /**
+     * Whether some playable episode comes after the given one, in season and episode order. Episodes of retired
+     * seasons are skipped, and nothing is playable in a retired series.
+     */
+    public boolean hasPlayableEpisodeAfter(Episode episode) {
+        if (!isAvailable()) {
+            return false;
+        }
+        int seasonNumber = episode.getSeason().getNumber();
+        return seasons.stream()
+                .filter(Season::isAvailable)
+                .anyMatch(season -> season.getNumber() > seasonNumber
+                        ? !season.getEpisodes().isEmpty()
+                        : season.getNumber() == seasonNumber
+                                && season.getEpisodes().stream()
+                                        .anyMatch(other -> other.getNumber() > episode.getNumber()));
+    }
+
     public List<Season> getSeasons() {
         return List.copyOf(seasons);
     }

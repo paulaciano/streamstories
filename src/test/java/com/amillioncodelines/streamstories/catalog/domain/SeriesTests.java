@@ -69,4 +69,31 @@ class SeriesTests {
         season.changeAvailability(Availability.AVAILABLE);
         assertThat(pilot.isPlayable()).isTrue();
     }
+
+    @Test
+    void shouldFindPlayableEpisodesAfterAnEpisodeSkippingRetiredSeasons() {
+        Season first = series.addSeason(1, null);
+        Episode pilot = first.addEpisode(1, PILOT);
+        Episode finale = first.addEpisode(2, PILOT);
+        Season second = series.addSeason(2, null);
+        second.addEpisode(1, PILOT);
+
+        assertThat(series.hasPlayableEpisodeAfter(pilot)).isTrue();
+        assertThat(series.hasPlayableEpisodeAfter(finale)).isTrue();
+
+        second.changeAvailability(Availability.RETIRED);
+        assertThat(series.hasPlayableEpisodeAfter(pilot)).isTrue();
+        assertThat(series.hasPlayableEpisodeAfter(finale)).isFalse();
+
+        series.changeAvailability(Availability.RETIRED);
+        assertThat(series.hasPlayableEpisodeAfter(pilot)).isFalse();
+    }
+
+    @Test
+    void shouldIgnoreEmptySeasonsWhenLookingForTheNextEpisode() {
+        Episode pilot = series.addSeason(1, null).addEpisode(1, PILOT);
+        series.addSeason(2, null);
+
+        assertThat(series.hasPlayableEpisodeAfter(pilot)).isFalse();
+    }
 }

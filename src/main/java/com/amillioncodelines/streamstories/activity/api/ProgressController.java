@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me/progress")
-@Tag(name = "Actividad", description = "Progreso de reproducción del usuario actual")
+@Tag(name = "Actividad", description = "Progreso de reproducción, Seguir viendo e historial del usuario actual")
 class ProgressController {
 
     private static final String DESCRIPTION =

@@ -106,10 +106,12 @@ Para un `USER`, el contenido que no se puede reproducir (una película retirada,
 | `PUT` | `/me/progress/movies/{movieId}` | 👤 | Reporta la posición de reproducción (upsert). Responde `409` si el contenido está retirado. |
 | `PUT` | `/me/progress/episodes/{episodeId}` | 👤 | Lo mismo, para un episodio. |
 | `GET` | `/me/continue-watching` | 👤 | Películas sin terminar y una entrada por serie con el último episodio visto, según las reglas A5 a A7. |
-| `GET` | `/me/history` | 👤 | Historial completo y paginado. |
+| `GET` | `/me/history` | 👤 | Historial completo y paginado: una fila por película o episodio visto, incluido el contenido retirado. |
 | `PUT` | `/me/ratings/{mediaItemId}` | 👤 | Crea o reemplaza la puntuación de un título. |
 | `DELETE` | `/me/ratings/{mediaItemId}` | 👤 | Quita la puntuación. |
 | `GET` | `/me/ratings` | 👤 | Las puntuaciones del usuario. |
+
+Seguir viendo y el historial van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
 
 A partir de la fase 2, el detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `averageRating` (con un decimal), `ratingCount` y la puntuación del usuario actual.
 
@@ -203,6 +205,32 @@ PUT /api/v1/me/progress/episodes/0193a7…
   "durationSeconds": 2700,
   "completed": false,
   "lastWatchedAt": "2026-11-16T21:04:11Z"
+}
+```
+
+**Seguir viendo**
+
+```http
+GET /api/v1/me/continue-watching
+```
+
+```json
+{
+  "content": [
+    {
+      "type": "SERIES",
+      "titleId": "0193a6f2…",
+      "title": "Estación Austral",
+      "coverImageUrl": "https://cdn.example.com/covers/estacion-austral.jpg",
+      "episode": { "id": "0193a7…", "seasonNumber": 1, "number": 3, "title": "Deriva" },
+      "positionSeconds": 1260,
+      "durationSeconds": 2700,
+      "completed": false,
+      "playable": true,
+      "lastWatchedAt": "2026-11-16T21:04:11Z"
+    }
+  ],
+  "page": { "number": 0, "size": 20, "totalElements": 1, "totalPages": 1 }
 }
 ```
 
