@@ -55,8 +55,8 @@ flowchart LR
 | Historia | Criterio de aceptación |
 |----------|------------------------|
 | Como usuario, quiero que se guarde por dónde voy | `PUT /me/progress/...` guarda la posición exacta y marca el contenido como visto al 90 % (A1 a A4). |
-| Como usuario, quiero retomar lo que estaba viendo | "Seguir viendo" cumple las reglas A5 a A7. En particular, no avanza al episodio siguiente si el actual no está visto. |
-| Como usuario, quiero ver mi historial | Lista paginada con fechas, incluido el contenido retirado marcado como tal. |
+| Como usuario, quiero retomar lo que estaba viendo | "Seguir viendo" cumple las reglas A5 a A7: las películas sin terminar y una entrada por serie con el último episodio visto. |
+| Como usuario, quiero ver mi historial | Lista paginada con la fecha de la última vez que se vio cada contenido, incluido el retirado, marcado como tal. |
 | Como usuario, quiero calificar | Una puntuación entera de 1 a 5 por título, que puedo cambiar o borrar. |
 | Como usuario, quiero ver cómo está calificado algo | El detalle del título incluye el promedio con un decimal, la cantidad de puntuaciones y mi puntuación. |
 | Como usuario reactivado, quiero recuperar mi actividad | Después de desactivar la cuenta y que la reactiven, el historial y las puntuaciones siguen intactos. |

@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.identity.api;
 
+import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.identity.application.AccountService;
 import com.amillioncodelines.streamstories.identity.domain.AccountStatus;
 import com.amillioncodelines.streamstories.identity.domain.Role;
@@ -53,6 +54,6 @@ class AdminUserController {
             description = "No se puede desactivar ni degradar al último administrador activo.")
     UserResponse update(
             @PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal Jwt jwt) {
-        return UserResponse.from(accounts.updateUser(id, request.status(), request.role(), Principals.userId(jwt)));
+        return UserResponse.from(accounts.updateUser(id, request.status(), request.role(), CurrentUser.id(jwt)));
     }
 }

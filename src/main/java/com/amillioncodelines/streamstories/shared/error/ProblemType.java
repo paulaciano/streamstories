@@ -12,6 +12,7 @@ public enum ProblemType {
     ACCOUNT_INACTIVE("account-inactive", "Cuenta inactiva", HttpStatus.FORBIDDEN),
     NOT_FOUND("not-found", "Recurso no encontrado", HttpStatus.NOT_FOUND),
     CONFLICT("conflict", "Conflicto", HttpStatus.CONFLICT),
+    CONTENT_UNAVAILABLE("content-unavailable", "Contenido no disponible", HttpStatus.CONFLICT),
     INTERNAL_ERROR("internal-error", "Error interno", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private static final String URN_PREFIX = "urn:streamstories:problem:";

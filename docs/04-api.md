@@ -103,9 +103,9 @@ Para un `USER`, el contenido que no se puede reproducir (una película retirada,
 
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
-| `PUT` | `/me/progress/movies/{movieId}` | 👤 | Reporta la posición de reproducción (upsert). |
+| `PUT` | `/me/progress/movies/{movieId}` | 👤 | Reporta la posición de reproducción (upsert). Responde `409` si el contenido está retirado. |
 | `PUT` | `/me/progress/episodes/{episodeId}` | 👤 | Lo mismo, para un episodio. |
-| `GET` | `/me/continue-watching` | 👤 | Lo que se puede retomar, según las reglas A5 a A7. |
+| `GET` | `/me/continue-watching` | 👤 | Películas sin terminar y una entrada por serie con el último episodio visto, según las reglas A5 a A7. |
 | `GET` | `/me/history` | 👤 | Historial completo y paginado. |
 | `PUT` | `/me/ratings/{mediaItemId}` | 👤 | Crea o reemplaza la puntuación de un título. |
 | `DELETE` | `/me/ratings/{mediaItemId}` | 👤 | Quita la puntuación. |
@@ -251,4 +251,4 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 
 Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "credenciales inválidas", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
 
-`content-unavailable` se empieza a usar en la fase 2, junto con el progreso de reproducción y las puntuaciones.
+`content-unavailable` lo usan el progreso de reproducción y, desde que estén disponibles, las puntuaciones.

@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.identity.api;
 
+import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.identity.application.AuthenticationService;
 import com.amillioncodelines.streamstories.identity.application.ReactivationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +57,7 @@ class AuthController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Revoca el refresh token enviado")
     void logout(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody RefreshTokenRequest request) {
-        authentication.logout(Principals.userId(jwt), request.refreshToken());
+        authentication.logout(CurrentUser.id(jwt), request.refreshToken());
     }
 
     @PostMapping("/reactivation-requests")

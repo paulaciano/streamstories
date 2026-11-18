@@ -64,7 +64,7 @@ El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
 ### Actividad (`Activity`)
 
 - **Progreso de reproducción:** por cada película o episodio que el usuario empezó, se guardan el punto exacto de reproducción, la fecha y si lo terminó. Un contenido se considera **visto** al llegar al 90 % de su duración.
-- **Seguir viendo:** retoma cada contenido en el punto donde quedó. En una serie, recién pasa al episodio siguiente cuando el actual está visto.
+- **Seguir viendo:** muestra las películas sin terminar, en el punto donde quedaron, y cada serie con el último episodio visto.
 - **Puntuaciones:** el usuario califica películas y series con un entero de **1 a 5**. Cada título muestra además su promedio general, con decimales.
 
 ### Recomendaciones (`Recommendation`)
