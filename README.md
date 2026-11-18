@@ -92,8 +92,8 @@ El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
 | Fase | Alcance | Estado |
 |------|---------|:------:|
 | 0 · Cimientos | Configuración base, CI, manejo de errores, OpenAPI | ✅ Completada |
-| 1 · MVP | Catálogo, cuentas y autenticación | 🚧 En curso |
-| 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ⏳ |
+| 1 · MVP | Catálogo, cuentas y autenticación | ✅ Completada |
+| 2 · Interacción | Progreso de reproducción, historial y puntuaciones | 🚧 En curso |
 | 3 · Inteligencia | Recomendaciones personalizadas | ⏳ |
 | 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ⏳ |
 

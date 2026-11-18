@@ -7,6 +7,9 @@ import com.amillioncodelines.streamstories.support.ApiClient;
 import com.amillioncodelines.streamstories.support.ApiClient.Session;
 import com.amillioncodelines.streamstories.support.CatalogApi;
 import com.amillioncodelines.streamstories.support.IntegrationTest;
+import com.jayway.jsonpath.JsonPath;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -50,18 +53,24 @@ class SampleCatalogLoaderIntegrationTests {
 
         assertThat(loader.load()).isEqualTo(11);
 
+        // Other tests share the database and may create titles with similar names: match the exact title.
         Session user = api.newUserSession();
         assertThat(search(user, "Estación Austral"))
                 .bodyJson()
-                .extractingPath("$.content[0].type")
-                .isEqualTo("SERIES");
+                .extractingPath("$.content[?(@.title == 'Estación Austral')].type")
+                .asArray()
+                .containsExactly("SERIES");
         assertThat(search(user, "El archivo perdido"))
                 .bodyJson()
-                .extractingPath("$.page.totalElements")
-                .isEqualTo(0);
+                .extractingPath("$.content[?(@.title == 'El archivo perdido')]")
+                .asArray()
+                .isEmpty();
 
-        String vecinos = ApiClient.read(search(user, "Vecinos"), "$.content[0].id");
-        assertThat(catalog.get(user, "/api/v1/series/" + vecinos))
+        List<String> vecinos = JsonPath.read(
+                new String(search(user, "Vecinos").getResponse().getContentAsByteArray(), StandardCharsets.UTF_8),
+                "$.content[?(@.title == 'Vecinos' && @.type == 'SERIES')].id");
+        assertThat(vecinos).hasSize(1);
+        assertThat(catalog.get(user, "/api/v1/series/" + vecinos.getFirst()))
                 .bodyJson()
                 .extractingPath("$.seasons[*].number")
                 .asArray()
@@ -69,6 +78,6 @@ class SampleCatalogLoaderIntegrationTests {
     }
 
     private MvcTestResult search(Session session, String text) {
-        return catalog.get(session, "/api/v1/catalog?q=" + text);
+        return catalog.get(session, "/api/v1/catalog?size=100&q=" + text);
     }
 }

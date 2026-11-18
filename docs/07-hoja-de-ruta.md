@@ -34,7 +34,7 @@ flowchart LR
 |----------|------------------------|
 | Como visitante, quiero registrarme | `POST /auth/register` crea un `USER` activo. Un email duplicado devuelve 409. |
 | Como usuario, quiero iniciar sesión | Recibo un access token y un refresh token. Con credenciales inválidas recibo 401 con un mensaje genérico. |
-| Como usuario, quiero mantener la sesión | `/auth/refresh` rota el token. Reutilizar uno ya revocado revoca todos los demás. |
+| Como usuario, quiero mantener la sesión | `/auth/refresh` rota el token. Reutilizar uno ya rotado revoca todos los refresh tokens del usuario. |
 | Como usuario, quiero desactivar mi cuenta | Pierdo el acceso de inmediato y mis datos se conservan. |
 | Como usuario inactivo, quiero volver | Puedo solicitar la reactivación con mis credenciales. Solo puede haber una solicitud pendiente. |
 | Como admin, quiero resolver reactivaciones | Veo las solicitudes pendientes y las apruebo o rechazo. Al aprobar, la cuenta queda activa. |
