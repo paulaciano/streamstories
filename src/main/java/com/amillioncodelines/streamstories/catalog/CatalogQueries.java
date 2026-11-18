@@ -1,5 +1,7 @@
 package com.amillioncodelines.streamstories.catalog;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +18,10 @@ public interface CatalogQueries {
      * @throws IllegalArgumentException for {@link ContentKind#SERIES}: a series is played through its episodes
      */
     Optional<PlayableContent> findPlayable(ContentKind kind, UUID id);
+
+    /** Movies by id. Ids that do not exist are left out. */
+    Map<UUID, MovieSummary> findMovies(Collection<UUID> ids);
+
+    /** Episodes by id, with their series. Ids that do not exist are left out. */
+    Map<UUID, EpisodeSummary> findEpisodes(Collection<UUID> ids);
 }

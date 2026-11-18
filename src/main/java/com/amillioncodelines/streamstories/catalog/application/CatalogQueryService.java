@@ -2,11 +2,19 @@ package com.amillioncodelines.streamstories.catalog.application;
 
 import com.amillioncodelines.streamstories.catalog.CatalogQueries;
 import com.amillioncodelines.streamstories.catalog.ContentKind;
+import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
+import com.amillioncodelines.streamstories.catalog.MovieSummary;
 import com.amillioncodelines.streamstories.catalog.PlayableContent;
+import com.amillioncodelines.streamstories.catalog.domain.Episode;
 import com.amillioncodelines.streamstories.catalog.domain.EpisodeRepository;
 import com.amillioncodelines.streamstories.catalog.domain.MovieRepository;
+import com.amillioncodelines.streamstories.catalog.domain.Series;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +46,43 @@ class CatalogQueryService implements CatalogQueries {
                                 episode.isPlayable()));
             case SERIES -> throw new IllegalArgumentException("A series is played through its episodes");
         };
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, MovieSummary> findMovies(Collection<UUID> ids) {
+        return movies.findAllById(ids).stream()
+                .map(movie -> new MovieSummary(
+                        movie.getId(),
+                        movie.getTitle(),
+                        movie.getCoverImageUrl(),
+                        movie.getDurationSeconds(),
+                        movie.isPlayable()))
+                .collect(Collectors.toMap(MovieSummary::id, Function.identity()));
+    }
+
+    /** Seasons and episodes of each series are loaded in batches (default_batch_fetch_size), not one by one. */
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, EpisodeSummary> findEpisodes(Collection<UUID> ids) {
+        return episodes.findWithSeasonAndSeriesByIdIn(ids).stream()
+                .map(CatalogQueryService::summary)
+                .collect(Collectors.toMap(EpisodeSummary::id, Function.identity()));
+    }
+
+    private static EpisodeSummary summary(Episode episode) {
+        Series series = episode.getSeason().getSeries();
+        return new EpisodeSummary(
+                episode.getId(),
+                episode.getSeason().getNumber(),
+                episode.getNumber(),
+                episode.getTitle(),
+                episode.getDurationSeconds(),
+                episode.isPlayable(),
+                series.getId(),
+                series.getTitle(),
+                series.getCoverImageUrl(),
+                series.isAvailable(),
+                series.hasPlayableEpisodeAfter(episode));
     }
 }

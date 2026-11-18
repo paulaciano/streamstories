@@ -98,7 +98,7 @@ src/main/java/com/amillioncodelines/streamstories/
 │   ├── ContentActivity.java         ← API pública: interfaz que implementan los módulos con actividad
 │   ├── ContentKind.java
 │   ├── CatalogQueries.java          ← API pública: consultas de solo lectura para otros módulos
-│   ├── PlayableContent.java
+│   ├── PlayableContent.java         ← y los resúmenes MovieSummary y EpisodeSummary
 │   ├── api/                         ← entrada HTTP: controllers, DTO request/response
 │   ├── application/                 ← casos de uso, transacciones, commands y views
 │   └── domain/                      ← entidades JPA, enums, repositorios, consultas
