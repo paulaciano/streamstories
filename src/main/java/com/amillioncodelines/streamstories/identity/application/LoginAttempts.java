@@ -1,14 +1,15 @@
 package com.amillioncodelines.streamstories.identity.application;
 
-import com.amillioncodelines.streamstories.identity.domain.LoginAttempt;
 import com.amillioncodelines.streamstories.identity.domain.LoginAttemptRepository;
 import com.amillioncodelines.streamstories.identity.domain.User;
 import com.amillioncodelines.streamstories.shared.error.TooManyRequestsException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HexFormat;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -34,27 +35,29 @@ class LoginAttempts {
         this.hashKey = new SecretKeySpec(properties.jwt().secret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
 
-    @Transactional(readOnly = true)
-    public void ensureNotBlocked(String email) {
+    /** Counts this attempt and rejects it if the email already used up the window, before the password is checked. */
+    @Transactional
+    public void reserve(String email) {
         Instant now = clock.instant();
-        attempts.findById(hash(email))
-                .filter(attempt -> attempt.getFailures() >= maxFailures)
-                .map(LoginAttempt::getWindowStartedAt)
-                .map(started -> started.plus(window))
-                .filter(end -> end.isAfter(now))
-                .ifPresent(end -> {
-                    Duration retryAfter = Duration.between(now, end);
-                    throw new TooManyRequestsException(
-                            "Too many failed attempts. Try again in %d seconds."
-                                    .formatted(Math.max(1, retryAfter.toSeconds())),
-                            retryAfter);
-                });
+        Object[] row =
+                attempts.reserveAttempt(hash(email), now, now.minus(window)).getFirst();
+        int failures = ((Number) row[0]).intValue();
+        if (failures > maxFailures) {
+            Instant end = toInstant(row[1]).plus(window);
+            Duration retryAfter = Duration.between(now, end);
+            throw new TooManyRequestsException(
+                    "Too many failed attempts. Try again in %d seconds.".formatted(Math.max(1, retryAfter.toSeconds())),
+                    retryAfter);
+        }
     }
 
-    @Transactional
-    public void recordFailure(String email) {
-        Instant now = clock.instant();
-        attempts.recordFailure(hash(email), now, now.minus(window));
+    private static Instant toInstant(Object value) {
+        return switch (value) {
+            case Instant instant -> instant;
+            case OffsetDateTime dateTime -> dateTime.toInstant();
+            case Timestamp timestamp -> timestamp.toInstant();
+            default -> throw new IllegalStateException("Unexpected timestamp type " + value.getClass());
+        };
     }
 
     @Transactional

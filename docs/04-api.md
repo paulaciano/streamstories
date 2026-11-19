@@ -52,15 +52,17 @@ GET /api/v1/catalog?genre=sci-fi&type=MOVIE&q=matrix&page=0&size=20&sort=title,a
 ```
 
 - `size` defaults to 20 and is at most 100: a larger value is reduced to 100.
-- A page that starts beyond the largest offset the database supports (`page × size` greater than 2,147,483,647) answers `400`.
+- A page that ends beyond the largest offset the database supports (`(page + 1) × size` greater than 2,147,483,647) answers `400`.
 - `sort` only accepts the fields of an allowed list.
 - Catalog endpoints accept the `availability` filter, but only for `ADMIN`. A `USER` always sees available content only.
 
 ### Concurrent changes to titles
 
-The detail of a movie or a series, and the responses of its `POST`, `PUT` and `PATCH`, include an `ETag` header with the title's version. If the client sends it back in `If-Match` when changing the title, the change only applies if nobody modified it since it was read; otherwise the answer is `412` (`precondition-failed`). Without `If-Match`, the change is not conditional.
+The detail of a movie or a series, and the responses of its `POST`, `PUT` and `PATCH`, include an `ETag` header. It combines the title's version with a hash of the response (`"3-1a2b3c4d"`), because the response also depends on the ratings and on who asks: a `GET` with `If-None-Match` only answers `304` when the response is the same.
 
-The version covers the title's data, not its seasons or episodes: adding an episode does not change the series' `ETag`.
+If the client sends the `ETag` back in `If-Match` when changing the title, the change only applies if nobody modified the title since it was read; otherwise the answer is `412` (`precondition-failed`). `If-Match` compares only the version part, with the strong comparison of [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.if-match): a weak `ETag` (`W/"…"`) never matches. Without `If-Match`, the change is not conditional.
+
+The version covers the title's data, not its seasons, episodes, ratings or franchise: adding an episode or putting a movie in a franchise does not change the version.
 
 ## 4.4 Endpoint map
 
@@ -79,7 +81,7 @@ Every route is relative to `/api/v1`.
 | `GET` | `/me` | 👤 | The current user's data. |
 | `POST` | `/me/deactivate` | 👤 | Deactivates your own account and revokes its tokens. Answers `204`. |
 | `GET` | `/admin/users` | 🛠️ | Users, filterable by `status` and `role`. |
-| `PATCH` | `/admin/users/{id}` | 🛠️ | Changes a user's `status` or `role`. Reactivating the account also approves its pending request, if there is one. |
+| `PATCH` | `/admin/users/{id}` | 🛠️ | Changes a user's `status` or `role`. Reactivating the account also approves its pending request, if there is one. If the user changed at the same time (for example, another admin's change), it answers `409` instead of overwriting it. |
 | `GET` | `/admin/reactivation-requests` | 🛠️ | Reactivation requests, filterable by `status` (`PENDING` by default). |
 | `POST` | `/admin/reactivation-requests/{id}/approve` | 🛠️ | Approves the request and reactivates the account. |
 | `POST` | `/admin/reactivation-requests/{id}/reject` | 🛠️ | Rejects the request. The account stays inactive. |

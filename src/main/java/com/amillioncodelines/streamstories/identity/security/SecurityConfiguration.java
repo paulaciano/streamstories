@@ -7,6 +7,7 @@ import com.amillioncodelines.streamstories.identity.domain.UserRepository;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.DispatcherType;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +27,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -47,6 +50,18 @@ class SecurityConfiguration {
         "/swagger-ui.html",
         "/swagger-ui/**"
     };
+
+    /**
+     * Clients often attach the access token to every request. On the public auth endpoints an expired token must not
+     * block a refresh, a login or a reactivation request, so the header is ignored there.
+     */
+    private static BearerTokenResolver ignoringPublicAuthEndpoints() {
+        Set<String> publicPaths = Set.of(PUBLIC_AUTH_ENDPOINTS);
+        DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
+        return request -> HttpMethod.POST.matches(request.getMethod()) && publicPaths.contains(request.getRequestURI())
+                ? null
+                : resolver.resolve(request);
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(
@@ -83,6 +98,7 @@ class SecurityConfiguration {
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(ignoringPublicAuthEndpoints())
                         .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(problemHandler)
                         .accessDeniedHandler(problemHandler))

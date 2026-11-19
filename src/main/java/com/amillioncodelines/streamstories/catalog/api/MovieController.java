@@ -75,9 +75,10 @@ class MovieController {
     @Operation(summary = "Creates a movie (ADMIN)")
     ResponseEntity<MovieResponse> create(@Valid @RequestBody MovieRequest request) {
         MovieView movie = movies.create(request.toCommand());
+        MovieResponse body = MovieResponse.from(movie);
         return ResponseEntity.created(URI.create("/api/v1/movies/" + movie.id()))
-                .eTag(String.valueOf(movie.version()))
-                .body(MovieResponse.from(movie));
+                .eTag(ETags.of(movie.version(), body))
+                .body(body);
     }
 
     @PutMapping("/{id}")

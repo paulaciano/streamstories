@@ -88,6 +88,63 @@ class ConditionalUpdateIntegrationTests {
                 .hasStatus(HttpStatus.PRECONDITION_FAILED);
     }
 
+    @Test
+    void shouldChangeTheETagWhenTheRatingsChangeSoAStaleCopyIsNeverConfirmed() {
+        Session admin = api.adminSession();
+        Session user = api.newUserSession();
+        String movie = catalog.createMovie(admin, "Versioned " + token(), 2000);
+        String uri = "/api/v1/movies/" + movie;
+        String before = etag(catalog.get(user, uri));
+
+        catalog.send(user, "PUT", "/api/v1/me/ratings/" + movie, """
+                {"score": 5}
+                """);
+
+        assertThat(mvc.get()
+                        .uri(uri)
+                        .header(HttpHeaders.AUTHORIZATION, user.bearer())
+                        .header(HttpHeaders.IF_NONE_MATCH, before))
+                .hasStatusOk();
+    }
+
+    @Test
+    void shouldGiveViewersAndAdministratorsDifferentETagsForDifferentResponses() {
+        Session admin = api.adminSession();
+        String movie = catalog.createMovie(admin, "Versioned " + token(), 2000);
+        String uri = "/api/v1/movies/" + movie;
+        catalog.changeAvailability(admin, uri, "RETIRED");
+
+        // The viewer gets no videoUrl for a retired movie, so the two responses differ.
+        assertThat(etag(catalog.get(api.newUserSession(), uri))).isNotEqualTo(etag(catalog.get(admin, uri)));
+    }
+
+    @Test
+    void shouldRejectAWeakETagInIfMatch() {
+        Session admin = api.adminSession();
+        String title = "Versioned " + token();
+        String movie = catalog.createMovie(admin, title, 2000);
+        String uri = "/api/v1/movies/" + movie;
+
+        assertThat(put(admin, uri, "W/" + etag(catalog.get(admin, uri)), CatalogApi.movieJson(title, 2001)))
+                .hasStatus(HttpStatus.PRECONDITION_FAILED);
+    }
+
+    @Test
+    void shouldKeepTheMovieVersionWhenItJoinsAFranchise() {
+        Session admin = api.adminSession();
+        String title = "Versioned " + token();
+        String movie = catalog.createMovie(admin, title, 2000);
+        String uri = "/api/v1/movies/" + movie;
+        String read = etag(catalog.get(admin, uri));
+
+        assertThat(catalog.send(admin, "POST", "/api/v1/franchises", """
+                        {"name": "Saga %s", "movieIds": ["%s"]}
+                        """.formatted(token(), movie)))
+                .hasStatus(HttpStatus.CREATED);
+
+        assertThat(put(admin, uri, read, CatalogApi.movieJson(title, 2001))).hasStatusOk();
+    }
+
     private MvcTestResult put(Session admin, String uri, String ifMatch, String json) {
         var request = mvc.put()
                 .uri(uri)

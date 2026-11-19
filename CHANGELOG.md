@@ -11,6 +11,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The documentation in `docs/`, the ADRs and this changelog are now in English, with English file names. The README has an English version (`README.md`) and a Spanish one (`README.es.md`).
 - The README explains step by step how to run and try the project locally.
 
+### Fixed
+
+- Simultaneous logins with wrong passwords could check many more than 5 passwords before the limit applied; each attempt is now counted atomically before the password is checked.
+- Two simultaneous changes to the same user (for example, an admin demoting it while another deactivates it) could silently lose one of them; the second now answers `409`.
+- An expired access token attached to `POST /auth/refresh`, `/auth/login` or `/auth/reactivation-requests` made them answer `401` or `403`; the public authentication endpoints now ignore the `Authorization` header.
+- A title's `ETag` only reflected its version, so `If-None-Match` could answer `304` after its ratings changed. The `ETag` now also reflects the response, and `If-Match` rejects weak `ETag`s.
+- Putting a movie in a franchise changed its version, so an admin editing it got `412`. Franchise membership now lives in its own table.
+
 ## [1.0.0] - 2026-11-19
 
 ### Added
