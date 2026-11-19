@@ -1,6 +1,8 @@
 # StreamStories
 
-**API REST para una plataforma de catálogo audiovisual bajo demanda:** películas, series con temporadas y episodios, géneros, progreso de reproducción, puntuaciones y recomendaciones personalizadas.
+**English** · [Español](README.es.md)
+
+**REST API for an on-demand streaming catalog:** movies, series with seasons and episodes, genres, watch progress, ratings and personalized recommendations.
 
 [![CI](https://github.com/paulaciano/streamstories/actions/workflows/ci.yml/badge.svg)](https://github.com/paulaciano/streamstories/actions/workflows/ci.yml)
 ![Java 25](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white)
@@ -10,31 +12,33 @@
 
 ---
 
-## ¿Qué hace?
+## What does it do?
 
-| | Funcionalidad |
+| | Feature |
 |---|---|
-| 🎬 **Catálogo** | Películas y series (con temporadas y episodios), clasificadas en varios géneros a la vez. Se puede explorar un catálogo mixto filtrado por género, tipo o texto. |
-| 👤 **Cuentas** | Registro, inicio de sesión con JWT, roles `USER` y `ADMIN`. Las cuentas se pueden desactivar, y su reactivación la aprueba un administrador. |
-| ▶️ **Seguir viendo** | Guarda la posición exacta de reproducción de cada película o episodio, que cuenta como visto al llegar al 90 %. Muestra las películas sin terminar y cada serie con el último episodio visto. |
-| ⭐ **Puntuaciones** | Calificaciones de 1 a 5 para películas y series, con el promedio en el detalle de cada título. |
-| 💡 **Recomendaciones** | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
-| 🔖 **Lista de seguimiento** | Películas y series guardadas para ver después. |
-| 🎞️ **Sagas** | Películas relacionadas agrupadas en el orden en que conviene verlas. |
-| 🗄️ **Retiro de contenido** | El contenido que deja de ofrecerse se retira sin borrarse, así no se pierde la actividad de los usuarios. |
+| 🎬 **Catalog** | Movies and series (with seasons and episodes), classified in several genres at once. A mixed catalog can be browsed and filtered by genre, type or text. |
+| 👤 **Accounts** | Sign-up, JWT login, `USER` and `ADMIN` roles. Accounts can be deactivated, and an administrator approves their reactivation. |
+| ▶️ **Continue watching** | Saves the exact playback position of each movie or episode, which counts as watched at 90%. Shows the unfinished movies and each series with its last watched episode. |
+| ⭐ **Ratings** | Scores from 1 to 5 for movies and series, with the average in each title's detail. |
+| 💡 **Recommendations** | Suggestions based on the genres the user watches and rates, each with its reason. |
+| 🔖 **Watchlist** | Movies and series saved to watch later. |
+| 🎞️ **Franchises** | Related movies grouped in the order they are best watched. |
+| 🗄️ **Retiring content** | Content that stops being offered is retired instead of deleted, so no user activity is lost. |
 
-La API gestiona el catálogo y la actividad. La reproducción del video ocurre en el cliente, a partir de la URL de cada contenido ([ADR-0004](docs/adr/0004-video-como-metadato.md)).
+The API manages the catalog and the activity. Video playback happens on the client, from each piece of content's URL ([ADR-0004](docs/adr/0004-video-as-metadata.md)).
 
-## Arquitectura en un vistazo
+The catalog content (titles, synopses, genres) is in Spanish; the API, the code and the documentation are in English.
 
-Es un **monolito modular**: una sola aplicación Spring Boot dividida en módulos por funcionalidad. [Spring Modulith](https://docs.spring.io/spring-modulith/reference/) verifica los límites entre módulos en cada build.
+## Architecture at a glance
+
+It is a **modular monolith**: a single Spring Boot application split into modules by feature. [Spring Modulith](https://docs.spring.io/spring-modulith/reference/) checks the module boundaries on every build.
 
 ```mermaid
 flowchart LR
-    identity["identity<br/><sub>usuarios y autenticación</sub>"]
-    catalog["catalog<br/><sub>películas, series, géneros</sub>"]
-    activity["activity<br/><sub>progreso y puntuaciones</sub>"]
-    reco["recommendation<br/><sub>recomendaciones</sub>"]
+    identity["identity<br/><sub>users and authentication</sub>"]
+    catalog["catalog<br/><sub>movies, series, genres</sub>"]
+    activity["activity<br/><sub>progress and ratings</sub>"]
+    reco["recommendation<br/><sub>recommendations</sub>"]
 
     activity --> catalog
     activity --> identity
@@ -44,19 +48,19 @@ flowchart LR
 
 **Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 6 · Testcontainers · GitHub Actions.
 
-## Cómo probarlo en tu máquina
+## How to try it on your machine
 
-### 1. Requisitos
+### 1. Requirements
 
-| Herramienta | Para qué | Cómo verificarlo |
-|-------------|----------|------------------|
-| [JDK 25](https://adoptium.net/temurin/releases/?version=25) | Compilar y ejecutar la aplicación | `java -version` muestra `25` |
-| [Docker](https://docs.docker.com/get-started/get-docker/) (Docker Desktop o Docker Engine), **en ejecución** | Levantar PostgreSQL | `docker info` responde sin errores |
-| [Git](https://git-scm.com/downloads) | Clonar el repositorio | `git --version` |
+| Tool | What for | How to check it |
+|------|----------|-----------------|
+| [JDK 25](https://adoptium.net/temurin/releases/?version=25) | Build and run the application | `java -version` shows `25` |
+| [Docker](https://docs.docker.com/get-started/get-docker/) (Docker Desktop or Docker Engine), **running** | Start PostgreSQL | `docker info` answers without errors |
+| [Git](https://git-scm.com/downloads) | Clone the repository | `git --version` |
 
-No hace falta instalar Maven ni PostgreSQL: el proyecto trae el wrapper de Maven (`./mvnw`), y la base corre en un contenedor. Los puertos `8080` (la API) y `5432` (PostgreSQL) tienen que estar libres.
+There is no need to install Maven or PostgreSQL: the project includes the Maven wrapper (`./mvnw`), and the database runs in a container. Ports `8080` (the API) and `5432` (PostgreSQL) must be free.
 
-### 2. Clonar y arrancar
+### 2. Clone and start
 
 ```bash
 git clone https://github.com/paulaciano/streamstories.git
@@ -64,111 +68,111 @@ cd streamstories
 ./mvnw spring-boot:run
 ```
 
-En Windows, usá `mvnw.cmd spring-boot:run`. La primera vez tarda unos minutos, porque descarga las dependencias y la imagen de PostgreSQL. La aplicación está lista cuando el log muestra `Started StreamstoriesApplication`.
+On Windows, use `mvnw.cmd spring-boot:run`. The first run takes a few minutes, because it downloads the dependencies and the PostgreSQL image. The application is ready when the log shows `Started StreamstoriesApplication`.
 
-Al arrancar con `./mvnw spring-boot:run` se activa el perfil de desarrollo (`dev`), que:
+`./mvnw spring-boot:run` enables the development profile (`dev`), which:
 
-- levanta PostgreSQL con [Docker Compose](compose.yaml) y crea las tablas;
-- carga un **catálogo de ejemplo**: 8 películas y 3 series con temporadas y episodios, en 6 géneros, con una película y una temporada retiradas;
-- crea un **administrador de desarrollo**: `admin@streamstories.local`, con la contraseña `dev-admin-password`.
+- starts PostgreSQL with [Docker Compose](compose.yaml) and creates the tables;
+- loads a **sample catalog**: 8 movies and 3 series with seasons and episodes, in 6 genres, with one retired movie and one retired season;
+- creates a **development administrator**: `admin@streamstories.local`, with the password `dev-admin-password`.
 
 | | URL |
 |---|---|
 | Swagger UI | http://localhost:8080/swagger-ui.html |
-| Especificación OpenAPI | http://localhost:8080/v3/api-docs |
-| Estado de salud | http://localhost:8080/actuator/health |
+| OpenAPI specification | http://localhost:8080/v3/api-docs |
+| Health | http://localhost:8080/actuator/health |
 
-### 3. Probar la API desde Swagger UI
+### 3. Try the API from Swagger UI
 
-1. Abrí http://localhost:8080/swagger-ui.html.
-2. En **Authentication**, abrí `POST /api/v1/auth/login`, tocá **Try it out** y enviá:
+1. Open http://localhost:8080/swagger-ui.html.
+2. Under **Authentication**, open `POST /api/v1/auth/login`, click **Try it out** and send:
    ```json
    { "email": "admin@streamstories.local", "password": "dev-admin-password" }
    ```
-3. Copiá el valor de `accessToken` de la respuesta.
-4. Tocá **Authorize** (arriba a la derecha), pegá el token **sin** escribir `Bearer` delante y confirmá.
-5. Ya podés usar cualquier endpoint, por ejemplo `GET /api/v1/catalog`.
+3. Copy the `accessToken` value from the response.
+4. Click **Authorize** (top right), paste the token **without** typing `Bearer` before it, and confirm.
+5. You can now call any endpoint, for example `GET /api/v1/catalog`.
 
-El administrador ve todo, incluido el contenido retirado. Para ver la API como un usuario común, registrá una cuenta con `POST /api/v1/auth/register`, iniciá sesión con ella y autorizá con ese token. El access token dura 15 minutos: cuando vence, volvé a iniciar sesión.
+The administrator sees everything, including retired content. To use the API as a regular user, sign up with `POST /api/v1/auth/register`, log in with that account and authorize with its token. The access token lasts 15 minutes: when it expires, log in again.
 
-### 4. Probar la API desde la terminal
+### 4. Try the API from the terminal
 
 ```bash
-# Registrar un usuario e iniciar sesión
+# Sign up and log in
 curl -s -X POST localhost:8080/api/v1/auth/register -H 'Content-Type: application/json' \
-  -d '{"email": "ana@example.com", "password": "una-clave-segura", "displayName": "Ana"}'
+  -d '{"email": "ana@example.com", "password": "a-secure-password", "displayName": "Ana"}'
 TOKEN=$(curl -s -X POST localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
-  -d '{"email": "ana@example.com", "password": "una-clave-segura"}' | sed -E 's/.*"accessToken":"([^"]+)".*/\1/')
+  -d '{"email": "ana@example.com", "password": "a-secure-password"}' | sed -E 's/.*"accessToken":"([^"]+)".*/\1/')
 
-# Explorar el catálogo y buscar un título
+# Browse the catalog and search for a title
 curl -s localhost:8080/api/v1/catalog -H "Authorization: Bearer $TOKEN"
 curl -s "localhost:8080/api/v1/catalog?q=orbita" -H "Authorization: Bearer $TOKEN"
 
-# Puntuar un título (reemplazá TITLE_ID por un id del catálogo) y pedir recomendaciones
+# Rate a title (replace TITLE_ID with an id from the catalog) and get recommendations
 curl -s -X PUT localhost:8080/api/v1/me/ratings/TITLE_ID -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' -d '{"score": 5}'
 curl -s localhost:8080/api/v1/me/recommendations -H "Authorization: Bearer $TOKEN"
 ```
 
-Todos los endpoints, con sus parámetros y ejemplos, están en [Diseño de la API](docs/04-api.md).
+Every endpoint, with its parameters and examples, is in [API design](docs/04-api.md).
 
-### 5. Detener y empezar de cero
+### 5. Stop and start from scratch
 
-- **Detener:** `Ctrl+C` en la terminal donde corre la aplicación. Si el contenedor de PostgreSQL sigue corriendo (`docker ps` lo muestra), `docker compose stop` lo detiene. Los datos se conservan para la próxima vez.
-- **Empezar de cero:** `docker compose down -v` borra la base local. Al volver a arrancar, se cargan de nuevo el catálogo de ejemplo y el administrador.
+- **Stop:** `Ctrl+C` in the terminal where the application runs. If the PostgreSQL container keeps running (`docker ps` lists it), `docker compose stop` stops it. The data is kept for the next time.
+- **Start from scratch:** `docker compose down -v` deletes the local database. On the next start, the sample catalog and the administrator are loaded again.
 
-### 6. Correr los tests
+### 6. Run the tests
 
 ```bash
 ./mvnw verify
 ```
 
-Ejecuta el chequeo de formato, los tests unitarios y de integración, y la verificación de módulos. Los tests de integración usan un PostgreSQL real con [Testcontainers](https://testcontainers.com/), así que **Docker tiene que estar en ejecución**: si no, se omiten sin fallar. Para formatear el código: `./mvnw spotless:apply`.
+It runs the format check, the unit and integration tests, and the module verification. Integration tests use a real PostgreSQL through [Testcontainers](https://testcontainers.com/), so **Docker must be running**: otherwise they are skipped without failing. To format the code: `./mvnw spotless:apply`.
 
-### Problemas frecuentes
+### Common problems
 
-| Síntoma | Causa y solución |
-|---------|------------------|
-| `release version 25 not supported` o un error de versión de Java | Hay otro JDK activo. Instalá el JDK 25 y verificá con `java -version`; si tenés varios, configurá `JAVA_HOME` para que apunte al 25. |
-| La aplicación no arranca y menciona Docker Compose | Docker no está en ejecución. Abrí Docker Desktop (o iniciá el servicio) y verificá con `docker info`. |
-| `port is already allocated` o `Address already in use` | Otro proceso usa el puerto `5432` o el `8080`, por ejemplo un PostgreSQL instalado localmente. Detenelo antes de arrancar. |
-| `401` en todos los endpoints de Swagger UI | Falta el token o venció. Volvé a iniciar sesión y cargalo en **Authorize**. |
-| `429` al iniciar sesión | Hubo 5 contraseñas incorrectas para ese email en 15 minutos. Esperá los segundos que indica `Retry-After`. |
+| Symptom | Cause and fix |
+|---------|---------------|
+| `release version 25 not supported`, or another Java version error | Another JDK is active. Install JDK 25 and check with `java -version`; if you have several, set `JAVA_HOME` to point to 25. |
+| The application does not start and mentions Docker Compose | Docker is not running. Open Docker Desktop (or start the service) and check with `docker info`. |
+| `port is already allocated` or `Address already in use` | Another process uses port `5432` or `8080`, for example a locally installed PostgreSQL. Stop it before starting. |
+| `401` on every endpoint in Swagger UI | The token is missing or expired. Log in again and load it in **Authorize**. |
+| `429` when logging in | There were 5 wrong passwords for that email in 15 minutes. Wait the seconds that `Retry-After` indicates. |
 
-### Imagen de contenedor
+### Container image
 
-`./mvnw spring-boot:build-image` arma la imagen `streamstories:<versión>` con [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html), sin `Dockerfile`. Está pensada para otros entornos: no incluye el perfil `dev`, así que necesita un PostgreSQL propio y las variables de [`.env.example`](.env.example):
+`./mvnw spring-boot:build-image` builds the `streamstories:<version>` image with [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html), without a `Dockerfile`. It is meant for other environments: it does not include the `dev` profile, so it needs its own PostgreSQL and the variables in [`.env.example`](.env.example):
 
 ```bash
-docker run -p 8080:8080 --env-file .env streamstories:<versión>
+docker run -p 8080:8080 --env-file .env streamstories:<version>
 ```
 
-## Documentación
+## Documentation
 
-La documentación completa está en [`docs/`](docs/README.md):
+The full documentation is in [`docs/`](docs/README.md):
 
-- [Visión y alcance](docs/01-vision-y-alcance.md)
-- [Arquitectura](docs/02-arquitectura.md)
-- [Modelo de dominio y datos](docs/03-modelo-de-dominio.md)
-- [Diseño de la API](docs/04-api.md)
-- [Seguridad](docs/05-seguridad.md)
-- [Calidad y flujo de trabajo](docs/06-calidad-y-flujo-de-trabajo.md)
-- [Hoja de ruta](docs/07-hoja-de-ruta.md)
-- [Desarrollo asistido por IA](docs/08-desarrollo-con-ia.md)
-- [Registro de decisiones de arquitectura (ADR)](docs/adr/README.md)
+- [Vision and scope](docs/01-vision-and-scope.md)
+- [Architecture](docs/02-architecture.md)
+- [Domain model and data](docs/03-domain-model.md)
+- [API design](docs/04-api.md)
+- [Security](docs/05-security.md)
+- [Quality and workflow](docs/06-quality-and-workflow.md)
+- [Roadmap](docs/07-roadmap.md)
+- [AI-assisted development](docs/08-ai-assisted-development.md)
+- [Architecture decision records (ADR)](docs/adr/README.md)
 
-## Estado del proyecto
+## Project status
 
-El desarrollo avanzó por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)), y con la versión `1.0.0` están todas completas:
+Development went through phases ([roadmap](docs/07-roadmap.md)), and with version `1.0.0` all of them are complete:
 
-| Fase | Alcance | Estado |
-|------|---------|:------:|
-| 0 · Cimientos | Configuración base, CI, manejo de errores, OpenAPI | ✅ Completada |
-| 1 · MVP | Catálogo, cuentas y autenticación | ✅ Completada |
-| 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ✅ Completada |
-| 3 · Inteligencia | Recomendaciones personalizadas | ✅ Completada |
-| 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ✅ Completada |
+| Phase | Scope | Status |
+|-------|-------|:------:|
+| 0 · Foundations | Base configuration, CI, error handling, OpenAPI | ✅ Done |
+| 1 · MVP | Catalog, accounts and authentication | ✅ Done |
+| 2 · Interaction | Watch progress, history and ratings | ✅ Done |
+| 3 · Intelligence | Personalized recommendations | ✅ Done |
+| 4 · Evolution | Watchlist, franchises and optimizations | ✅ Done |
 
-## Licencia
+## License
 
-Distribuido bajo la [licencia MIT](LICENSE).
+Distributed under the [MIT license](LICENSE).

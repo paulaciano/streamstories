@@ -1,128 +1,133 @@
 # Changelog
 
-Todos los cambios relevantes del proyecto se documentan en este archivo.
+All notable changes to this project are documented in this file.
 
-El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el proyecto usa [versionado semántico](https://semver.org/lang/es/).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+
+### Changed
+
+- The documentation in `docs/`, the ADRs and this changelog are now in English, with English file names. The README has an English version (`README.md`) and a Spanish one (`README.es.md`).
+- The README explains step by step how to run and try the project locally.
 
 ## [1.0.0] - 2026-11-19
 
 ### Added
 
-- Lista de seguimiento (`/me/watchlist`): películas y series para ver después. Agregar y quitar son idempotentes, y un título retirado no se puede agregar, pero sigue en las listas donde ya estaba.
-- Sagas (`/franchises`): películas agrupadas en orden. Una película pertenece como máximo a una saga, y borrar la saga no borra sus películas.
-- Imagen de contenedor con Cloud Native Buildpacks (`./mvnw spring-boot:build-image`).
+- Watchlist (`/me/watchlist`): movies and series to watch later. Adding and removing are idempotent, and a retired title cannot be added, but it stays in the lists that already had it.
+- Franchises (`/franchises`): movies grouped in order. A movie belongs to one franchise at most, and deleting the franchise does not delete its movies.
+- Container image with Cloud Native Buildpacks (`./mvnw spring-boot:build-image`).
 
 ### Changed
 
-- Las recomendaciones leen el catálogo y los promedios con consultas de filas simples: con 6.000 títulos y 300.000 puntuaciones, la respuesta baja de unos 390 ms a unos 150 ms ([ADR-0012](docs/adr/0012-rendimiento-sin-cache.md)).
+- The recommendations read the catalog and the averages with queries that return plain rows: with 6,000 titles and 300,000 ratings, the response goes from about 390 ms to about 150 ms ([ADR-0012](docs/adr/0012-measured-performance-without-cache.md)).
 
 ### Security
 
-- Límite de intentos de login: tras 5 contraseñas incorrectas para un email en 15 minutos, el login y la reactivación de ese email responden `429`. Los intentos se guardan en la base, así el límite vale para todas las instancias.
+- Login attempt limit: after 5 wrong passwords for an email within 15 minutes, login and reactivation for that email answer `429`. Attempts are stored in the database, so the limit holds for every instance.
 
 ## [0.3.0] - 2026-11-19
 
 ### Added
 
-- Recomendaciones personalizadas (`GET /me/recommendations`), basadas en los géneros de los títulos que el usuario calificó y terminó, con el motivo de cada una. Sin actividad, se recomiendan los títulos mejor calificados por la comunidad. El contenido retirado nunca se recomienda.
+- Personalized recommendations (`GET /me/recommendations`), based on the genres of the titles the user rated and finished, each with its reason. Without activity, the titles best rated by the community are recommended. Retired content is never recommended.
 
 ## [0.2.0] - 2026-11-18
 
 ### Added
 
-- Progreso de reproducción: `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
-- El contenido con progreso o puntuaciones ya no se puede borrar, solo retirar.
-- Seguir viendo (`GET /me/continue-watching`): las películas sin terminar y una entrada por serie con el último episodio visto, mientras quede algo por ver.
-- Historial de reproducción (`GET /me/history`), paginado e incluido el contenido retirado.
-- Puntuaciones de 1 a 5 para películas y series (`/me/ratings`). El detalle de cada título muestra el promedio, la cantidad y la puntuación propia. Un título retirado conserva sus puntuaciones, pero no acepta nuevas.
-- `ETag` en el detalle de películas y series, e `If-Match` opcional para cambiarlas sin pisar el cambio de otro administrador (`412` si la versión no coincide).
-- La búsqueda por texto ignora los acentos: "orbita" encuentra "Órbita".
-- Los refresh tokens vencidos se borran una vez por día.
+- Watch progress: `PUT /me/progress/movies/{id}` and `PUT /me/progress/episodes/{id}` save the exact position and mark the content as watched at 90%. Retired content accepts no new progress.
+- Content with progress or ratings can no longer be deleted, only retired.
+- Continue watching (`GET /me/continue-watching`): unfinished movies and one entry per series with its last watched episode, while there is something left to watch.
+- Watch history (`GET /me/history`), paginated and including retired content.
+- Ratings from 1 to 5 for movies and series (`/me/ratings`). Each title's detail shows the average, the count and the user's own score. A retired title keeps its ratings, but accepts no new ones.
+- `ETag` in the detail of movies and series, and an optional `If-Match` to change them without overwriting another administrator's change (`412` if the version does not match).
+- Text search ignores accents: "orbita" finds "Órbita".
+- Expired refresh tokens are deleted once a day.
 
 ### Changed
 
-- La API responde en inglés: mensajes de error, títulos de los Problem Details, validaciones y la especificación OpenAPI. El contenido del catálogo no cambia.
-- Los errores del framework, como `405` y `415`, también tienen un `type` de StreamStories (`method-not-allowed`, `unsupported-media-type`, `not-acceptable`).
-- Un título de temporada en blanco se guarda como `null`, igual que una temporada sin título.
-- Borrar una serie verifica la actividad de todos sus episodios en una sola consulta, no en una por episodio.
+- The API answers in English: error messages, Problem Details titles, validation messages and the OpenAPI specification. The catalog content does not change.
+- Framework errors, such as `405` and `415`, also get a StreamStories `type` (`method-not-allowed`, `unsupported-media-type`, `not-acceptable`).
+- A blank season title is stored as `null`, like a season without a title.
+- Deleting a series checks the activity of all its episodes in a single query, instead of one per episode.
 
 ### Fixed
 
-- Un número con decimales en un campo entero se truncaba (`4.5` se guardaba como `4`); ahora responde `400`.
-- Una página muy lejana (por ejemplo, `?page=30000000&size=100`) respondía `500`; ahora responde `400`.
-- Un `null` dentro de `genreIds` respondía `500`; ahora es un error de validación.
-- Un texto en un campo numérico (`"score": "4"`) se convertía a número; ahora responde `400`.
-- La base de datos ahora también limita los números de temporada y episodio a 999.
+- A number with decimals in an integer field was truncated (`4.5` was stored as `4`); it now answers `400`.
+- A very distant page (for example, `?page=30000000&size=100`) answered `500`; it now answers `400`.
+- A `null` inside `genreIds` answered `500`; it is now a validation error.
+- Text in a numeric field (`"score": "4"`) was converted to a number; it now answers `400`.
+- The database now also limits season and episode numbers to 999.
 
 ### Security
 
-- La configuración del perfil `dev` (clave JWT y administrador de desarrollo) ya no entra en el jar.
-- La aplicación no arranca si la contraseña del administrador inicial es débil o es el valor de ejemplo.
-- PostgreSQL de Docker Compose solo escucha en `127.0.0.1`.
-- Los errores reenviados por el contenedor ya no se convierten en `401` en las peticiones que no son `GET`.
+- The `dev` profile configuration (JWT key and development administrator) is no longer in the jar.
+- The application does not start if the initial administrator's password is weak or is the example value.
+- PostgreSQL in Docker Compose only listens on `127.0.0.1`.
+- Errors forwarded by the container no longer become `401` on requests that are not `GET`.
 
 ## [0.1.0] - 2026-11-17
 
 ### Added
 
-- Cuentas y autenticación (fase 1):
-  - Registro, inicio de sesión con access token JWT y refresh token con rotación y detección de reutilización.
-  - Desactivación de la propia cuenta, con efecto inmediato aunque el access token siga vigente.
-  - Solicitudes de reactivación que resuelve un administrador.
-  - Administración de usuarios: listado con filtros, cambio de estado y de rol, protección del último administrador activo.
-  - Creación del administrador inicial a partir de variables de entorno.
-- Catálogo (fase 1):
-  - Géneros con slug generado a partir del nombre.
-  - Películas y series con géneros, y series con temporadas y episodios numerados.
-  - Catálogo mixto de películas y series con filtros por género, tipo y texto.
-  - Retiro de contenido: lo retirado no aparece en los listados de los usuarios, pero sigue accesible por id y sin URL de video.
-  - El borrado físico solo se permite sobre contenido sin actividad.
-- Datos de ejemplo en el perfil `dev`: catálogo de prueba y administrador de desarrollo, que se crean solo si no existen.
-- Entidad base con identificador UUIDv7 y auditoría de fechas de creación y modificación.
-- Respuesta paginada uniforme y validación de los campos de orden permitidos.
+- Accounts and authentication (phase 1):
+  - Sign-up, login with a JWT access token, and a refresh token with rotation and reuse detection.
+  - Deactivating your own account, effective immediately even while the access token is still valid.
+  - Reactivation requests that an administrator resolves.
+  - User administration: listing with filters, changing status and role, protecting the last active administrator.
+  - Creating the initial administrator from environment variables.
+- Catalog (phase 1):
+  - Genres with a slug derived from the name.
+  - Movies and series with genres, and series with numbered seasons and episodes.
+  - A mixed catalog of movies and series with filters by genre, type and text.
+  - Retiring content: retired content does not appear in the users' listings, but it is still reachable by id, without a video URL.
+  - Physical deletion is only allowed for content without activity.
+- Sample data in the `dev` profile: a sample catalog and a development administrator, created only if they do not exist.
+- A base entity with a UUIDv7 identifier and auditing of the creation and modification dates.
+- A uniform paginated response and validation of the allowed sort fields.
 
 ### Fixed
 
-- Los números de temporada y episodio fuera de rango se truncaban al guardarse; ahora se validan (de 1 a 999).
-- Reutilizar un refresh token vencido o revocado por logout cerraba todas las sesiones del usuario; ahora solo la reutilización de un token rotado se trata como robo.
-- Aprobar y rechazar a la vez la misma solicitud de reactivación podía dejar datos inconsistentes; ahora se bloquea la solicitud.
-- Dos pedidos simultáneos de reactivación devolvían `409`; ahora devuelven la misma solicitud pendiente.
-- Cambiar solo los géneros de un título no actualizaba `updatedAt`.
-- La comparación de entidades fallaba con proxies de Hibernate.
-- Los valores inválidos rechazados por la base respondían `409` en lugar de `400`, y el log incluía el detalle de PostgreSQL.
-- La paginación podía repetir u omitir elementos cuando había empates en el orden.
-- El orden alfabético ponía los títulos acentuados al final ("Órbita" después de "Vecinos"); ahora se ordena como en español.
+- Out-of-range season and episode numbers were truncated when stored; they are now validated (from 1 to 999).
+- Reusing a refresh token that had expired or been revoked by a logout closed all the user's sessions; now only reusing a rotated token is treated as theft.
+- Approving and rejecting the same reactivation request at once could leave inconsistent data; the request is now locked.
+- Two simultaneous reactivation requests returned `409`; they now return the same pending request.
+- Changing only the genres of a title did not update `updatedAt`.
+- Entity comparison failed with Hibernate proxies.
+- Invalid values rejected by the database answered `409` instead of `400`, and the log included the PostgreSQL detail.
+- Pagination could repeat or skip items when the sort had ties.
+- Alphabetical order put accented titles last ("Órbita" after "Vecinos"); it now sorts as in Spanish.
 
 ### Security
 
-- La aplicación empaquetada ya no activa el perfil `dev` por defecto: sin `STREAMSTORIES_SECURITY_JWT_SECRET` no arranca, en lugar de usar la clave de desarrollo.
+- The packaged application no longer enables the `dev` profile by default: without `STREAMSTORIES_SECURITY_JWT_SECRET` it does not start, instead of using the development key.
 
 ### Changed
 
-- El contenido de una serie se retira por temporada completa, no por episodio (ADR-0011, que reemplaza a ADR-0009). `PATCH /series/{id}/seasons/{number}` cambia la disponibilidad de la temporada, y `PATCH /episodes/{id}` deja de existir.
-- El catálogo tiene DTOs propios en la capa `api`, como identity.
-- Edición concurrente de títulos con bloqueo optimista.
-- Los mensajes de validación salen siempre en español.
-- Login y reactivación verifican la contraseña fuera de la transacción, sin retener una conexión de la base.
-- Los errores de autenticación, autorización y constraints de la base también responden con Problem Details.
+- A series' content is retired by whole season, not by episode (ADR-0011, which supersedes ADR-0009). `PATCH /series/{id}/seasons/{number}` changes the season's availability, and `PATCH /episodes/{id}` no longer exists.
+- The catalog has its own DTOs in the `api` layer, like identity.
+- Concurrent edits of titles use optimistic locking.
+- Validation messages are always in Spanish.
+- Login and reactivation check the password outside the transaction, without holding a database connection.
+- Authentication, authorization and database constraint errors also answer with Problem Details.
 
 ## [0.0.1] - 2026-11-17
 
 ### Added
 
-- Documentación del producto, la arquitectura y las decisiones de diseño (ADR).
-- Base técnica del proyecto (fase 0):
-  - Configuración con virtual threads, Open Session in View desactivado y validación del esquema con Flyway.
-  - PostgreSQL local con Docker Compose.
-  - Manejo global de errores con Problem Details (RFC 9457).
-  - Especificación OpenAPI y Swagger UI.
-  - Actuator limitado a `health` e `info`.
-  - Verificación de módulos con Spring Modulith.
-  - Tests de integración con Testcontainers.
-  - CI con GitHub Actions, formato automático con Spotless y cobertura con JaCoCo.
-  - Dependabot, plantilla de pull request y EditorConfig.
+- Documentation of the product, the architecture and the design decisions (ADR).
+- Technical base of the project (phase 0):
+  - Configuration with virtual threads, Open Session in View disabled and schema validation with Flyway.
+  - Local PostgreSQL with Docker Compose.
+  - Global error handling with Problem Details (RFC 9457).
+  - OpenAPI specification and Swagger UI.
+  - Actuator limited to `health` and `info`.
+  - Module verification with Spring Modulith.
+  - Integration tests with Testcontainers.
+  - CI with GitHub Actions, automatic formatting with Spotless and coverage with JaCoCo.
+  - Dependabot, a pull request template and EditorConfig.
 
 [Unreleased]: https://github.com/paulaciano/streamstories/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/paulaciano/streamstories/compare/v0.3.0...v1.0.0

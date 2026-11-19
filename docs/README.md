@@ -1,28 +1,28 @@
-# Documentación de StreamStories
+# StreamStories documentation
 
-StreamStories es una **API REST** para una plataforma de catálogo audiovisual bajo demanda: películas, series con temporadas y episodios, géneros, historial de visualización, puntuaciones y recomendaciones personalizadas.
+StreamStories is a **REST API** for an on-demand streaming catalog: movies, series with seasons and episodes, genres, watch history, ratings and personalized recommendations.
 
-Esta carpeta describe **qué** hace el sistema, **cómo** está organizado y **por qué** se tomó cada decisión de diseño. La documentación se mantiene junto con el código: cada cambio importante la actualiza en el mismo pull request.
+This folder describes **what** the system does, **how** it is organized and **why** each design decision was made. The documentation lives next to the code: every significant change updates it in the same pull request.
 
-## Índice
+## Contents
 
-| # | Documento | Qué responde |
-|---|-----------|--------------|
-| 1 | [Visión y alcance](01-vision-y-alcance.md) | ¿Qué problema resuelve el sistema? ¿Qué entra y qué no entra? |
-| 2 | [Arquitectura](02-arquitectura.md) | ¿Cómo está organizado? ¿Qué tecnologías usa? |
-| 3 | [Modelo de dominio y datos](03-modelo-de-dominio.md) | ¿Qué entidades existen, cómo se relacionan y qué reglas cumplen? |
-| 4 | [Diseño de la API](04-api.md) | ¿Qué endpoints expone y con qué convenciones? |
-| 5 | [Seguridad](05-seguridad.md) | ¿Cómo se autentican los usuarios? ¿Quién puede hacer qué? |
-| 6 | [Calidad y flujo de trabajo](06-calidad-y-flujo-de-trabajo.md) | ¿Cómo se prueba, se integra y se entrega el código? |
-| 7 | [Hoja de ruta](07-hoja-de-ruta.md) | ¿En qué orden se construye y cuándo se da por terminada cada fase? |
-| 8 | [Desarrollo asistido por IA](08-desarrollo-con-ia.md) | ¿Cómo se usa la IA en el desarrollo sin perder calidad ni control? |
-| — | [Registro de decisiones (ADR)](adr/README.md) | ¿Por qué se eligió X y no Y? |
+| # | Document | What it answers |
+|---|----------|-----------------|
+| 1 | [Vision and scope](01-vision-and-scope.md) | What problem does the system solve? What is in and out of scope? |
+| 2 | [Architecture](02-architecture.md) | How is it organized? Which technologies does it use? |
+| 3 | [Domain model and data](03-domain-model.md) | Which entities exist, how do they relate and which rules do they follow? |
+| 4 | [API design](04-api.md) | Which endpoints does it expose, and with which conventions? |
+| 5 | [Security](05-security.md) | How do users authenticate? Who can do what? |
+| 6 | [Quality and workflow](06-quality-and-workflow.md) | How is the code tested, integrated and delivered? |
+| 7 | [Roadmap](07-roadmap.md) | In which order is it built, and when is each phase done? |
+| 8 | [AI-assisted development](08-ai-assisted-development.md) | How is AI used in development without losing quality or control? |
+| — | [Architecture decision records (ADR)](adr/README.md) | Why X and not Y? |
 
-Para una lectura rápida, alcanza con **Visión y alcance** y **Arquitectura**. Antes de contribuir con código conviene leer todo en orden.
+For a quick read, **Vision and scope** and **Architecture** are enough. Before contributing code, read everything in order.
 
-## Convenciones
+## Conventions
 
-- **Idioma:** esta documentación está en español. La API y el código están en inglés, incluidos los mensajes de error y la especificación OpenAPI. Los identificadores técnicos (entidades, clases, endpoints, campos) se escriben `así`, igual que en el código.
-- **Formato:** Markdown con diagramas [Mermaid](https://mermaid.js.org/), que GitHub muestra de forma nativa ([ADR-0008](adr/0008-documentacion-markdown-mermaid.md)).
-- **Decisiones:** toda decisión que sea costosa de revertir se registra como un [ADR](adr/README.md).
-- **Palabras clave:** "debe" indica un requisito obligatorio, "debería" una recomendación fuerte y "puede" algo opcional.
+- **Language:** the documentation, the code and the API are in English. The README also has a [Spanish version](../README.es.md). Technical identifiers (entities, classes, endpoints, fields) are written `like this`, as in the code.
+- **Format:** Markdown with [Mermaid](https://mermaid.js.org/) diagrams, which GitHub renders natively ([ADR-0008](adr/0008-markdown-and-mermaid-docs.md)).
+- **Decisions:** every decision that is expensive to reverse is recorded as an [ADR](adr/README.md).
+- **Keywords:** "must" marks a mandatory requirement, "should" a strong recommendation and "may" something optional.
