@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Rule C11: a movie or a series with ratings cannot be deleted. Episodes are never rated (rule A10). */
 @Component
 class RatingActivity implements ContentActivity {
 

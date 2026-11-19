@@ -21,7 +21,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-/** Rule C11 for series: the series and every one of its episodes must be free of activity. */
 class SeriesServiceTests {
 
     private final SeriesRepository seriesRepository = mock();

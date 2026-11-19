@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Read-only view of a reactivation request together with the user who made it. */
 public record ReactivationView(
         UUID id,
         UUID userId,

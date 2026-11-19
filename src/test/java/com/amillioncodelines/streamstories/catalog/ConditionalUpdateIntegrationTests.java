@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Optimistic locking for clients: ETag on reads and writes, If-Match on changes. */
 @IntegrationTest
 class ConditionalUpdateIntegrationTests {
 

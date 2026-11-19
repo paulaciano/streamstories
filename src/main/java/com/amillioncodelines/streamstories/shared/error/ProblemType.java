@@ -3,7 +3,6 @@ package com.amillioncodelines.streamstories.shared.error;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 
-/** Machine-readable problem types returned in the {@code type} field of every error response (RFC 9457). */
 public enum ProblemType {
     VALIDATION_ERROR("validation-error", "Invalid data", HttpStatus.BAD_REQUEST),
     MALFORMED_REQUEST("malformed-request", "Malformed request", HttpStatus.BAD_REQUEST),

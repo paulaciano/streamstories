@@ -25,7 +25,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-/** Rule I9: the system can never be left without an active administrator. */
 class AccountServiceTests {
 
     private final UserRepository users = mock();

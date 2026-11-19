@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-/** What an administrator sees about a reactivation request. */
 record AdminReactivationResponse(
         UUID id,
         UUID userId,

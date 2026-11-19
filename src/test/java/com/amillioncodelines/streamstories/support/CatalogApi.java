@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Creates catalog content through the API, as an administrator would. */
 @TestComponent
 public class CatalogApi {
 
@@ -23,7 +22,6 @@ public class CatalogApi {
         this.mvc = mvc;
     }
 
-    /** A short random token to make titles and genre names unique, and to find them again with {@code q}. */
     public static String token() {
         return UUID.randomUUID().toString().substring(0, 8);
     }

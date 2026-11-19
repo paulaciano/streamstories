@@ -10,12 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * General metadata of the OpenAPI specification served at {@code /v3/api-docs}.
- *
- * <p>Every operation requires a bearer JWT by default. Public operations opt out with an empty
- * {@code @SecurityRequirements}.
- */
 @Configuration(proxyBeanMethods = false)
 class OpenApiConfiguration {
 

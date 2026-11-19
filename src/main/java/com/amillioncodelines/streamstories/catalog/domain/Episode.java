@@ -9,9 +9,6 @@ import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * An episode: playable content that belongs to a season. It is not a title: genres and ratings belong to its series.
- */
 @Entity
 public class Episode extends BaseEntity {
 
@@ -54,10 +51,6 @@ public class Episode extends BaseEntity {
         this.videoUrl = details.videoUrl();
     }
 
-    /**
-     * An episode is playable only if both its season and its series are available. Episodes have no availability of
-     * their own: the smallest unit that can be retired is the season.
-     */
     public boolean isPlayable() {
         return season.isAvailable() && season.getSeries().isAvailable();
     }

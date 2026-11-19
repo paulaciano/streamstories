@@ -4,7 +4,6 @@ import com.amillioncodelines.streamstories.shared.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
-/** A genre that classifies titles. Name and slug are unique, ignoring case (rule C3). */
 @Entity
 public class Genre extends BaseEntity {
 

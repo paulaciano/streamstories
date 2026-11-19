@@ -20,13 +20,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-/**
- * Applies account changes immediately, without waiting for the access token to expire.
- *
- * <p>After the JWT is validated, the account is looked up: an inactive account is rejected with
- * {@code 403 account-inactive}, a deleted one with {@code 401}, and the authorities are taken from the current role in
- * the database, so a demotion also takes effect at once.
- */
+/** Reads the account on every request, so deactivations and role changes apply before the access token expires. */
 class ActiveAccountFilter extends OncePerRequestFilter {
 
     private final UserRepository users;

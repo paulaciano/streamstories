@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Exercises the global error handling through a probe controller that triggers each error type. */
 @WebMvcTest(GlobalExceptionHandlerTests.ProbeController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandlerTests.ProbeController.class)

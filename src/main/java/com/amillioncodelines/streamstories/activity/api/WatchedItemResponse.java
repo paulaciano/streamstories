@@ -7,10 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * A watched movie, or a series with one of its episodes. {@code titleId} is the movie or the series, and
- * {@code episode} is only present for series.
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 record WatchedItemResponse(
         ContentKind type,

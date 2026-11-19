@@ -10,9 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.Instant;
 
-/**
- * A refresh token issued to a user. Only the SHA-256 hash of the token value is stored, never the value itself.
- */
 @Entity
 public class RefreshToken extends BaseEntity {
 
@@ -43,7 +40,6 @@ public class RefreshToken extends BaseEntity {
         return revokedAt != null;
     }
 
-    /** A rotated token presented again means it may have been stolen. */
     public boolean wasRotated() {
         return revocationReason == RevocationReason.ROTATED;
     }

@@ -1,9 +1,3 @@
-/**
- * Cross-cutting building blocks shared by every module: error handling, API documentation, the auditable base
- * entity, pagination helpers and the application clock.
- *
- * <p>Declared as an open module so other modules may use its types directly.
- */
 @ApplicationModule(type = ApplicationModule.Type.OPEN)
 package com.amillioncodelines.streamstories.shared;
 

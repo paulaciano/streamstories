@@ -4,11 +4,6 @@ import java.util.List;
 import java.util.function.Function;
 import org.springframework.data.domain.Page;
 
-/**
- * Stable JSON representation of a page of results: {@code {"content": [...], "page": {...}}}.
- *
- * @param <T> type of the elements
- */
 public record PageResponse<T>(List<T> content, PageMetadata page) {
 
     public record PageMetadata(int number, int size, long totalElements, int totalPages) {}

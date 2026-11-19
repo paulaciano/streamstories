@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Rules C3 and C8. */
 @IntegrationTest
 class GenreIntegrationTests {
 

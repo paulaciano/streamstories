@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import org.springframework.data.jpa.domain.Specification;
 
-/** Translates a {@link CatalogFilter} into a query over titles. */
 public final class MediaItemSpecifications {
 
     private static final char LIKE_ESCAPE = '\\';
@@ -27,7 +26,6 @@ public final class MediaItemSpecifications {
                 predicates.add(cb.equal(root.type(), subtype));
             }
             if (filter.text() != null && !filter.text().isBlank()) {
-                // Case and accents are ignored on both sides, with PostgreSQL's unaccent.
                 String pattern = "%" + escapeLike(filter.text().strip().toLowerCase(Locale.ROOT)) + "%";
                 predicates.add(cb.like(
                         cb.lower(cb.function("unaccent", String.class, root.get("title"))),

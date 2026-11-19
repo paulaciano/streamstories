@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Series together with their seasons and episodes, which only exist inside a series. */
 @Service
 public class SeriesService {
 
@@ -43,8 +42,6 @@ public class SeriesService {
         this.genres = genres;
         this.activity = activity;
     }
-
-    // Series
 
     @Transactional(readOnly = true)
     public Page<SeriesSummaryView> list(CatalogFilter filter, Audience audience, Pageable pageable) {
@@ -72,7 +69,6 @@ public class SeriesService {
         return replace(id, command, null);
     }
 
-    /** @param expectedVersion the version the client read, or {@code null} for an unconditional change */
     @Transactional
     public SeriesView replace(UUID id, SeriesCommand command, Long expectedVersion) {
         Series series = findSeries(id);
@@ -81,7 +77,6 @@ public class SeriesService {
         return SeriesView.of(seriesRepository.saveAndFlush(series), Audience.ADMIN);
     }
 
-    /** Retiring a series makes all its episodes unplayable, without touching them. */
     @Transactional
     public SeriesView changeAvailability(UUID id, Availability availability) {
         return changeAvailability(id, availability, null);
@@ -95,7 +90,6 @@ public class SeriesService {
         return SeriesView.of(seriesRepository.saveAndFlush(series), Audience.ADMIN);
     }
 
-    /** Deletes the series with its seasons and episodes, only if none of them has activity (rule C11). */
     @Transactional
     public void delete(UUID id) {
         Series series = findSeries(id);
@@ -108,15 +102,11 @@ public class SeriesService {
         seriesRepository.delete(series);
     }
 
-    // Seasons
-
-    /** Retired seasons are still reachable by number, flagged as such (rule C9). */
     @Transactional(readOnly = true)
     public SeasonView getSeason(UUID seriesId, int number) {
         return SeasonView.of(findSeason(findSeries(seriesId), number));
     }
 
-    /** Season numbers are unique within the series and start at 1 (rule C4). */
     @Transactional
     public SeasonView addSeason(UUID seriesId, int number, String title) {
         Series series = findSeries(seriesId);
@@ -133,7 +123,6 @@ public class SeriesService {
         return SeasonView.of(season);
     }
 
-    /** Retiring a season makes all its episodes unplayable, without touching them or their activity. */
     @Transactional
     public SeasonView changeSeasonAvailability(UUID seriesId, int number, Availability availability) {
         Season season = findSeason(findSeries(seriesId), number);
@@ -141,21 +130,17 @@ public class SeriesService {
         return SeasonView.of(season);
     }
 
-    /** Only an empty season can be deleted. */
     @Transactional
     public void deleteSeason(UUID seriesId, int number) {
         Series series = findSeries(seriesId);
         series.removeSeason(findSeason(series, number));
     }
 
-    // Episodes
-
     @Transactional(readOnly = true)
     public EpisodeView getEpisode(UUID id, Audience audience) {
         return EpisodeView.of(findEpisode(id), audience);
     }
 
-    /** Episode numbers are unique within the season and start at 1 (rule C5). */
     @Transactional
     public EpisodeView addEpisode(UUID seriesId, int seasonNumber, EpisodeCommand command) {
         Series series = findSeries(seriesId);
@@ -173,7 +158,6 @@ public class SeriesService {
         return EpisodeView.of(episode, Audience.ADMIN);
     }
 
-    /** Only episodes without activity can be deleted (rule C11). */
     @Transactional
     public void deleteEpisode(UUID id) {
         Episode episode = findEpisode(id);

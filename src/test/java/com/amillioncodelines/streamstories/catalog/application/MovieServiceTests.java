@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-/** Rule C11: content with activity can be retired, but not deleted. */
 class MovieServiceTests {
 
     private final MovieRepository movies = mock();

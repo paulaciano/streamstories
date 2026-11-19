@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** "Continue watching" and the history, built from the saved progress and the catalog (rules A5 to A8). */
 @Service
 public class WatchHistoryService {
 
@@ -30,13 +29,7 @@ public class WatchHistoryService {
         this.catalog = catalog;
     }
 
-    /**
-     * Movies not completed and one entry per series with its most recently watched episode. A series leaves once
-     * that episode is completed and no playable episode comes after it. Retired movies and series are left out.
-     *
-     * <p>The database returns one candidate per series and per unfinished movie. Which of them stay depends on the
-     * catalog (availability, following episodes), so the page is cut in memory from those candidates.
-     */
+    /** Which candidates stay depends on the catalog, so the page is cut in memory. */
     @Transactional(readOnly = true)
     public Page<WatchedItemView> continueWatching(UUID userId, Pageable pageable) {
         List<WatchProgress> candidates = progress.findContinueWatchingCandidates(userId);
@@ -50,7 +43,6 @@ public class WatchHistoryService {
                 }
             } else {
                 EpisodeSummary episode = content.episodes().get(saved.getEpisodeId());
-                // The repository already returns only the most recent episode of each series (rule A6).
                 if (episode != null && resumable(saved, episode)) {
                     entries.add(view(saved, episode));
                 }
@@ -59,7 +51,6 @@ public class WatchHistoryService {
         return Pageables.slice(entries, pageable);
     }
 
-    /** Every movie and episode watched, including retired content, marked as not playable (rule A8). */
     @Transactional(readOnly = true)
     public Page<WatchedItemView> history(UUID userId, Pageable pageable) {
         Page<WatchProgress> saved = progress.findByUserId(userId, pageable);

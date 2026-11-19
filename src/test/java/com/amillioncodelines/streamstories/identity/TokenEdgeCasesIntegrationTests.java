@@ -20,7 +20,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-/** Tokens and passwords at the edges: signed tokens of unknown users, inactive accounts and long passwords. */
 @IntegrationTest
 class TokenEdgeCasesIntegrationTests {
 

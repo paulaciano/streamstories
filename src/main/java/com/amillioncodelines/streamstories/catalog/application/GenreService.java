@@ -35,7 +35,6 @@ public class GenreService {
         return GenreView.of(find(id));
     }
 
-    /** Names and slugs are unique ignoring case (rule C3). */
     @Transactional
     public GenreView create(String name) {
         String slug = slugOf(name);
@@ -56,7 +55,6 @@ public class GenreService {
         return GenreView.of(genres.saveAndFlush(genre));
     }
 
-    /** A genre that classifies titles cannot be deleted (rule C8). */
     @Transactional
     public void delete(UUID id) {
         Genre genre = find(id);

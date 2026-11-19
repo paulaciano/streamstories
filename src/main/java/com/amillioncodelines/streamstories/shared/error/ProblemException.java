@@ -2,12 +2,7 @@ package com.amillioncodelines.streamstories.shared.error;
 
 import java.util.Map;
 
-/**
- * Base class for business exceptions that map directly to a {@link ProblemType}.
- *
- * <p>The message becomes the {@code detail} of the response, so it must be safe to show to API clients.
- * Optional properties are added as extension members of the problem.
- */
+/** The message becomes the {@code detail} of the response, so it must be safe to show to API clients. */
 public abstract class ProblemException extends RuntimeException {
 
     private final ProblemType type;

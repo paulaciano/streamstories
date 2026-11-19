@@ -39,13 +39,11 @@ public interface RatingRepository extends JpaRepository<Rating, UUID> {
 
     boolean existsByMediaItemIdIn(Collection<UUID> mediaItemIds);
 
-    /** Average and count over every rating of the title, including those of inactive accounts (rule A11). */
     @Query("select avg(r.score) as average, count(r) as count from Rating r where r.mediaItemId = :mediaItemId")
     RatingStats statsOf(@Param("mediaItemId") UUID mediaItemId);
 
     interface RatingStats {
 
-        /** {@code null} without ratings. */
         Double getAverage();
 
         long getCount();

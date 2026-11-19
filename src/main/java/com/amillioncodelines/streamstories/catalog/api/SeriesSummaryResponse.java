@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import java.util.List;
 import java.util.UUID;
 
-/** A series without its seasons, as shown in listings. */
 record SeriesSummaryResponse(
         UUID id,
         String title,

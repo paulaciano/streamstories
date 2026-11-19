@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.identity.domain.ReactivationStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-/** What an inactive user sees about their own request. */
 record ReactivationRequestResponse(UUID id, ReactivationStatus status, Instant requestedAt) {
 
     static ReactivationRequestResponse from(ReactivationView request) {

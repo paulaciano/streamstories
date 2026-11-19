@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Deactivation, reactivation requests and user administration (rules I3 to I7, ADR-0010). */
 @IntegrationTest
 class AccountLifecycleIntegrationTests {
 

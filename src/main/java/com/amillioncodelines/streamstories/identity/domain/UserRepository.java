@@ -31,7 +31,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Query("select u from User u where u.id = :id")
     Optional<User> lockById(UUID id);
 
-    /** Lightweight lookup used on every authenticated request. */
     @Query("select new com.amillioncodelines.streamstories.identity.domain.AccountSnapshot(u.id, u.role, u.status)"
             + " from User u where u.id = :id")
     Optional<AccountSnapshot> findSnapshotById(UUID id);

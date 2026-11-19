@@ -11,10 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-/**
- * Computes the recommendations of a user on each request, over the whole catalog. If the catalog grows, the result can
- * be cached or precomputed later (docs/03, section 3.5).
- */
 @Service
 public class RecommendationService {
 

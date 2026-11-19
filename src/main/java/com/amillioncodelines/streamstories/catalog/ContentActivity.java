@@ -3,15 +3,8 @@ package com.amillioncodelines.streamstories.catalog;
 import java.util.Collection;
 import java.util.UUID;
 
-/**
- * Tells the catalog whether a piece of content has user activity (watch progress, ratings, watchlist entries).
- *
- * <p>The catalog does not know about users or their activity. Modules that record activity implement this interface,
- * and the catalog asks every implementation before physically deleting content (rule C11). Without implementations,
- * no content has activity.
- */
+/** Implemented by the modules that record activity, so the catalog can check it without depending on them (C11). */
 public interface ContentActivity {
 
-    /** Whether any of the given contents of that kind has activity. Checked in one go, not one by one. */
     boolean existsForAny(ContentKind kind, Collection<UUID> contentIds);
 }

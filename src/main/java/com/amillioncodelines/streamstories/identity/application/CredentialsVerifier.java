@@ -32,7 +32,6 @@ class CredentialsVerifier {
         this.dummyHash = passwordEncoder.encode("dummy-password-for-timing-safety");
     }
 
-    /** Returns the user, active or not, whose credentials match. */
     User verify(String email, String password) {
         if (exceedsMaxLength(password)) {
             throw new UnauthorizedException(INVALID_CREDENTIALS);

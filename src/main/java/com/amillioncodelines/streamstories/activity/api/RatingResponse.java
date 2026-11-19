@@ -5,9 +5,6 @@ import com.amillioncodelines.streamstories.catalog.ContentKind;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * @param available {@code false} once the title is retired; its rating is kept
- */
 record RatingResponse(
         UUID titleId,
         ContentKind type,

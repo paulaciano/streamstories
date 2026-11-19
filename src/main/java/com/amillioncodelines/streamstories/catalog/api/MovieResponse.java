@@ -8,9 +8,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @param videoUrl {@code null} for a viewer when the movie is retired
- */
 record MovieResponse(
         UUID id,
         String title,
@@ -29,7 +26,6 @@ record MovieResponse(
         return from(movie, null);
     }
 
-    /** The detail of a title also includes its ratings. */
     static MovieResponse from(MovieView movie, RatingSummary ratings) {
         return new MovieResponse(
                 movie.id(),

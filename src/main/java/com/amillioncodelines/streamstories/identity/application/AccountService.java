@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Account self-service and user administration. */
 @Service
 public class AccountService {
 
@@ -44,7 +43,6 @@ public class AccountService {
         return UserView.of(findUser(userId));
     }
 
-    /** The holder deactivates their own account: access is lost immediately and activity is kept (rules I4, I7). */
     @Transactional
     public void deactivateOwnAccount(UUID userId) {
         deactivate(findUser(userId));
@@ -55,10 +53,6 @@ public class AccountService {
         return users.findAll(UserSpecifications.filter(status, role), pageable).map(UserView::of);
     }
 
-    /**
-     * Changes the status and/or role of a user. Reactivating directly also approves the pending reactivation request,
-     * if there is one (rule I5).
-     */
     @Transactional
     public UserView updateUser(UUID userId, AccountStatus newStatus, Role newRole, UUID adminId) {
         User user = findUser(userId);
@@ -95,7 +89,6 @@ public class AccountService {
         refreshTokens.revokeAllForUser(user.getId(), clock.instant(), RevocationReason.ACCOUNT_DEACTIVATED);
     }
 
-    /** Rule I9: the system can never be left without an active administrator. */
     private void ensureNotLastActiveAdmin(User admin) {
         List<User> activeAdmins = users.lockActiveAdmins();
         boolean isTheOnlyOne = activeAdmins.size() == 1 && activeAdmins.contains(admin);

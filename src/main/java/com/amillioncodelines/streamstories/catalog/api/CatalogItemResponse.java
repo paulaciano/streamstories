@@ -6,7 +6,6 @@ import com.amillioncodelines.streamstories.catalog.domain.MediaType;
 import java.util.List;
 import java.util.UUID;
 
-/** A title in the mixed catalog, movie or series. */
 record CatalogItemResponse(
         UUID id,
         MediaType type,

@@ -21,14 +21,12 @@ record SeriesResponse(
         Instant updatedAt,
         @JsonInclude(JsonInclude.Include.NON_NULL) RatingsResponse ratings) {
 
-    /** Viewers only see available seasons; administrators see every season. */
     record SeasonSummary(int number, String title, Availability availability, int episodeCount) {}
 
     static SeriesResponse from(SeriesView series) {
         return from(series, null);
     }
 
-    /** The detail of a title also includes its ratings. */
     static SeriesResponse from(SeriesView series, RatingSummary ratings) {
         List<SeasonSummary> seasons = series.seasons().stream()
                 .map(season -> new SeasonSummary(

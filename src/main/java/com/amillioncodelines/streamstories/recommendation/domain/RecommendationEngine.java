@@ -14,21 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Content-based recommendations (docs/03, section 3.5). Pure logic: it receives the catalog, the user's activity and
- * the community ratings, and returns every recommendation in order.
- *
- * <ol>
- *   <li>Each title the user rated or completed gives a signal: a score of 4 or 5 adds 2, a score of 1 or 2 subtracts
- *       2, and a completed title adds 1. A series counts once, however many episodes were completed.
- *   <li>The signal of a title goes to each of its genres: that is the user's affinity for the genre. Retired titles
- *       count too, because they still show what the user likes.
- *   <li>Candidates are available titles with a genre of positive affinity that the user neither rated nor started.
- *       Their score is the sum of the affinities of their genres, plus {@value #PREFERRED_FORMAT_BONUS} for the format
- *       (movie or series) with more liked titles.
- *   <li>Without candidates (a new user, for example), the user gets the best rated titles they have not seen.
- * </ol>
- */
 public final class RecommendationEngine {
 
     static final double PREFERRED_FORMAT_BONUS = 0.5;
@@ -78,7 +63,6 @@ public final class RecommendationEngine {
                 .toList();
     }
 
-    /** Rules A9 to A12 guarantee scores from 1 to 5; 3 is neutral. */
     private static Map<UUID, Integer> signals(UserActivity activity) {
         Map<UUID, Integer> signals = new HashMap<>();
         activity.scores().forEach((titleId, score) -> {
@@ -100,7 +84,6 @@ public final class RecommendationEngine {
         return affinity;
     }
 
-    /** The format with more titles of positive signal, or {@code null} on a tie. */
     private static ContentKind preferredFormat(Map<UUID, Integer> signals, Map<UUID, CatalogTitle> byId) {
         long movies = 0;
         long series = 0;
@@ -124,7 +107,6 @@ public final class RecommendationEngine {
         return title.type() == preferred ? score + PREFERRED_FORMAT_BONUS : score;
     }
 
-    /** Up to two genres of the title, the ones the user likes most. */
     private String reason(CatalogTitle title, Map<UUID, Integer> affinity) {
         List<String> liked = title.genres().stream()
                 .filter(genre -> affinity.getOrDefault(genre.id(), 0) > 0)
@@ -145,7 +127,6 @@ public final class RecommendationEngine {
                 .toList();
     }
 
-    /** Best average first, then more ratings; titles without ratings go last. */
     private static Comparator<CatalogTitle> byCommunity(Map<UUID, CommunityRating> community) {
         return Comparator.comparing(
                 (CatalogTitle title) -> community.get(title.id()),
@@ -154,7 +135,6 @@ public final class RecommendationEngine {
                         .reversed()));
     }
 
-    /** Newest first, then alphabetical as in Spanish, then by id so the order never depends on the input. */
     private Comparator<CatalogTitle> byRecency() {
         return Comparator.comparingInt(CatalogTitle::releaseYear)
                 .reversed()

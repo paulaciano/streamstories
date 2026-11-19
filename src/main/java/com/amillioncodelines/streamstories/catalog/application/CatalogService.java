@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** The mixed catalog: movies and series together, from a single query (ADR-0007). */
 @Service
 public class CatalogService {
 
@@ -26,7 +25,6 @@ public class CatalogService {
                 .map(CatalogItemView::of);
     }
 
-    /** Viewers only ever see available titles in listings, whatever they ask for (rule C9). */
     static CatalogFilter forAudience(CatalogFilter filter, Audience audience) {
         if (audience.seesRetiredContent()) {
             return filter;

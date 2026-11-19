@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Shortcuts for the authentication flows that most integration tests need as a starting point. */
 @TestComponent
 public class ApiClient {
 
@@ -25,7 +24,6 @@ public class ApiClient {
         this.mvc = mvc;
     }
 
-    /** A unique email, so tests sharing the database never collide. */
     public static String uniqueEmail() {
         return "user-" + UUID.randomUUID() + "@example.com";
     }
@@ -54,7 +52,6 @@ public class ApiClient {
                 """.formatted(email, password));
     }
 
-    /** Registers a new user and logs in. */
     public Session newUserSession() {
         String email = uniqueEmail();
         assertThat(register(email, DEFAULT_PASSWORD)).hasStatus(HttpStatus.CREATED);
@@ -92,7 +89,6 @@ public class ApiClient {
                 .exchange();
     }
 
-    /** An authenticated user: email, tokens and id. */
     public record Session(String email, String accessToken, String refreshToken, UUID userId) {
 
         public String bearer() {

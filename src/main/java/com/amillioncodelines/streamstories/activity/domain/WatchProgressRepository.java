@@ -34,7 +34,6 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
             @Param("completed") boolean completed,
             @Param("now") Instant now);
 
-    /** Same as {@link #upsertMovieProgress}, for an episode. */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(nativeQuery = true, value = """
             INSERT INTO watch_progress (id, user_id, episode_id, series_id, position_seconds, completed, last_watched_at)
@@ -62,10 +61,7 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
 
     Page<WatchProgress> findByUserId(UUID userId, Pageable pageable);
 
-    /**
-     * What "continue watching" starts from, most recently watched first: movies not completed, and the most recent
-     * episode of each series (rule A6), completed or not, because a series can still continue after it.
-     */
+    /** Completed episodes are kept: a series can still continue after them. */
     @Query(nativeQuery = true, value = """
             SELECT * FROM (
                 SELECT DISTINCT ON (series_id) *
@@ -81,7 +77,6 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
             """)
     List<WatchProgress> findContinueWatchingCandidates(@Param("userId") UUID userId);
 
-    /** The titles a user started (movies, or series through their episodes), and whether any part is completed. */
     @Query(nativeQuery = true, value = """
             SELECT COALESCE(movie_id, series_id) AS titleId, bool_or(completed) AS completed
             FROM watch_progress

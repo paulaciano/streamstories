@@ -16,10 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-/**
- * Authorization matrix of every protected endpoint: without a token the answer is 401, and an endpoint reserved to
- * administrators answers 403 to a {@code USER}. The authorized paths are covered by each feature's tests.
- */
 @IntegrationTest
 class AuthorizationIntegrationTests {
 

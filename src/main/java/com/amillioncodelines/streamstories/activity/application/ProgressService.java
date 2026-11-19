@@ -13,7 +13,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Watch progress of each user on movies and episodes (rules A1 to A4). */
 @Service
 public class ProgressService {
 
@@ -51,7 +50,6 @@ public class ProgressService {
                 episode, progress.findByUserIdAndEpisodeId(userId, episodeId).orElseThrow());
     }
 
-    /** Rule A4: retired content does not accept new progress. What was already saved stays as it is. */
     private PlayableContent playable(ContentKind kind, UUID id, String notFoundMessage) {
         PlayableContent content = catalog.findPlayable(kind, id)
                 .orElseThrow(() -> new ResourceNotFoundException(notFoundMessage.formatted(id)));

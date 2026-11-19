@@ -9,7 +9,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-/** Provides a real PostgreSQL instance for integration tests, shared across the test suite. */
 @TestConfiguration(proxyBeanMethods = false)
 public class TestcontainersConfiguration {
 
