@@ -6,8 +6,15 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
 ### Added
 
+- Progreso de reproducción: `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
+- El contenido con progreso o puntuaciones ya no se puede borrar, solo retirar.
+- Seguir viendo (`GET /me/continue-watching`): las películas sin terminar y una entrada por serie con el último episodio visto, mientras quede algo por ver.
+- Historial de reproducción (`GET /me/history`), paginado e incluido el contenido retirado.
+- Puntuaciones de 1 a 5 para películas y series (`/me/ratings`). El detalle de cada título muestra el promedio, la cantidad y la puntuación propia. Un título retirado conserva sus puntuaciones, pero no acepta nuevas.
 - `ETag` en el detalle de películas y series, e `If-Match` opcional para cambiarlas sin pisar el cambio de otro administrador (`412` si la versión no coincide).
 - La búsqueda por texto ignora los acentos: "orbita" encuentra "Órbita".
 - Los refresh tokens vencidos se borran una vez por día.
@@ -17,12 +24,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - La API responde en inglés: mensajes de error, títulos de los Problem Details, validaciones y la especificación OpenAPI. El contenido del catálogo no cambia.
 - Los errores del framework, como `405` y `415`, también tienen un `type` de StreamStories (`method-not-allowed`, `unsupported-media-type`, `not-acceptable`).
 - Un título de temporada en blanco se guarda como `null`, igual que una temporada sin título.
-- "Seguir viendo" ya no carga todo el progreso de episodios del usuario: la base devuelve solo el último episodio de cada serie.
 - Borrar una serie verifica la actividad de todos sus episodios en una sola consulta, no en una por episodio.
 
 ### Fixed
 
-- La CI reintenta la descarga de dependencias, después de que una falla momentánea de Maven Central hiciera fallar el build de `main`.
+- Un número con decimales en un campo entero se truncaba (`4.5` se guardaba como `4`); ahora responde `400`.
 - Una página muy lejana (por ejemplo, `?page=30000000&size=100`) respondía `500`; ahora responde `400`.
 - Un `null` dentro de `genreIds` respondía `500`; ahora es un error de validación.
 - Un texto en un campo numérico (`"score": "4"`) se convertía a número; ahora responde `400`.
@@ -34,20 +40,6 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - La aplicación no arranca si la contraseña del administrador inicial es débil o es el valor de ejemplo.
 - PostgreSQL de Docker Compose solo escucha en `127.0.0.1`.
 - Los errores reenviados por el contenedor ya no se convierten en `401` en las peticiones que no son `GET`.
-
-## [0.2.0] - 2026-11-18
-
-### Added
-
-- Progreso de reproducción: `PUT /me/progress/movies/{id}` y `PUT /me/progress/episodes/{id}` guardan la posición exacta y marcan el contenido como visto al 90 %. El contenido retirado no acepta progreso nuevo.
-- El contenido con progreso o puntuaciones ya no se puede borrar, solo retirar.
-- Seguir viendo (`GET /me/continue-watching`): las películas sin terminar y una entrada por serie con el último episodio visto, mientras quede algo por ver.
-- Historial de reproducción (`GET /me/history`), paginado e incluido el contenido retirado.
-- Puntuaciones de 1 a 5 para películas y series (`/me/ratings`). El detalle de cada título muestra el promedio, la cantidad y la puntuación propia. Un título retirado conserva sus puntuaciones, pero no acepta nuevas.
-
-### Fixed
-
-- Un número con decimales en un campo entero se truncaba (`4.5` se guardaba como `4`); ahora responde `400`.
 
 ## [0.1.0] - 2026-11-17
 
