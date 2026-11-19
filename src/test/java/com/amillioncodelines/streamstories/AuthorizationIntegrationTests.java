@@ -51,7 +51,9 @@ class AuthorizationIntegrationTests {
                 Arguments.of(HttpMethod.GET, "/api/v1/me/recommendations"),
                 Arguments.of(HttpMethod.GET, "/api/v1/me/watchlist"),
                 Arguments.of(HttpMethod.PUT, "/api/v1/me/watchlist/" + ID),
-                Arguments.of(HttpMethod.DELETE, "/api/v1/me/watchlist/" + ID));
+                Arguments.of(HttpMethod.DELETE, "/api/v1/me/watchlist/" + ID),
+                Arguments.of(HttpMethod.GET, "/api/v1/franchises"),
+                Arguments.of(HttpMethod.GET, "/api/v1/franchises/" + ID));
     }
 
     static Stream<Arguments> adminEndpoints() {
@@ -78,7 +80,10 @@ class AuthorizationIntegrationTests {
                 Arguments.of(HttpMethod.DELETE, "/api/v1/series/" + ID + "/seasons/1"),
                 Arguments.of(HttpMethod.POST, "/api/v1/series/" + ID + "/seasons/1/episodes"),
                 Arguments.of(HttpMethod.PUT, "/api/v1/episodes/" + ID),
-                Arguments.of(HttpMethod.DELETE, "/api/v1/episodes/" + ID));
+                Arguments.of(HttpMethod.DELETE, "/api/v1/episodes/" + ID),
+                Arguments.of(HttpMethod.POST, "/api/v1/franchises"),
+                Arguments.of(HttpMethod.PUT, "/api/v1/franchises/" + ID),
+                Arguments.of(HttpMethod.DELETE, "/api/v1/franchises/" + ID));
     }
 
     static Stream<Arguments> protectedEndpoints() {

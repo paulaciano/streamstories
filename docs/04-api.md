@@ -135,8 +135,11 @@ El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratin
 | `GET` | `/me/watchlist` | 👤 | La lista de seguimiento, de lo último agregado a lo primero. Un título retirado aparece con `available: false`. |
 | `PUT` | `/me/watchlist/{titleId}` | 👤 | Agrega una película o una serie. Responde `204` aunque ya estuviera, y `409` si el título está retirado. |
 | `DELETE` | `/me/watchlist/{titleId}` | 👤 | Quita un título, aunque esté retirado. Responde `204` aunque no estuviera. |
-| `GET` | `/franchises/{id}` | 👤 | Una saga con sus películas en orden. |
-| `POST` `PUT` `DELETE` | `/franchises[/{id}]` | 🛠️ | ABM de sagas. |
+| `GET` | `/franchises` | 👤 | Lista de sagas, paginada y ordenable por `name`. |
+| `GET` | `/franchises/{id}` | 👤 | Una saga con sus películas en orden. Un `USER` no ve las retiradas. |
+| `POST` | `/franchises` | 🛠️ | Crea una saga con `name` y `movieIds`: el orden de la lista es el de la saga. `409` si el nombre ya existe o una película ya está en otra saga. |
+| `PUT` | `/franchises/{id}` | 🛠️ | Reemplaza el nombre y la lista completa. Las películas que no están en la lista nueva quedan fuera de la saga. |
+| `DELETE` | `/franchises/{id}` | 🛠️ | Borra la saga. Sus películas siguen en el catálogo. |
 
 ## 4.5 Ejemplos
 
