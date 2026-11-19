@@ -3,10 +3,10 @@ package com.amillioncodelines.streamstories.activity.api;
 import com.amillioncodelines.streamstories.activity.application.WatchHistoryService;
 import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
+import com.amillioncodelines.streamstories.shared.web.Pageables;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 class WatchHistoryController {
 
     /** Both lists go from the most recently watched content: the order is fixed and a {@code sort} is ignored. */
-    private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "lastWatchedAt", "id");
+    private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "lastWatchedAt");
 
     private final WatchHistoryService history;
 
@@ -51,6 +51,6 @@ class WatchHistoryController {
     }
 
     private static Pageable mostRecentFirst(Pageable pageable) {
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), MOST_RECENT_FIRST);
+        return Pageables.fixedOrder(pageable, MOST_RECENT_FIRST);
     }
 }

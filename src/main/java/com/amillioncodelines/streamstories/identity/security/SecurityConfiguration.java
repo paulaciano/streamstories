@@ -5,6 +5,7 @@ import com.amillioncodelines.streamstories.identity.application.SecurityProperti
 import com.amillioncodelines.streamstories.identity.domain.ReactivationRequestRepository;
 import com.amillioncodelines.streamstories.identity.domain.UserRepository;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import jakarta.servlet.DispatcherType;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -51,8 +52,7 @@ class SecurityConfiguration {
         "/v3/api-docs",
         "/v3/api-docs/**",
         "/swagger-ui.html",
-        "/swagger-ui/**",
-        "/error"
+        "/swagger-ui/**"
     };
 
     @Bean
@@ -70,7 +70,11 @@ class SecurityConfiguration {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS)
+                .authorizeHttpRequests(requests -> requests
+                        // An error forwarded by the container keeps its own status, whatever the request method.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS)
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_OPERATIONS_ENDPOINTS)
                         .permitAll()

@@ -21,6 +21,9 @@ spring:
       fail-on-unknown-properties: true
       # 4.5 in an integer field is a client error, not 4.
       accept-float-as-int: false
+    mapper:
+      # "4" (a string) in a numeric field is a client error too.
+      allow-coercion-of-scalars: false
   data:
     web:
       pageable:

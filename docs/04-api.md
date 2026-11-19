@@ -52,6 +52,7 @@ GET /api/v1/catalog?genre=sci-fi&type=MOVIE&q=matrix&page=0&size=20&sort=title,a
 ```
 
 - `size` vale 20 por defecto y como máximo 100: un valor mayor se reduce a 100.
+- Una página que empieza más allá del máximo que admite la base (`page × size` mayor que 2.147.483.647) responde `400`.
 - `sort` solo acepta los campos de una lista permitida.
 - Los endpoints de catálogo aceptan el filtro `availability`, pero solo para `ADMIN`. Un `USER` siempre ve únicamente el contenido disponible.
 
@@ -263,7 +264,8 @@ En el detalle de la serie:
 
 - Los DTO de entrada son `record` con anotaciones de [Bean Validation](https://beanvalidation.org/): `@NotBlank`, `@Size`, `@Positive`, `@Min(1) @Max(5)`, etc.
 - Los campos desconocidos en el JSON devuelven `400`, para que un error de tipeo no pase en silencio.
-- Un número con decimales en un campo entero (por ejemplo, `"score": 4.5`) devuelve `400`, en lugar de truncarse.
+- Un número con decimales en un campo entero (por ejemplo, `"score": 4.5`) o un texto en un campo numérico (`"score": "4"`) devuelve `400`, en lugar de convertirse.
+- Un título de temporada en blanco se guarda como "sin título" (`null`).
 - Las URLs (`videoUrl`, `coverImageUrl`) deben usar `https://`.
 
 ## 4.7 Errores

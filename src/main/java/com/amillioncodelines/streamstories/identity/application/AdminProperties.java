@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public record AdminProperties(
         String email,
         String password,
-        @DefaultValue("Administrador") String displayName) {
+        @DefaultValue("Administrator") String displayName) {
 
     boolean isConfigured() {
         return email != null && !email.isBlank() && password != null && !password.isBlank();

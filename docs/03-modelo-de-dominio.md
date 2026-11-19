@@ -44,6 +44,7 @@ erDiagram
         varchar token_hash UK
         timestamptz expires_at
         timestamptz revoked_at "null si está vigente"
+        varchar revocation_reason "ROTATED | LOGOUT | ACCOUNT_DEACTIVATED | REUSE_DETECTED"
     }
     REACTIVATION_REQUEST {
         uuid id PK
@@ -69,6 +70,7 @@ erDiagram
         varchar availability "AVAILABLE | RETIRED"
         timestamptz created_at
         timestamptz updated_at
+        bigint version "bloqueo optimista"
     }
     MEDIA_ITEM_GENRE {
         uuid media_item_id PK, FK

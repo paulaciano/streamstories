@@ -23,7 +23,7 @@ record MovieRequest(
         @Size(max = 2048) @URL(protocol = "https", message = "must be an https URL")
         String coverImageUrl,
 
-        Set<UUID> genreIds) {
+        Set<@NotNull UUID> genreIds) {
 
     MovieCommand toCommand() {
         return new MovieCommand(title, synopsis, releaseYear, durationSeconds, videoUrl, coverImageUrl, genreIds);

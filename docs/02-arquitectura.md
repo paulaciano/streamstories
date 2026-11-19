@@ -120,7 +120,7 @@ src/main/java/com/amillioncodelines/streamstories/
 
 src/main/resources/
 ├── application.yaml                 ← configuración común
-├── application-dev.yaml             ← perfil de desarrollo local (clave JWT y administrador de desarrollo)
+├── application-dev.yaml             ← perfil de desarrollo local (clave JWT y administrador de desarrollo); no entra en el jar
 ├── application-prod.yaml            ← perfil productivo (logs estructurados)
 ├── db/migration/                    ← migraciones Flyway (V1__…, V2__…, …)
 └── sample-data/catalog.json         ← catálogo de ejemplo que carga el perfil dev
@@ -158,7 +158,7 @@ src/test/java/com/amillioncodelines/streamstories/
 | **Identificadores** | `UUID` en todas las entidades expuestas, preferentemente ordenables en el tiempo (v7). No permiten adivinar recursos ajenos ni revelan volúmenes. |
 | **Fechas** | `Instant` en Java y `timestamptz` en PostgreSQL, siempre en UTC. |
 | **Auditoría** | `createdAt` y `updatedAt` automáticos, con [Spring Data JPA Auditing](https://docs.spring.io/spring-data/jpa/reference/auditing.html). |
-| **Configuración** | `application.yaml` con perfiles: `dev` (lo activa `./mvnw spring-boot:run`), `test` (lo activa Maven al ejecutar los tests) y `prod`. Los secretos se reciben solo por variables de entorno; solo `dev` y `test` traen valores propios, que no sirven fuera de esos entornos. La aplicación empaquetada no activa ningún perfil por defecto, así que sin la clave JWT no arranca. |
+| **Configuración** | `application.yaml` con perfiles: `dev` (lo activa `./mvnw spring-boot:run`), `test` (lo activa Maven al ejecutar los tests) y `prod`. Los secretos se reciben solo por variables de entorno; solo `dev` y `test` traen valores propios, que no sirven fuera de esos entornos. `application-dev.yaml` queda fuera del jar, así que la aplicación empaquetada no puede usar las credenciales de desarrollo aunque se active `dev` por error. Tampoco activa ningún perfil por defecto: sin la clave JWT no arranca. |
 | **Virtual threads** | Activados (`spring.threads.virtual.enabled=true`): dan alta concurrencia con código bloqueante simple ([JEP 444](https://openjdk.org/jeps/444)). |
 | **Logs** | Formato estructurado JSON ([ECS](https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.structured)) en el perfil `prod`. Nunca se loguean contraseñas ni tokens. |
 
@@ -179,10 +179,10 @@ sequenceDiagram
     F->>F: valida firma, expiración, rol y cuenta activa
     F->>C: request autenticado
     C->>C: valida el DTO (positionSeconds ≥ 0)
-    C->>S: recordProgress(userId, episodeId, position)
-    S->>Q: findPlayable(episodeId)
-    Q->>DB: SELECT episodio + serie
-    Q-->>S: PlayableView(id, duration, playable)
+    C->>S: reportEpisode(userId, episodeId, positionSeconds)
+    S->>Q: findPlayable(EPISODE, episodeId)
+    Q->>DB: SELECT episodio + temporada + serie
+    Q-->>S: PlayableContent(kind, id, durationSeconds, playable)
     alt contenido retirado
         S-->>C: ContentUnavailableException
         C-->>U: 409 Conflict (content-unavailable)
@@ -190,7 +190,8 @@ sequenceDiagram
         S->>S: recorta la posición a la duración y calcula completed (≥ 90 %)
         S->>R: upsert (userId, episodeId)
         R->>DB: INSERT … ON CONFLICT DO UPDATE
-        S-->>C: WatchProgressResponse
+        S-->>C: ProgressView
+        C->>C: ProgressResponse.from(view)
         C-->>U: 200 OK + JSON
     end
 ```
