@@ -66,6 +66,7 @@ El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
 - **Progreso de reproducción:** por cada película o episodio que el usuario empezó, se guardan el punto exacto de reproducción, la fecha y si lo terminó. Un contenido se considera **visto** al llegar al 90 % de su duración.
 - **Seguir viendo:** muestra las películas sin terminar, en el punto donde quedaron, y cada serie con el último episodio visto.
 - **Puntuaciones:** el usuario califica películas y series con un entero de **1 a 5**. Cada título muestra además su promedio general, con decimales.
+- **Lista de seguimiento:** el usuario guarda películas y series que quiere ver más adelante, como un "para ver después". Es una lista personal, independiente de lo que ya vio o calificó: guardar un título no lo marca como empezado ni cambia sus recomendaciones. Si un título guardado se retira, sigue en la lista marcado como no disponible.
 
 ### Recomendaciones (`Recommendation`)
 
