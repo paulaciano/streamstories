@@ -1,116 +1,116 @@
-# 5. Seguridad
+# 5. Security
 
-## 5.1 Modelo de autenticación
+## 5.1 Authentication model
 
-La API es **stateless**: el servidor no guarda sesiones. Cada request se autentica con un **access token JWT** en el header `Authorization: Bearer <token>` ([ADR-0005](adr/0005-autenticacion-jwt.md)).
+The API is **stateless**: the server keeps no sessions. Each request is authenticated with a **JWT access token** in the `Authorization: Bearer <token>` header ([ADR-0005](adr/0005-jwt-authentication.md)).
 
-| Token | Formato | Vida útil | Almacenamiento | Uso |
-|-------|---------|-----------|----------------|-----|
-| **Access token** | [JWT](https://datatracker.ietf.org/doc/html/rfc7519) firmado (HS256) | 15 minutos | Solo en el cliente | Autenticar cada request |
-| **Refresh token** | Valor aleatorio opaco de 256 bits | 7 días | En el cliente. En la base solo se guarda su **hash** | Obtener un nuevo access token sin volver a iniciar sesión |
+| Token | Format | Lifetime | Storage | Use |
+|-------|--------|----------|---------|-----|
+| **Access token** | Signed [JWT](https://datatracker.ietf.org/doc/html/rfc7519) (HS256) | 15 minutes | Only on the client | Authenticate each request |
+| **Refresh token** | Opaque random 256-bit value | 7 days | On the client. The database only stores its **hash** | Get a new access token without logging in again |
 
-**Claims del access token:** `sub` (UUID del usuario), `role`, `iat`, `exp`, `iss`. No incluye datos personales.
+**Access token claims:** `sub` (the user's UUID), `role`, `iat`, `exp`, `iss`. It carries no personal data.
 
-**Implementación:** el access token se valida con el soporte estándar de [Spring Security OAuth2 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) (`NimbusJwtDecoder`). No se usan filtros ni librerías de validación propios.
+**Implementation:** the access token is validated with the standard support of [Spring Security OAuth2 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) (`NimbusJwtDecoder`). No custom validation filters or libraries are used.
 
-## 5.2 Flujos
+## 5.2 Flows
 
-### Login y uso de la API
+### Login and API use
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor C as Cliente
+    actor C as Client
     participant A as /auth (identity)
     participant DB as PostgreSQL
-    participant API as Endpoint protegido
+    participant API as Protected endpoint
 
     C->>A: POST /auth/login {email, password}
-    A->>DB: busca el usuario por email
-    A->>A: verifica el hash de la contraseña
-    alt cuenta INACTIVE
+    A->>DB: finds the user by email
+    A->>A: checks the password hash
+    alt INACTIVE account
         A-->>C: 403 account-inactive
-    else cuenta ACTIVE
-        A->>DB: guarda el hash del refresh token
+    else ACTIVE account
+        A->>DB: stores the refresh token hash
         A-->>C: { accessToken, refreshToken, expiresIn }
         C->>API: GET /catalog (Bearer accessToken)
-        API->>API: valida firma, exp, rol y cuenta activa
+        API->>API: checks signature, exp, role and active account
         API-->>C: 200 OK
     end
 ```
 
-### Límite de intentos
+### Login attempt limit
 
-Después de **5 contraseñas incorrectas** para un mismo email en **15 minutos**, el login y la solicitud de reactivación de ese email responden `429 too-many-requests` con un header `Retry-After`, hasta que termine la ventana. Mientras dura el bloqueo, tampoco se acepta la contraseña correcta. Un login correcto antes de llegar al límite reinicia el contador.
+After **5 wrong passwords** for the same email within **15 minutes**, login and reactivation requests for that email answer `429 too-many-requests` with a `Retry-After` header until the window ends. While the block lasts, the right password is not accepted either. A successful login before reaching the limit resets the count.
 
-- **Persistente:** los intentos se guardan en la base (`login_attempt`), así el límite se cumple aunque haya varias instancias de la aplicación.
-- **Sin revelar emails:** se cuentan también los emails que no tienen cuenta. Si solo se bloquearan las cuentas reales, el `429` revelaría qué emails existen. Por eso la tabla no guarda el email sino un HMAC, calculado con la clave del servidor.
-- **Costo aceptado:** cualquiera puede bloquear por 15 minutos el login de un email ajeno. Se prefiere a limitar por IP, que detrás de un proxy no es confiable.
-- Una tarea diaria borra los intentos de ventanas ya terminadas.
+- **Persistent:** attempts are stored in the database (`login_attempt`), so the limit holds even with several application instances.
+- **Without revealing emails:** emails without an account are counted too. If only real accounts were blocked, the `429` would reveal which emails exist. That is also why the table does not store the email but an HMAC of it, computed with the server key.
+- **Accepted cost:** anyone can block the login of someone else's email for 15 minutes. That is preferred to limiting by IP, which is unreliable behind a proxy.
+- A daily task deletes the attempts of finished windows.
 
-### Renovación con rotación
+### Refresh with rotation
 
-1. El cliente envía su refresh token a `POST /auth/refresh`.
-2. El servidor busca su hash. Si el token está vigente, no fue revocado y el usuario sigue `ACTIVE`, **revoca ese token** (motivo: rotado) y emite un par nuevo.
-3. **Detección de reutilización:** si llega un refresh token que ya había sido **rotado**, se asume que pudo ser robado y se revocan **todos** los refresh tokens del usuario.
-4. Un token vencido, o revocado por logout o por desactivación de la cuenta, solo se rechaza con `401`. Si la cuenta está inactiva, el refresh también responde el mismo `401` genérico: `account-inactive` solo lo informan el login y la reactivación, que reciben la contraseña. Así, un cliente viejo que reintenta con un token inválido no cierra las sesiones vigentes del usuario.
+1. The client sends its refresh token to `POST /auth/refresh`.
+2. The server looks up its hash. If the token is unexpired, not revoked and the user is still `ACTIVE`, it **revokes that token** (reason: rotated) and issues a new pair.
+3. **Reuse detection:** if a refresh token arrives that had already been **rotated**, it may have been stolen, so **every** refresh token of the user is revoked.
+4. A token that expired, or that was revoked by a logout or an account deactivation, is only rejected with `401`. If the account is inactive, the refresh also answers the same generic `401`: only login and reactivation, which receive the password, report `account-inactive`. That way an old client retrying with an invalid token does not close the user's active sessions.
 
-Cada revocación guarda su motivo (`ROTATED`, `LOGOUT`, `ACCOUNT_DEACTIVATED`, `REUSE_DETECTED`), que es lo que permite distinguir estos casos.
+Each revocation stores its reason (`ROTATED`, `LOGOUT`, `ACCOUNT_DEACTIVATED`, `REUSE_DETECTED`), which is what tells these cases apart.
 
-Una vez por día se borran los refresh tokens vencidos. Hasta que vencen se conservan aunque estén revocados, porque un token rotado es el que permite detectar la reutilización.
+Expired refresh tokens are deleted once a day. Until they expire they are kept, even if revoked, because a rotated token is what detects reuse.
 
-### Ciclo de vida de una cuenta
+### Account lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ACTIVE : registro
-    ACTIVE --> INACTIVE : el titular la desactiva<br/>o un admin la desactiva
-    INACTIVE --> INACTIVE : el usuario solicita la reactivación<br/>(queda PENDING)
-    INACTIVE --> ACTIVE : un admin aprueba la solicitud<br/>o reactiva la cuenta directamente
+    [*] --> ACTIVE : sign-up
+    ACTIVE --> INACTIVE : the holder deactivates it<br/>or an admin deactivates it
+    INACTIVE --> INACTIVE : the user requests reactivation<br/>(it stays PENDING)
+    INACTIVE --> ACTIVE : an admin approves the request<br/>or reactivates the account directly
 ```
 
-Mientras la cuenta está inactiva:
+While the account is inactive:
 
-- se revocan todos sus refresh tokens;
-- se conservan intactos el historial y las puntuaciones;
-- el login devuelve `403 account-inactive` si las credenciales son correctas;
-- el usuario puede crear una solicitud de reactivación con `POST /auth/reactivation-requests`, enviando sus credenciales. Si ya hay una pendiente, se devuelve esa misma;
-- un `ADMIN` revisa las solicitudes pendientes y las aprueba o las rechaza. Al aprobar una, la cuenta vuelve a `ACTIVE` y el usuario puede iniciar sesión normalmente.
+- all its refresh tokens are revoked;
+- its history and ratings are kept intact;
+- login answers `403 account-inactive` if the credentials are correct;
+- the user can create a reactivation request with `POST /auth/reactivation-requests`, sending their credentials. If one is already pending, that same one is returned;
+- an `ADMIN` reviews the pending requests and approves or rejects them. Once one is approved, the account is `ACTIVE` again and the user can log in as usual.
 
-**Efecto inmediato de los cambios de cuenta.** Un access token emitido antes de desactivar la cuenta sigue siendo criptográficamente válido hasta que vence (como máximo 15 minutos). Para que la desactivación se aplique en el momento, un filtro verifica en cada request que el usuario siga `ACTIVE`. El mismo filtro toma el rol **actual** de la base de datos, no el del token, así que promover o degradar a un usuario también tiene efecto inmediato. Es una consulta liviana por request, que se puede cachear unos segundos si hiciera falta.
+**Account changes apply immediately.** An access token issued before the account was deactivated stays cryptographically valid until it expires (15 minutes at most). For the deactivation to apply at once, a filter checks on each request that the user is still `ACTIVE`. The same filter takes the **current** role from the database, not the one in the token, so promoting or demoting a user also applies immediately. It is a lightweight query per request, which could be cached for a few seconds if needed.
 
-## 5.3 Autorización
+## 5.3 Authorization
 
-| Rol | Permisos |
-|-----|----------|
-| Anónimo | Registrarse, iniciar sesión, refrescar el token, solicitar la reactivación. Consultar `/actuator/health` y la documentación de la API. |
-| `USER` | Leer el catálogo disponible y gestionar **su propia** actividad, puntuaciones y cuenta. |
-| `ADMIN` | Todo lo de `USER`, más gestionar el catálogo, los usuarios y las solicitudes de reactivación. |
+| Role | Permissions |
+|------|-------------|
+| Anonymous | Sign up, log in, refresh the token, request reactivation. Read `/actuator/health` and the API documentation. |
+| `USER` | Read the available catalog and manage **their own** activity, ratings and account. |
+| `ADMIN` | Everything a `USER` can do, plus managing the catalog, the users and the reactivation requests. |
 
-- Las reglas por ruta y método se declaran en el `SecurityFilterChain`. Si aparecen reglas más finas que la ruta (por ejemplo, según el dueño de un recurso), se resuelven en el servicio.
-- **Denegación por defecto:** todo endpoint que no esté listado explícitamente exige autenticación.
-- Los recursos del usuario se resuelven **siempre** a partir del token (`/me/...`). Esto evita el [acceso a datos ajenos manipulando identificadores (IDOR)](https://owasp.org/www-community/attacks/Insecure_Direct_Object_Reference).
-- Una matriz de tests recorre cada endpoint protegido sin token (401) y, si es de administración, con el rol `USER` (403). El camino autorizado de cada endpoint lo cubren los tests de su funcionalidad.
+- Rules by route and method are declared in the `SecurityFilterChain`. Rules finer than the route (for example, by resource owner) are resolved in the service.
+- **Deny by default:** every endpoint not explicitly listed requires authentication.
+- The user's resources are **always** resolved from the token (`/me/...`). That prevents [access to other people's data by manipulating identifiers (IDOR)](https://owasp.org/www-community/attacks/Insecure_Direct_Object_Reference).
+- A test matrix calls each protected endpoint without a token (401) and, for administration endpoints, with the `USER` role (403). The authorized path of each endpoint is covered by its feature's tests.
 
-## 5.4 Prácticas de seguridad
+## 5.4 Security practices
 
-| Área | Práctica |
+| Area | Practice |
 |------|----------|
-| Contraseñas | Hash con BCrypt a través de [`DelegatingPasswordEncoder`](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html), que permite migrar de algoritmo. Longitud: de 8 caracteres a 72 bytes, el máximo que BCrypt procesa. |
-| Secretos | La clave de firma JWT (`STREAMSTORIES_SECURITY_JWT_SECRET`, al menos 32 caracteres) y las credenciales de la base se reciben solo por variables de entorno. Fuera del perfil de desarrollo no hay valores por defecto: si falta la clave, la aplicación no arranca. Los archivos `.env` no se versionan. |
-| Fuerza bruta | Límite de contraseñas incorrectas por email (ver §5.2, "Límite de intentos"). |
-| CORS | Desactivado por defecto. Se habilita con una lista explícita de orígenes si hace falta. |
-| CSRF | Desactivado: la autenticación va por header `Bearer`, no por cookies de sesión ([referencia](https://docs.spring.io/spring-security/reference/features/exploits/csrf.html#csrf-when)). |
-| Actuator | Solo se exponen `health` e `info`. |
-| Headers | Se usan los [headers de seguridad por defecto](https://docs.spring.io/spring-security/reference/features/exploits/headers.html) de Spring Security. |
-| Errores | No incluyen stack traces. El login y la solicitud de reactivación no revelan si un email existe: si no existe, igual se verifica la contraseña contra un hash de relleno, para que el tiempo de respuesta tampoco lo delate. El registro sí informa un email duplicado (`409`), porque es inevitable para que el usuario sepa por qué falla. |
-| Dependencias | [Dependabot](https://docs.github.com/code-security/dependabot) mantiene las actualizaciones y las alertas de vulnerabilidades. |
-| Logs | Nunca se loguean contraseñas, tokens ni el header `Authorization`. |
+| Passwords | Hashed with BCrypt through [`DelegatingPasswordEncoder`](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html), which allows migrating to another algorithm. Length: 8 characters to 72 bytes, the maximum BCrypt processes. |
+| Secrets | The JWT signing key (`STREAMSTORIES_SECURITY_JWT_SECRET`, at least 32 characters) and the database credentials only come from environment variables. Outside the development profile there are no defaults: without the key, the application does not start. `.env` files are not versioned. |
+| Brute force | A limit of wrong passwords per email (see §5.2, "Login attempt limit"). |
+| CORS | Disabled by default. Enabled with an explicit list of origins if needed. |
+| CSRF | Disabled: authentication goes in a `Bearer` header, not in session cookies ([reference](https://docs.spring.io/spring-security/reference/features/exploits/csrf.html#csrf-when)). |
+| Actuator | Only `health` and `info` are exposed. |
+| Headers | Spring Security's [default security headers](https://docs.spring.io/spring-security/reference/features/exploits/headers.html) are used. |
+| Errors | They include no stack traces. Login and reactivation requests do not reveal whether an email exists: when it does not, the password is still checked against a dummy hash, so the response time does not give it away either. Sign-up does report a duplicate email (`409`), because the user needs to know why it fails. |
+| Dependencies | [Dependabot](https://docs.github.com/code-security/dependabot) keeps the updates and the vulnerability alerts. |
+| Logs | Passwords, tokens and the `Authorization` header are never logged. |
 
-Las prácticas siguen las recomendaciones de [OWASP API Security Top 10](https://owasp.org/API-Security/).
+These practices follow the recommendations of the [OWASP API Security Top 10](https://owasp.org/API-Security/).
 
-## 5.5 Administrador inicial
+## 5.5 Initial administrator
 
-El primer `ADMIN` se crea al iniciar la aplicación si todavía no existe ninguno, con el email y la contraseña de las variables de entorno `STREAMSTORIES_ADMIN_EMAIL` y `STREAMSTORIES_ADMIN_PASSWORD`. Si esas variables no están definidas, no se crea y se registra una advertencia en el log. La contraseña sigue las mismas reglas que el registro (de 8 caracteres a 72 bytes) y no puede ser el valor de ejemplo de `.env.example`: si no las cumple, la aplicación no arranca. **No existen credenciales por defecto.**
+The first `ADMIN` is created on startup if none exists yet, with the email and password from the `STREAMSTORIES_ADMIN_EMAIL` and `STREAMSTORIES_ADMIN_PASSWORD` environment variables. If they are not set, no administrator is created and a warning is logged. The password follows the same rules as sign-up (8 characters to 72 bytes) and cannot be the example value of `.env.example`: otherwise, the application does not start. **There are no default credentials.**
 
-La única excepción es el perfil `dev`, que solo activa `./mvnw spring-boot:run`: define un administrador de desarrollo (`admin@streamstories.local`) para explorar la API en una base local. Su configuración no entra en el jar, así que la aplicación empaquetada no puede usarla.
+The only exception is the `dev` profile, which only `./mvnw spring-boot:run` enables: it defines a development administrator (`admin@streamstories.local`) to explore the API on a local database. Its configuration is not in the jar, so the packaged application cannot use it.

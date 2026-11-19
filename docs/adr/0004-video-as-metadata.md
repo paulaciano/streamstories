@@ -1,23 +1,23 @@
-# ADR-0004: El video se gestiona como metadato
+# ADR-0004: Video is handled as metadata
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-Distribuir video implica almacenarlo, transcodificarlo a formatos adaptativos ([HLS](https://datatracker.ietf.org/doc/html/rfc8216) o DASH), servirlo desde una CDN y protegerlo. Es un problema de infraestructura distinto del dominio de este sistema, que es el catálogo, los usuarios y su actividad.
+Delivering video means storing it, transcoding it to adaptive formats ([HLS](https://datatracker.ietf.org/doc/html/rfc8216) or DASH), serving it from a CDN and protecting it. That is an infrastructure problem, separate from this system's domain: the catalog, the users and their activity.
 
-## Decisión
+## Decision
 
-Cada película y cada episodio guarda una `videoUrl` externa y su `durationSeconds`. La API **no sube, procesa ni sirve video**. El cliente reproduce desde la URL e informa la posición con `PUT /me/progress/...`.
+Each movie and each episode stores an external `videoUrl` and its `durationSeconds`. The API **does not upload, process or serve video**. The client plays from the URL and reports the position with `PUT /me/progress/...`.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Servir los archivos desde la API con HTTP Range:** agrega almacenamiento e I/O pesado sin aportar al dominio.
-- **Integrar almacenamiento de objetos con transcodificación:** es un sistema en sí mismo.
+- **Serving the files from the API with HTTP Range:** it adds storage and heavy I/O without adding to the domain.
+- **Integrating object storage with transcoding:** it is a system in itself.
 
-## Consecuencias
+## Consequences
 
-- ✅ El alcance se concentra en catálogo, usuarios y actividad.
-- ✅ El progreso de reproducción se modela como en las plataformas reales: lo informa el cliente.
-- ⚠️ La API confía en la posición que informa el cliente, y solo la valida contra la duración.
+- ✅ The scope stays on the catalog, the users and their activity.
+- ✅ Watch progress is modeled as real platforms do it: the client reports it.
+- ⚠️ The API trusts the position the client reports, and only validates it against the duration.

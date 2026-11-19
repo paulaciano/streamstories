@@ -1,23 +1,23 @@
-# ADR-0008: Documentación en Markdown con diagramas Mermaid
+# ADR-0008: Documentation in Markdown with Mermaid diagrams
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-La documentación tiene que poder leerse cómodamente en GitHub, versionarse junto con el código y editarse en cualquier editor.
+The documentation has to be comfortable to read on GitHub, versioned with the code and editable in any editor.
 
-## Decisión
+## Decision
 
-La documentación se escribe en [Markdown](https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) dentro de `docs/`, con diagramas [Mermaid](https://mermaid.js.org/) embebidos. GitHub [muestra ambos de forma nativa](https://docs.github.com/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams).
+The documentation is written in [Markdown](https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) in `docs/`, with embedded [Mermaid](https://mermaid.js.org/) diagrams. GitHub [renders both natively](https://docs.github.com/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams).
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **HTML:** GitHub muestra el código fuente, no la página. Además, editarlo y revisar sus cambios es incómodo.
-- **PDF o documentos de oficina:** son binarios, sus cambios no se pueden comparar y no se revisan en los PR.
-- **Diagramas como imágenes:** se desactualizan y no se pueden revisar como texto.
+- **HTML:** GitHub shows the source, not the page. Editing it and reviewing its changes is also uncomfortable.
+- **PDF or office documents:** they are binary, their changes cannot be compared, and they are not reviewed in PRs.
+- **Diagrams as images:** they go out of date and cannot be reviewed as text.
 
-## Consecuencias
+## Consequences
 
-- ✅ Se lee en GitHub sin herramientas adicionales y los cambios se revisan como texto.
-- ⚠️ Mermaid ofrece menos control visual que una herramienta de diseño.
+- ✅ It reads on GitHub without extra tools, and changes are reviewed as text.
+- ⚠️ Mermaid gives less visual control than a design tool.

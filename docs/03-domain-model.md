@@ -1,16 +1,16 @@
-# 3. Modelo de dominio y datos
+# 3. Domain model and data
 
-## 3.1 Conceptos clave
+## 3.1 Key concepts
 
-El dominio tiene dos jerarquías que se cruzan:
+The domain has two hierarchies that cross each other:
 
 ```mermaid
 flowchart LR
-    subgraph T["Título (MediaItem)<br/>se explora, clasifica y califica"]
+    subgraph T["Title (MediaItem)<br/>browsed, classified and rated"]
         Movie
         Series
     end
-    subgraph P["Contenido reproducible (Playable)<br/>tiene duración y progreso"]
+    subgraph P["Playable content (Playable)<br/>has a duration and progress"]
         Movie2[Movie]
         Episode
     end
@@ -18,19 +18,19 @@ flowchart LR
     Movie -.- Movie2
 ```
 
-- **`Movie`** es título y además contenido reproducible.
-- **`Series`** es título, pero no se reproduce directamente.
-- **`Episode`** es reproducible, pero no es título: no tiene géneros ni puntuación propios, porque los hereda de su serie.
+- **`Movie`** is a title and also playable content.
+- **`Series`** is a title, but it is not played directly.
+- **`Episode`** is playable, but it is not a title: it has no genres or ratings of its own, because they belong to its series.
 
-De esta distinción salen dos reglas: **los géneros y las puntuaciones se asignan a títulos** y **el progreso se registra sobre contenido reproducible**.
+Two rules follow from this distinction: **genres and ratings belong to titles**, and **progress is recorded on playable content**.
 
-## 3.2 Diagrama entidad-relación
+## 3.2 Entity-relationship diagram
 
 ```mermaid
 erDiagram
     APP_USER {
         uuid id PK
-        varchar email UK "único, en minúsculas"
+        varchar email UK "unique, lower case"
         varchar password_hash
         varchar display_name
         varchar role "USER | ADMIN"
@@ -43,7 +43,7 @@ erDiagram
         uuid user_id FK
         varchar token_hash UK
         timestamptz expires_at
-        timestamptz revoked_at "null si está vigente"
+        timestamptz revoked_at "null while valid"
         varchar revocation_reason "ROTATED | LOGOUT | ACCOUNT_DEACTIVATED | REUSE_DETECTED"
     }
     REACTIVATION_REQUEST {
@@ -52,17 +52,17 @@ erDiagram
         varchar status "PENDING | APPROVED | REJECTED"
         timestamptz requested_at
         timestamptz resolved_at
-        uuid resolved_by FK "admin que resolvió"
+        uuid resolved_by FK "admin who resolved it"
     }
 
     GENRE {
         uuid id PK
         varchar name UK
-        varchar slug UK "p. ej. sci-fi"
+        varchar slug UK "e.g. sci-fi"
     }
     MEDIA_ITEM {
         uuid id PK
-        varchar type "MOVIE | SERIES (discriminador)"
+        varchar type "MOVIE | SERIES (discriminator)"
         varchar title
         text synopsis
         smallint release_year
@@ -70,7 +70,7 @@ erDiagram
         varchar availability "AVAILABLE | RETIRED"
         timestamptz created_at
         timestamptz updated_at
-        bigint version "bloqueo optimista"
+        bigint version "optimistic locking"
     }
     MEDIA_ITEM_GENRE {
         uuid media_item_id PK, FK
@@ -80,8 +80,8 @@ erDiagram
         uuid id PK, FK "= media_item.id"
         int duration_seconds
         varchar video_url
-        uuid franchise_id FK "opcional"
-        smallint franchise_order "posición en la saga"
+        uuid franchise_id FK "optional"
+        smallint franchise_order "position in the franchise"
     }
     SERIES {
         uuid id PK, FK "= media_item.id"
@@ -89,14 +89,14 @@ erDiagram
     SEASON {
         uuid id PK
         uuid series_id FK
-        smallint number "único por serie"
-        varchar title "opcional"
+        smallint number "unique per series"
+        varchar title "optional"
         varchar availability "AVAILABLE | RETIRED"
     }
     EPISODE {
         uuid id PK
         uuid season_id FK
-        smallint number "único por temporada"
+        smallint number "unique per season"
         varchar title
         text synopsis
         int duration_seconds
@@ -106,9 +106,9 @@ erDiagram
     WATCH_PROGRESS {
         uuid id PK
         uuid user_id FK
-        uuid movie_id FK "exactamente uno de los dos"
-        uuid episode_id FK "exactamente uno de los dos"
-        uuid series_id FK "la serie del episodio"
+        uuid movie_id FK "exactly one of the two"
+        uuid episode_id FK "exactly one of the two"
+        uuid series_id FK "the series of the episode"
         int position_seconds
         boolean completed
         timestamptz last_watched_at
@@ -117,7 +117,7 @@ erDiagram
         uuid id PK
         uuid user_id FK
         uuid media_item_id FK
-        smallint score "entero 1..5"
+        smallint score "integer 1..5"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -134,142 +134,143 @@ erDiagram
         timestamptz added_at
     }
 
-    APP_USER ||--o{ REFRESH_TOKEN : "tiene"
-    APP_USER ||--o{ REACTIVATION_REQUEST : "solicita"
-    MEDIA_ITEM ||--o| MOVIE : "es una"
-    MEDIA_ITEM ||--o| SERIES : "es una"
-    MEDIA_ITEM ||--o{ MEDIA_ITEM_GENRE : "clasificado en"
-    GENRE ||--o{ MEDIA_ITEM_GENRE : "clasifica"
-    SERIES ||--o{ SEASON : "tiene"
-    SEASON ||--o{ EPISODE : "tiene"
-    APP_USER ||--o{ WATCH_PROGRESS : "registra"
-    MOVIE ||--o{ WATCH_PROGRESS : "progreso de"
-    EPISODE ||--o{ WATCH_PROGRESS : "progreso de"
-    APP_USER ||--o{ RATING : "califica"
-    MEDIA_ITEM ||--o{ RATING : "recibe"
-    FRANCHISE ||--o{ MOVIE : "agrupa"
-    APP_USER ||--o{ WATCHLIST_ENTRY : "guarda"
-    MEDIA_ITEM ||--o{ WATCHLIST_ENTRY : "guardado en"
+    APP_USER ||--o{ REFRESH_TOKEN : "has"
+    APP_USER ||--o{ REACTIVATION_REQUEST : "requests"
+    MEDIA_ITEM ||--o| MOVIE : "is a"
+    MEDIA_ITEM ||--o| SERIES : "is a"
+    MEDIA_ITEM ||--o{ MEDIA_ITEM_GENRE : "classified in"
+    GENRE ||--o{ MEDIA_ITEM_GENRE : "classifies"
+    SERIES ||--o{ SEASON : "has"
+    SEASON ||--o{ EPISODE : "has"
+    APP_USER ||--o{ WATCH_PROGRESS : "records"
+    MOVIE ||--o{ WATCH_PROGRESS : "progress of"
+    EPISODE ||--o{ WATCH_PROGRESS : "progress of"
+    APP_USER ||--o{ RATING : "rates"
+    MEDIA_ITEM ||--o{ RATING : "receives"
+    FRANCHISE ||--o{ MOVIE : "groups"
+    APP_USER ||--o{ WATCHLIST_ENTRY : "saves"
+    MEDIA_ITEM ||--o{ WATCHLIST_ENTRY : "saved in"
 ```
 
+The `login_attempt` table, which counts failed password checks, is described in [Security](05-security.md#login-attempt-limit).
 
-## 3.3 Decisiones de modelado
+## 3.3 Modeling decisions
 
-### Herencia de `MediaItem`: estrategia `JOINED`
+### `MediaItem` inheritance: the `JOINED` strategy
 
-`MediaItem` es una entidad abstracta con dos subclases (`Movie` y `Series`), mapeada con [herencia `JOINED`](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#entity-inheritance-joined-table) ([ADR-0007](adr/0007-modelo-herencia-y-progreso.md)).
+`MediaItem` is an abstract entity with two subclasses (`Movie` and `Series`), mapped with [`JOINED` inheritance](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#entity-inheritance-joined-table) ([ADR-0007](adr/0007-inheritance-and-progress-model.md)).
 
-- La tabla `media_item` contiene lo común. Así, una única consulta devuelve el **catálogo mixto**: películas y series juntas, filtradas por género.
-- Cada subtipo tiene su propia tabla, y sus columnas obligatorias pueden declararse `NOT NULL`.
+- The `media_item` table holds what they have in common. That way a single query returns the **mixed catalog**: movies and series together, filtered by genre.
+- Each subtype has its own table, and its required columns can be declared `NOT NULL`.
 
-### Progreso: dos FK excluyentes
+### Progress: two exclusive foreign keys
 
-`WATCH_PROGRESS` apunta a una película **o** a un episodio mediante dos columnas FK que admiten nulos, con esta restricción:
+`WATCH_PROGRESS` points to a movie **or** an episode through two nullable foreign key columns, with this constraint:
 
 ```sql
 CHECK ((movie_id IS NOT NULL) <> (episode_id IS NOT NULL))
 ```
 
-Además hay dos índices únicos parciales: `(user_id, movie_id)` y `(user_id, episode_id)`. Con este diseño, la base de datos garantiza la integridad referencial, algo que una referencia polimórfica (`content_type` + `content_id`) no permite.
+There are also two partial unique indexes: `(user_id, movie_id)` and `(user_id, episode_id)`. With this design the database guarantees referential integrity, which a polymorphic reference (`content_type` + `content_id`) cannot.
 
-El progreso de un episodio guarda también su serie (`series_id`). Es un dato derivado, porque un episodio nunca cambia de temporada. Sirve para que "Seguir viendo" encuentre el último episodio de cada serie con una sola consulta sobre la tabla del propio módulo `activity`, sin cargar todo lo que el usuario vio.
+The progress of an episode also stores its series (`series_id`). It is derived data, because an episode never changes season. It lets "continue watching" find the last episode of each series with a single query on the `activity` module's own table, without loading everything the user watched.
 
-### Disponibilidad en lugar de borrado
+### Availability instead of deletion
 
-El contenido que deja de ofrecerse no se borra: cambia su `availability` a `RETIRED` ([ADR-0011](adr/0011-retiro-por-temporada.md)). La disponibilidad está en `media_item` (películas y series completas) y en `season` (temporadas completas). Los episodios no se retiran sueltos.
+Content that stops being offered is not deleted: its `availability` changes to `RETIRED` ([ADR-0011](adr/0011-retiring-by-season.md)). Availability lives in `media_item` (whole movies and series) and in `season` (whole seasons). Episodes are not retired one by one.
 
-Un contenido es **reproducible** si:
-- **Película:** su `availability` es `AVAILABLE`.
-- **Episodio:** su temporada **y** su serie tienen `availability = AVAILABLE`.
+Content is **playable** when:
+- **Movie:** its `availability` is `AVAILABLE`.
+- **Episode:** its season **and** its series have `availability = AVAILABLE`.
 
-### Orden alfabético en español
+### Spanish alphabetical order
 
-Los títulos, los nombres de género y los títulos de temporadas y episodios usan la collation ICU `es-x-icu`. Así, el orden respeta los acentos y la ñ ("Nube", "Ñandú", "Órbita") sin depender del locale del sistema operativo donde corre PostgreSQL.
+Titles, genre names and season and episode titles use the ICU collation `es-x-icu`. The catalog content is in Spanish, so the order respects accents and ñ ("Nube", "Ñandú", "Órbita") without depending on the locale of the operating system that runs PostgreSQL.
 
-### Usuario y cuenta son la misma entidad
+### User and account are the same entity
 
-Como una cuenta corresponde a un único espectador, `User` y `Account` son la misma entidad, con su `AccountStatus`. La tabla se llama `app_user` porque `user` es una palabra reservada en PostgreSQL.
+Since an account belongs to a single viewer, `User` and `Account` are the same entity, with its `AccountStatus`. The table is called `app_user` because `user` is a reserved word in PostgreSQL.
 
-### La reactivación es una entidad propia
+### Reactivation is an entity of its own
 
-Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su resolución (quién la resolvió y cuándo). Así queda trazabilidad de cada pedido y de cada decisión ([ADR-0010](adr/0010-reactivacion-aprobada-por-admin.md)). Un índice único parcial garantiza que cada usuario tenga como máximo **una** solicitud `PENDING`.
+Each reactivation request is a `REACTIVATION_REQUEST` row with its resolution (who resolved it and when). That keeps a trace of every request and every decision ([ADR-0010](adr/0010-admin-approved-reactivation.md)). A partial unique index guarantees that each user has at most **one** `PENDING` request.
 
-### Un rol por usuario
+### One role per user
 
-`role` es una columna enum (`USER` | `ADMIN`) y no una relación muchos a muchos: con dos roles excluyentes alcanza.
+`role` is an enum column (`USER` | `ADMIN`), not a many-to-many relation: two exclusive roles are enough.
 
-## 3.4 Reglas de negocio
+## 3.4 Business rules
 
-### Catálogo
+### Catalog
 
-| # | Regla | Dónde se garantiza |
-|---|-------|--------------------|
-| C1 | Todo título tiene `title` no vacío. | Bean Validation + `NOT NULL` |
-| C2 | Un título tiene de 0 a N géneros, sin repetir. | PK compuesta en `media_item_genre` |
-| C3 | El nombre y el slug de un género son únicos, sin distinguir mayúsculas. | Índice único sobre `lower(name)` |
-| C4 | El número de temporada es único dentro de su serie y va de 1 a 999. | `UNIQUE (series_id, number)` + `CHECK` |
-| C5 | El número de episodio es único dentro de su temporada y va de 1 a 999. | `UNIQUE (season_id, number)` + `CHECK` |
-| C6 | Películas y episodios tienen una duración mayor que 0. | `CHECK` + validación |
-| C7 | Una serie puede existir sin temporadas, por ejemplo mientras se carga. | — |
-| C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |
-| C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID (una temporada, por su número), indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
-| C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
-| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada (progreso, puntuaciones o lista de seguimiento), por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
-| C12 | Un contenido retirado puede volver a estar disponible. | — |
-| C13 | El nombre de una saga es único, sin distinguir mayúsculas. | Índice único sobre `lower(name)` |
-| C14 | Una saga agrupa solo películas, en el orden en que se cargan, y cada película pertenece como máximo a una saga. | FK en `movie` + `UNIQUE (franchise_id, franchise_order)` |
-| C15 | Borrar una saga no borra sus películas: solo las desvincula. Un `USER` no ve las películas retiradas de una saga; un `ADMIN` ve todas. | Servicio |
+| # | Rule | Enforced by |
+|---|------|-------------|
+| C1 | Every title has a non-empty `title`. | Bean Validation + `NOT NULL` |
+| C2 | A title has 0 to N genres, without repeats. | Composite PK in `media_item_genre` |
+| C3 | A genre's name and slug are unique, ignoring case. | Unique index on `lower(name)` |
+| C4 | A season number is unique within its series and goes from 1 to 999. | `UNIQUE (series_id, number)` + `CHECK` |
+| C5 | An episode number is unique within its season and goes from 1 to 999. | `UNIQUE (season_id, number)` + `CHECK` |
+| C6 | Movies and episodes have a duration greater than 0. | `CHECK` + validation |
+| C7 | A series can exist without seasons, for example while it is being loaded. | — |
+| C8 | A genre with titles cannot be deleted. | Service → `409 Conflict` |
+| C9 | Retired content does not appear in the listings, searches or series details that a `USER` sees, but it is still reachable by id (a season, by its number), showing its `availability`. An `ADMIN` sees everything. | Service queries |
+| C10 | Retiring content does not change or delete any related data: progress, ratings or watchlists. | Design (no cascades) |
+| C11 | Only content without any related activity (progress, ratings or watchlist entries) can be **deleted**, for example content loaded by mistake. Content with activity must be retired. A season can only be deleted if it has no episodes. | Service → `409 Conflict`, through the `ContentActivity` interface |
+| C12 | Retired content can be made available again. | — |
+| C13 | A franchise's name is unique, ignoring case. | Unique index on `lower(name)` |
+| C14 | A franchise only groups movies, in the order they are given, and each movie belongs to one franchise at most. | FK in `movie` + `UNIQUE (franchise_id, franchise_order)` |
+| C15 | Deleting a franchise does not delete its movies: it only releases them. A `USER` does not see the retired movies of a franchise; an `ADMIN` sees them all. | Service |
 
-### Identidad
+### Identity
 
-| # | Regla |
-|---|-------|
-| I1 | El email es único y se guarda normalizado (minúsculas y sin espacios). |
-| I2 | La contraseña se guarda solo como hash. Nunca se devuelve ni se loguea. |
-| I3 | Una cuenta `INACTIVE` no puede autenticarse ni usar la API. Lo único que puede hacer es solicitar la reactivación. |
-| I4 | La cuenta la puede desactivar su titular o un `ADMIN`. Al desactivarla se revocan todos sus refresh tokens. |
-| I5 | **Solo un `ADMIN` puede reactivar una cuenta**: aprobando una solicitud o directamente desde la gestión de usuarios. |
-| I6 | Un usuario inactivo tiene como máximo una solicitud de reactivación `PENDING`. Si vuelve a pedirla, se reutiliza la existente. |
-| I7 | Desactivar una cuenta **no borra** progreso ni puntuaciones. Al reactivarla, todo vuelve a estar disponible. |
-| I8 | El registro siempre crea un `USER`. Un `ADMIN` se crea al iniciar el sistema o por promoción de otro admin. |
-| I9 | No se puede desactivar ni degradar al último `ADMIN` activo. |
-| I10 | Después de 5 contraseñas incorrectas para un email en 15 minutos, el login y la reactivación de ese email se bloquean hasta que termine la ventana, exista o no la cuenta. |
+| # | Rule |
+|---|------|
+| I1 | The email is unique and stored normalized (lower case, without spaces). |
+| I2 | The password is only stored as a hash. It is never returned or logged. |
+| I3 | An `INACTIVE` account cannot authenticate or use the API. The only thing it can do is request reactivation. |
+| I4 | The account holder or an `ADMIN` can deactivate an account. Deactivating it revokes all its refresh tokens. |
+| I5 | **Only an `ADMIN` can reactivate an account**: by approving a request, or directly from user administration. |
+| I6 | An inactive user has at most one `PENDING` reactivation request. Asking again returns the existing one. |
+| I7 | Deactivating an account **does not delete** its progress or ratings. Once reactivated, everything is available again. |
+| I8 | Sign-up always creates a `USER`. An `ADMIN` is created on startup or promoted by another admin. |
+| I9 | The last active `ADMIN` cannot be deactivated or demoted. |
+| I10 | After 5 wrong passwords for an email within 15 minutes, login and reactivation for that email are blocked until the window ends, whether the account exists or not. |
 
-### Actividad
+### Activity
 
-| # | Regla |
-|---|-------|
-| A1 | Hay un único registro de progreso por (usuario, contenido reproducible). Cada reporte de progreso actualiza ese registro (upsert) y su fecha. |
-| A2 | `0 ≤ position_seconds ≤ duration_seconds`. Un valor mayor se recorta a la duración. Si después cambia la duración del contenido, el progreso guardado no se recalcula: lo completo sigue completo y la posición se recorta al mostrarla. |
-| A3 | Siempre se guarda la **posición exacta** reportada, y solo la última: no se guarda cada vez que se vio. El contenido se marca `completed` cuando la posición alcanza el **90 %** de la duración, y sigue completo aunque luego se reporte una posición menor (por ejemplo, al volver a verlo). |
-| A4 | No se puede reportar progreso sobre contenido no reproducible (retirado): la API responde `409`. El progreso ya guardado se conserva. |
-| A5 | **Seguir viendo**, para películas: aparecen las no completadas, con su posición guardada. |
-| A6 | **Seguir viendo**, para series: aparece **una entrada por serie**, con el episodio visto más recientemente, su posición y si está completo. No se calcula el episodio siguiente: desde la serie, el usuario elige por dónde seguir. La serie deja de aparecer cuando ese episodio está completo y no hay otro episodio reproducible después, porque era el último o porque las temporadas siguientes están retiradas. |
-| A7 | Seguir viendo está ordenado por `last_watched_at` descendente y excluye las películas y las series retiradas. Una serie disponible aparece aunque el último episodio visto esté en una temporada retirada. |
-| A8 | El historial muestra todo el progreso registrado: una fila por película o episodio, con la fecha de la última vez que se vio. Incluye el contenido retirado, que aparece marcado como tal. |
-| A9 | Hay una única puntuación por (usuario, título), y volver a puntuar la reemplaza. |
-| A10 | La puntuación es un **entero de 1 a 5**. Solo se califican títulos (películas y series), nunca episodios sueltos. |
-| A11 | El promedio de un título se calcula sobre todas sus puntuaciones, incluidas las de cuentas desactivadas, y se expresa con un decimal (por ejemplo, `4.3`). |
-| A12 | Se puede calificar un título que no se vio. Sobre un título retirado no se puede crear ni cambiar una puntuación, pero sí borrarla. Las existentes se conservan y siguen contando para el promedio. |
-| A13 | La lista de seguimiento tiene películas y series, nunca episodios sueltos, cada una como máximo una vez. Volver a agregar un título no cambia su fecha. |
-| A14 | No se puede agregar un título retirado. Uno que se retira después de agregarlo sigue en la lista, marcado como no disponible, y se puede quitar. |
+| # | Rule |
+|---|------|
+| A1 | There is a single progress record per (user, playable content). Each progress report updates that record (upsert) and its date. |
+| A2 | `0 ≤ position_seconds ≤ duration_seconds`. A larger value is capped at the duration. If the duration changes later, the saved progress is not recalculated: completed content stays completed, and the position is capped when shown. |
+| A3 | The **exact position** reported is always saved, and only the latest one: each viewing is not stored. Content is marked `completed` when the position reaches **90%** of the duration, and stays completed even if a shorter position is reported later (for example, when watching it again). |
+| A4 | Progress cannot be reported on content that is not playable (retired): the API answers `409`. Progress already saved is kept. |
+| A5 | **Continue watching**, for movies: the ones not completed appear, with their saved position. |
+| A6 | **Continue watching**, for series: there is **one entry per series**, with the most recently watched episode, its position and whether it is completed. The next episode is not calculated: from the series, the user chooses where to continue. The series leaves once that episode is completed and no playable episode follows it, because it was the last one or because the following seasons are retired. |
+| A7 | Continue watching is ordered by `last_watched_at` descending and leaves out retired movies and series. An available series appears even if its last watched episode is in a retired season. |
+| A8 | The history shows all recorded progress: one row per movie or episode, with the date it was last watched. It includes retired content, marked as such. |
+| A9 | There is a single rating per (user, title), and rating again replaces it. |
+| A10 | A rating is an **integer from 1 to 5**. Only titles (movies and series) are rated, never single episodes. |
+| A11 | A title's average is computed over all its ratings, including those of deactivated accounts, and shown with one decimal (for example, `4.3`). |
+| A12 | A title can be rated without being watched. A rating cannot be created or changed on a retired title, but it can be deleted. Existing ratings are kept and still count for the average. |
+| A13 | The watchlist holds movies and series, never single episodes, each at most once. Adding a title again does not change its date. |
+| A14 | A retired title cannot be added. One retired after being added stays in the list, marked as not available, and can be removed. |
 
-## 3.5 Motor de recomendaciones (fase 3)
+## 3.5 Recommendation engine (phase 3)
 
-Es un enfoque **basado en contenido**: simple, explicable y testeable.
+It is a **content-based** approach: simple, explainable and testable.
 
-1. **Señales del usuario.** Cada título que el usuario calificó o terminó da una señal:
-   - puntuación de 4 o 5 → +2; puntuación de 1 o 2 → −2; una puntuación de 3 es neutra;
-   - título completado → +1. Una película cuenta si está completa, y una serie si tiene al menos un episodio completo. Cada título cuenta una sola vez, sin importar cuántos episodios se vieron.
+1. **User signals.** Each title the user rated or completed gives a signal:
+   - a score of 4 or 5 → +2; a score of 1 or 2 → −2; a score of 3 is neutral;
+   - completed title → +1. A movie counts when it is completed, and a series when at least one of its episodes is completed. Each title counts once, however many episodes were watched.
 
-   Los títulos retirados también dan señales: siguen mostrando lo que le gusta al usuario, aunque nunca se recomienden.
-2. **Afinidad por género.** La señal de cada título se suma a cada uno de sus géneros.
-3. **Candidatos.** Títulos **disponibles**, con al menos un género de afinidad positiva, que el usuario **no calificó ni empezó a ver**. Una serie cuenta como empezada si tiene progreso en cualquiera de sus episodios.
-4. **Puntaje del candidato.** Suma de las afinidades de sus géneros, más **0,5** si es del formato preferido: película o serie, el que tenga más títulos con señal positiva. Si hay empate entre los formatos, no hay ajuste.
-5. **Orden.** Por puntaje; a igual puntaje, por el promedio de la comunidad (los títulos sin puntuaciones van al final), después por cantidad de puntuaciones, después los más recientes y, por último, por título.
-6. **Sin candidatos.** Un usuario nuevo, o uno sin afinidades positivas o que ya vio todo lo de sus géneros, recibe los títulos disponibles que no vio ni calificó, ordenados por el promedio de la comunidad, la cantidad de puntuaciones y los más recientes. Así la lista nunca queda vacía si hay catálogo.
-7. **Explicabilidad.** Cada recomendación incluye su motivo (`reason`), en inglés como el resto de la API:
-   - con candidatos, los dos géneros del título que más le gustan al usuario: `"Because you like Drama and Comedia"`;
-   - sin candidatos, `"Top rated by other viewers"`, o `"New on StreamStories"` si el título no tiene puntuaciones.
+   Retired titles give signals too: they still show what the user likes, even though they are never recommended.
+2. **Genre affinity.** Each title's signal is added to each of its genres.
+3. **Candidates.** **Available** titles with at least one genre of positive affinity, that the user **neither rated nor started**. A series counts as started if any of its episodes has progress.
+4. **Candidate score.** The sum of the affinities of its genres, plus **0.5** if it is in the favorite format: movie or series, whichever has more titles with a positive signal. If both formats tie, there is no adjustment.
+5. **Order.** By score; on equal scores, by community average (titles without ratings go last), then by number of ratings, then newest first and, finally, by title.
+6. **No candidates.** A new user, or one without positive affinities, or one who has seen everything in their genres, gets the available titles they have neither watched nor rated, ordered by community average, number of ratings and newest first. That way the list is never empty while there is a catalog.
+7. **Explainability.** Each recommendation includes its reason (`reason`):
+   - with candidates, the two genres of the title that the user likes most: `"Because you like Drama and Comedia"`;
+   - without candidates, `"Top rated by other viewers"`, or `"New on StreamStories"` if the title has no ratings.
 
-El cálculo se hace al momento de la consulta, sin caché ([ADR-0012](adr/0012-rendimiento-sin-cache.md)).
+It is computed on each request, without a cache ([ADR-0012](adr/0012-measured-performance-without-cache.md)).

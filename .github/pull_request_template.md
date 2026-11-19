@@ -1,18 +1,19 @@
-## Qué cambia
+## What changes
 
-<!-- Resumen breve del cambio. -->
+<!-- A short summary of the change. -->
 
-## Por qué
+## Why
 
-<!-- Motivo o problema que resuelve. Enlazá la historia de la hoja de ruta o el ADR si corresponde. -->
+<!-- The reason or the problem it solves. Link the roadmap story or the ADR if there is one. -->
 
-## Cómo probarlo
+## How to test it
 
-<!-- Pasos para verificar el cambio. -->
+<!-- Steps to verify the change. -->
 
 ## Checklist
 
-- [ ] Hay tests que cubren el comportamiento nuevo (incluida la autorización si hay endpoints).
-- [ ] Los cambios de esquema están en una migración nueva.
-- [ ] La documentación de `docs/` refleja el cambio (y hay un ADR si se tomó una decisión importante).
-- [ ] `CHANGELOG.md` actualizado.
+- [ ] There are tests that cover the new behavior (including authorization, if there are endpoints).
+- [ ] Schema changes are in a new migration.
+- [ ] The documentation in `docs/` reflects the change (and there is an ADR if an important decision was made).
+- [ ] If the README changed, both `README.md` and `README.es.md` are updated.
+- [ ] `CHANGELOG.md` is updated.

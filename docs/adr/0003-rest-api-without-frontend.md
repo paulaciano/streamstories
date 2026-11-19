@@ -1,23 +1,23 @@
-# ADR-0003: El sistema es exclusivamente una API REST
+# ADR-0003: The system is only a REST API
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-Hay que definir si el sistema incluye una interfaz de usuario o si se limita al backend.
+It must be decided whether the system includes a user interface or is limited to the backend.
 
-## Decisión
+## Decision
 
-StreamStories es **solo el backend**: una API REST JSON documentada con [OpenAPI](https://www.openapis.org/) y explorable desde Swagger UI. No incluye interfaz gráfica. Si alguna vez hiciera falta un frontend, sería un proyecto independiente que consuma esta API.
+StreamStories is **only the backend**: a JSON REST API documented with [OpenAPI](https://www.openapis.org/) and explorable from Swagger UI. It has no graphical interface. If a frontend were ever needed, it would be a separate project that uses this API.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Renderizado en el servidor (Thymeleaf):** acopla la presentación al backend y no ofrece una API reutilizable por otros clientes.
-- **API + frontend en el mismo repositorio:** amplía el alcance y mezcla dos ciclos de vida distintos.
+- **Server-side rendering (Thymeleaf):** it couples the presentation to the backend and offers no API that other clients can reuse.
+- **API + frontend in the same repository:** it widens the scope and mixes two different life cycles.
 
-## Consecuencias
+## Consequences
 
-- ✅ La API es el contrato del producto y puede consumirla cualquier cliente.
-- ✅ Swagger UI permite probar todos los endpoints sin herramientas adicionales.
-- ⚠️ Si se suma un frontend, habrá que configurar CORS.
+- ✅ The API is the product's contract, and any client can use it.
+- ✅ Swagger UI lets anyone try every endpoint without extra tools.
+- ⚠️ If a frontend is added, CORS will have to be configured.

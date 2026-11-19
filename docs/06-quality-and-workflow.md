@@ -1,84 +1,84 @@
-# 6. Calidad y flujo de trabajo
+# 6. Quality and workflow
 
-## 6.1 Estrategia de testing
+## 6.1 Testing strategy
 
-La base de la estrategia son los **tests de integración contra un PostgreSQL real** a través de [Testcontainers](https://testcontainers.com/). Así se prueban el mismo SQL, las mismas constraints y la misma cadena de seguridad que corren en producción. Los tests unitarios cubren las reglas que no necesitan Spring, y los tests de *slice* se reservan para piezas que conviene aislar.
+The strategy rests on **integration tests against a real PostgreSQL** through [Testcontainers](https://testcontainers.com/). They test the same SQL, the same constraints and the same security chain that run in production. Unit tests cover the rules that do not need Spring, and *slice* tests are kept for pieces worth isolating.
 
 ```mermaid
 flowchart TB
-    e2e["<b>Integración</b><br/>@SpringBootTest + MockMvcTester + Testcontainers<br/>contrato HTTP, autorización, constraints, flujos completos"]
-    unit["<b>Unitarios</b><br/>JUnit 6 + AssertJ + Mockito<br/>reglas de dominio y servicios"]
-    slice["<b>Slice</b><br/>@WebMvcTest<br/>mapeo de errores aislado"]
-    arch["<b>Arquitectura</b><br/>Spring Modulith: límites entre módulos"]
+    e2e["<b>Integration</b><br/>@SpringBootTest + MockMvcTester + Testcontainers<br/>HTTP contract, authorization, constraints, full flows"]
+    unit["<b>Unit</b><br/>JUnit 6 + AssertJ + Mockito<br/>domain rules and services"]
+    slice["<b>Slice</b><br/>@WebMvcTest<br/>isolated error mapping"]
+    arch["<b>Architecture</b><br/>Spring Modulith: module boundaries"]
     e2e --- unit
     e2e --- slice
     arch -.- unit
 ```
 
-| Nivel | Qué prueba | Ejemplo |
-|-------|------------|---------|
-| Integración | Contrato HTTP, validación, **autorización** de cada endpoint, constraints de la base y flujos completos | `POST /movies` sin token → 401, con `USER` → 403, inválido → 400 con `ProblemDetail`. Desactivar → solicitar la reactivación → un admin aprueba → se puede volver a iniciar sesión. |
-| Unitario | Reglas de negocio puras, sin Spring | "un episodio no se puede reproducir si su temporada o su serie están retiradas", "solo reutilizar un refresh token rotado revoca toda la familia" |
-| [`@WebMvcTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.spring-mvc-tests) | Piezas web que conviene probar aisladas | Cada tipo de excepción se convierte en el `ProblemDetail` correcto |
-| Arquitectura | Que no haya ciclos ni accesos a internos de otro módulo | [`ApplicationModules.of(...).verify()`](https://docs.spring.io/spring-modulith/reference/verification.html) |
+| Level | What it tests | Example |
+|-------|---------------|---------|
+| Integration | HTTP contract, validation, **authorization** of each endpoint, database constraints and full flows | `POST /movies` without a token → 401, as a `USER` → 403, invalid → 400 with a `ProblemDetail`. Deactivate → request reactivation → an admin approves → logging in works again. |
+| Unit | Pure business rules, without Spring | "an episode cannot be played if its season or its series is retired", "only reusing a rotated refresh token revokes the whole family", each rule of the recommendation engine |
+| [`@WebMvcTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.spring-mvc-tests) | Web pieces worth testing in isolation | Each kind of exception becomes the right `ProblemDetail` |
+| Architecture | No cycles and no access to another module's internals | [`ApplicationModules.of(...).verify()`](https://docs.spring.io/spring-modulith/reference/verification.html) |
 
-Las consultas complejas que lleguen en fases siguientes (por ejemplo, "Seguir viendo" o las recomendaciones) pueden sumar tests [`@DataJpaTest`](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html#testing.spring-boot-applications.autoconfigured-spring-data-jpa) específicos.
+**Conventions:**
 
-**Convenciones:**
+- Each test name describes a behavior: `shouldKeepExactPositionWhenMarkingAsCompleted()`.
+- *Given / when / then* structure.
+- One PostgreSQL container shared by the whole suite, with [`@ServiceConnection`](https://docs.spring.io/spring-boot/reference/testing/testcontainers.html#testing.testcontainers.service-connections). Since the tests share the database, each one creates its own data (for example, users with unique emails) and does not rely on an empty initial state.
+- Coverage is measured with [JaCoCo](https://www.jacoco.org/jacoco/) and published in CI. It is a guide, not a goal: the aim is to test behavior, not to cover lines.
 
-- El nombre de cada test describe un comportamiento: `shouldKeepExactPositionWhenMarkingAsCompleted()`.
-- Estructura *given / when / then*.
-- Un contenedor de PostgreSQL compartido por toda la suite, con [`@ServiceConnection`](https://docs.spring.io/spring-boot/reference/testing/testcontainers.html#testing.testcontainers.service-connections). Como los tests comparten la base, cada uno crea sus propios datos (por ejemplo, usuarios con emails únicos) y no depende de un estado inicial vacío.
-- La cobertura se mide con [JaCoCo](https://www.jacoco.org/jacoco/) y se publica en CI. Es una guía, no una meta: lo que se busca es probar comportamiento, no cubrir líneas.
+## 6.2 Style and static analysis
 
-## 6.2 Estilo y análisis estático
+| Tool | Purpose |
+|------|---------|
+| [Spotless](https://github.com/diffplug/spotless) + [Palantir Java Format](https://github.com/palantir/palantir-java-format) | Automatic, uniform formatting. CI fails if the code is not formatted. |
+| [EditorConfig](https://editorconfig.org/) | Consistent indentation and line endings in any editor. |
+| [Dependabot](https://docs.github.com/code-security/dependabot) | Weekly updates of the Maven, GitHub Actions and Docker Compose dependencies. It only proposes versions published at least 14 days ago ([`cooldown`](https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference#cooldown-)), to leave time for a broken or compromised release to be noticed. |
 
-| Herramienta | Propósito |
-|-------------|-----------|
-| [Spotless](https://github.com/diffplug/spotless) + [Palantir Java Format](https://github.com/palantir/palantir-java-format) | Formato automático y uniforme. La CI falla si el código no está formateado. |
-| [EditorConfig](https://editorconfig.org/) | Indentación y finales de línea consistentes en cualquier editor. |
-| [Dependabot](https://docs.github.com/code-security/dependabot) | Actualización semanal de las dependencias de Maven, GitHub Actions y Docker Compose. Solo propone versiones publicadas hace al menos 14 días ([`cooldown`](https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference#cooldown-)), para dar tiempo a que se detecte una versión defectuosa o comprometida. |
+Code comments are kept to the ones that explain a non-obvious reason: business rules live in these documents, not in the code.
 
-## 6.3 Integración continua
+## 6.3 Continuous integration
 
-[GitHub Actions](https://docs.github.com/actions) ejecuta el pipeline en cada push a `main` y en cada pull request:
+[GitHub Actions](https://docs.github.com/actions) runs the pipeline on every push to `main` and on every pull request:
 
 ```mermaid
 flowchart LR
-    A[checkout] --> B[JDK 25 + caché Maven] --> B2[descarga de dependencias<br/>con reintentos] --> C[verificación de formato] --> D["build + tests<br/>(unitarios, integración, Modulith)"] --> E[reporte de cobertura]
+    A[checkout] --> B[JDK 25 + Maven cache] --> B2[dependency download<br/>with retries] --> C[format check] --> D["build + tests<br/>(unit, integration, Modulith)"] --> E[coverage report]
 ```
 
-- La rama `main` está protegida: solo acepta merges desde un PR con la CI en verde.
-- Las actions se fijan por SHA de commit (con la versión como comentario), y Dependabot las mantiene actualizadas. Así se evita que un tag modificado ejecute código inesperado ([referencia](https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)).
-- Las dependencias se descargan en un paso propio que reintenta hasta tres veces, para que una falla momentánea de Maven Central no haga fallar el build.
-- Los tests de integración usan la misma imagen de PostgreSQL que `compose.yaml`, que la lee de ahí. Así, cuando Dependabot la actualiza, cambia en los dos lugares.
-- Los tests de integración necesitan Docker. Si no está disponible en la máquina local, se omiten (`@Testcontainers(disabledWithoutDocker = true)`); en la CI siempre corren.
+- The `main` branch is protected: it only accepts merges from a PR with a green CI.
+- Actions are pinned by commit SHA (with the version as a comment), and Dependabot keeps them updated. That prevents a moved tag from running unexpected code ([reference](https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)).
+- Dependencies are downloaded in a step of their own that retries up to three times, so a momentary Maven Central failure does not fail the build.
+- Integration tests use the same PostgreSQL image as `compose.yaml`, which they read from there. That way, when Dependabot updates it, it changes in both places.
+- Integration tests need Docker. If it is not available on the local machine, they are skipped (`@Testcontainers(disabledWithoutDocker = true)`); in CI they always run.
 
-## 6.4 Flujo de trabajo con Git
+## 6.4 Git workflow
 
-| Aspecto | Convención |
-|---------|------------|
-| Ramas | [Trunk-based](https://trunkbaseddevelopment.com/): `main` siempre está desplegable y cada tarea usa una rama corta (`feat/catalog-movies`, `fix/…`, `docs/…`). |
-| Commits | [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/), en inglés: `feat(catalog): add movie CRUD endpoints`. |
-| Pull requests | Un PR por funcionalidad. La descripción explica **qué** cambia, **por qué** y cómo probarlo. Si hay una decisión importante, se incluye su ADR. |
-| Merge | *Squash merge*, para que el historial de `main` sea legible. |
-| Versionado | [SemVer](https://semver.org/lang/es/), con un tag al cerrar cada fase. |
-| Changelog | [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). |
-| Licencia | [MIT](https://opensource.org/license/mit). |
+| Aspect | Convention |
+|--------|------------|
+| Branches | [Trunk-based](https://trunkbaseddevelopment.com/): `main` is always deployable and each task uses a short-lived branch (`feat/catalog-movies`, `fix/…`, `docs/…`). |
+| Commits | [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/): `feat(catalog): add movie CRUD endpoints`. |
+| Pull requests | One PR per feature. The description explains **what** changes, **why** and how to test it. An important decision comes with its ADR. |
+| Merge | *Squash merge*, so the history of `main` stays readable. |
+| Versioning | [SemVer](https://semver.org/), with a tag when each phase closes. |
+| Changelog | [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). |
+| License | [MIT](https://opensource.org/license/mit). |
 
-## 6.5 Definición de terminado
+## 6.5 Definition of done
 
-Una funcionalidad está terminada cuando:
+A feature is done when:
 
-- [ ] cumple los criterios de aceptación de la [hoja de ruta](07-hoja-de-ruta.md);
-- [ ] tiene tests en los niveles que corresponden, incluidos los de autorización si expone endpoints;
-- [ ] la CI está en verde (formato, tests, verificación de módulos);
-- [ ] los cambios de esquema están en una migración nueva, porque las migraciones ya aplicadas no se editan nunca;
-- [ ] los endpoints están bien descritos en OpenAPI;
-- [ ] la documentación refleja el cambio y, si se tomó una decisión importante, hay un ADR;
-- [ ] el PR fue revisado.
+- [ ] it meets the acceptance criteria of the [roadmap](07-roadmap.md);
+- [ ] it has tests at the right levels, including authorization tests if it exposes endpoints;
+- [ ] CI is green (format, tests, module verification);
+- [ ] schema changes are in a new migration, because migrations already applied are never edited;
+- [ ] the endpoints are well described in OpenAPI;
+- [ ] the documentation reflects the change (in English, and in both READMEs if the README changes) and, if an important decision was made, there is an ADR;
+- [ ] the PR was reviewed.
 
-## 6.6 Estructura del repositorio
+## 6.6 Repository structure
 
 ```
 streamstories/
@@ -86,16 +86,17 @@ streamstories/
 │   ├── workflows/ci.yml
 │   ├── dependabot.yml
 │   └── pull_request_template.md
-├── docs/                    ← esta documentación
+├── docs/                    ← this documentation
 ├── src/
 ├── .editorconfig
-├── .env.example             ← variables de entorno necesarias, sin valores reales
-├── .gitattributes           ← finales de línea de mvnw (LF) y mvnw.cmd (CRLF)
+├── .env.example             ← required environment variables, without real values
+├── .gitattributes           ← line endings of mvnw (LF) and mvnw.cmd (CRLF)
 ├── .gitignore
 ├── CHANGELOG.md
-├── compose.yaml             ← PostgreSQL para desarrollo local
+├── compose.yaml             ← PostgreSQL for local development
 ├── LICENSE
 ├── mvnw, mvnw.cmd, .mvn/    ← Maven Wrapper
 ├── pom.xml
-└── README.md                ← presentación, cómo ejecutar y enlace a docs/
+├── README.md                ← overview, how to run it and link to docs/
+└── README.es.md             ← the same README, in Spanish
 ```

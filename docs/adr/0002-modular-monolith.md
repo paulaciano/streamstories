@@ -1,25 +1,25 @@
-# ADR-0002: Monolito modular organizado por funcionalidad
+# ADR-0002: A modular monolith organized by feature
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-El dominio tiene áreas bien diferenciadas (identidad, catálogo, actividad y recomendaciones) que crecen por fases. El equipo es chico y no hay necesidad de escalar partes del sistema por separado. Se buscan límites claros entre áreas sin pagar el costo operativo de un sistema distribuido.
+The domain has well-defined areas (identity, catalog, activity and recommendations) that grow in phases. The team is small and there is no need to scale parts of the system separately. The goal is clear boundaries between areas, without paying the operational cost of a distributed system.
 
-## Decisión
+## Decision
 
-El sistema es **una sola aplicación Spring Boot** dividida en módulos por funcionalidad (`identity`, `catalog`, `activity`, `recommendation`, `shared`), cada uno con las subcapas `api`, `application` y `domain`. Los módulos se comunican solo a través de la API pública de cada uno, y [Spring Modulith](https://docs.spring.io/spring-modulith/reference/) verifica esas reglas en un test que corre en CI.
+The system is **a single Spring Boot application** split into modules by feature (`identity`, `catalog`, `activity`, `recommendation`, `shared`), each with the `api`, `application` and `domain` sublayers. Modules only talk through each other's public API, and [Spring Modulith](https://docs.spring.io/spring-modulith/reference/) checks those rules in a test that runs in CI.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Microservicios:** agregan red, consistencia eventual, múltiples despliegues y observabilidad distribuida, sin un problema que lo justifique.
-- **Paquetes por capa** (`controllers/`, `services/`, `repositories/`): no impiden dependencias arbitrarias y se pierde la cohesión de cada funcionalidad.
-- **Módulos Maven separados:** imponen límites más fuertes, pero complican el build. Spring Modulith logra límites verificables con menos fricción.
+- **Microservices:** they add networking, eventual consistency, several deployments and distributed observability, without a problem that justifies them.
+- **Packages by layer** (`controllers/`, `services/`, `repositories/`): they do not prevent arbitrary dependencies, and each feature loses its cohesion.
+- **Separate Maven modules:** they enforce stronger boundaries, but complicate the build. Spring Modulith achieves verifiable boundaries with less friction.
 
-## Consecuencias
+## Consequences
 
-- ✅ Un único despliegue, una base de datos y transacciones locales simples.
-- ✅ Los límites se verifican automáticamente.
-- ✅ Un módulo puede extraerse como servicio más adelante sin rediseñar el dominio.
-- ⚠️ Hay que diseñar con cuidado la API pública de cada módulo.
+- ✅ A single deployment, one database and simple local transactions.
+- ✅ Boundaries are checked automatically.
+- ✅ A module can be extracted as a service later without redesigning the domain.
+- ⚠️ Each module's public API must be designed with care.

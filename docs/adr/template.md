@@ -1,22 +1,22 @@
-# ADR-XXXX: Título corto en forma de decisión
+# ADR-XXXX: Short title phrased as a decision
 
-- **Estado:** Propuesto | Aceptado | Reemplazado por ADR-YYYY | Descartado
-- **Fecha:** AAAA-MM-DD
+- **Status:** Proposed | Accepted | Superseded by ADR-YYYY | Rejected
+- **Date:** YYYY-MM-DD
 
-## Contexto
+## Context
 
-¿Qué situación o problema obliga a tomar una decisión? ¿Qué restricciones hay?
+What situation or problem forces a decision? What are the constraints?
 
-## Decisión
+## Decision
 
-Qué se decidió, en voz activa: "Se usa…".
+What was decided, in the active voice: "We use…".
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Alternativa A:** por qué se descartó.
-- **Alternativa B:** por qué se descartó.
+- **Alternative A:** why it was discarded.
+- **Alternative B:** why it was discarded.
 
-## Consecuencias
+## Consequences
 
-- ✅ Positivas.
-- ⚠️ Negativas o costos que se aceptan.
+- ✅ Positive ones.
+- ⚠️ Negative ones, or costs that are accepted.

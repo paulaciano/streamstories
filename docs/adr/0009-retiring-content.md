@@ -1,33 +1,33 @@
-# ADR-0009: El contenido se retira, no se borra
+# ADR-0009: Content is retired, not deleted
 
-- **Estado:** Reemplazado por [ADR-0011](0011-retiro-por-temporada.md)
-- **Fecha:** 2026-11-16
+- **Status:** Superseded by [ADR-0011](0011-retiring-by-season.md)
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-El catálogo cambia: hay películas, series o episodios que dejan de ofrecerse. Pero tienen actividad asociada (progreso, historial, puntuaciones), y esa actividad es del usuario y alimenta los promedios y las recomendaciones.
+The catalog changes: some movies, series or episodes stop being offered. But they have related activity (progress, history, ratings), and that activity belongs to the users and feeds the averages and the recommendations.
 
-## Decisión
+## Decision
 
-El contenido tiene una **disponibilidad** (`availability`): `AVAILABLE` o `RETIRED`. Está en `media_item` (películas y series completas) y en `episode`.
+Content has an **availability** (`availability`): `AVAILABLE` or `RETIRED`. It lives in `media_item` (whole movies and series) and in `episode`.
 
-El contenido retirado:
-- no se puede reproducir: reportar progreso devuelve `409 content-unavailable`;
-- no se recomienda y no aparece en los listados ni en las búsquedas del catálogo;
-- no admite puntuaciones nuevas;
-- sigue accesible por ID y aparece en el historial del usuario, marcado como retirado;
-- conserva todos sus datos y su actividad asociada.
+Retired content:
+- cannot be played: reporting progress returns `409 content-unavailable`;
+- is not recommended and does not appear in the catalog listings or searches;
+- accepts no new ratings;
+- is still reachable by id and appears in the user's history, marked as retired;
+- keeps all its data and its related activity.
 
-Un episodio es reproducible solo si tanto él como su serie están disponibles. El borrado físico solo se permite sobre contenido sin ninguna actividad, por ejemplo uno cargado por error.
+An episode is playable only if both it and its series are available. Physical deletion is only allowed for content without any activity, for example content loaded by mistake.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Borrado en cascada:** destruye la actividad de los usuarios.
-- **Borrado lógico genérico (`deleted_at`) con filtros globales:** oculta el registro en todas partes, incluido el historial, y mezcla "retirado" con "eliminado".
-- **Ventanas de disponibilidad con fechas:** es más flexible, pero excede las necesidades actuales. Puede incorporarse más adelante.
+- **Cascading deletion:** it destroys the users' activity.
+- **Generic soft delete (`deleted_at`) with global filters:** it hides the row everywhere, including the history, and mixes "retired" with "deleted".
+- **Availability windows with dates:** more flexible, but beyond current needs. It can be added later.
 
-## Consecuencias
+## Consequences
 
-- ✅ No se pierde actividad de los usuarios.
-- ✅ Un contenido retirado puede volver a ofrecerse.
-- ⚠️ Las consultas del catálogo, "Seguir viendo" y las recomendaciones tienen que filtrar por disponibilidad. Se cubre con tests.
+- ✅ No user activity is lost.
+- ✅ Retired content can be offered again.
+- ⚠️ The catalog queries, "continue watching" and the recommendations must filter by availability. Tests cover it.

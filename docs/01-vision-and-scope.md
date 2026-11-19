@@ -1,101 +1,101 @@
-# 1. Visión y alcance
+# 1. Vision and scope
 
-## 1.1 Propósito
+## 1.1 Purpose
 
-StreamStories es el backend de una plataforma de catálogo audiovisual bajo demanda. Permite explorar películas y series, registrar lo que cada persona mira, calificar títulos y recibir recomendaciones personalizadas.
+StreamStories is the backend of an on-demand streaming catalog. It lets people browse movies and series, records what each person watches, lets them rate titles and gives them personalized recommendations.
 
-## 1.2 Estrategia: construcción progresiva
+## 1.2 Strategy: incremental delivery
 
-El sistema se construye de forma iterativa. Empieza con un **MVP** y suma funcionalidad en fases (ver [Hoja de ruta](07-hoja-de-ruta.md)). Esta documentación describe la **visión completa**, para que la arquitectura del MVP soporte las fases siguientes sin reescribir la base.
+The system is built iteratively. It starts with an **MVP** and adds features in phases (see the [Roadmap](07-roadmap.md)). This documentation describes the **full vision**, so the MVP architecture supports the later phases without rewriting its foundations.
 
-Cada fase debe terminar con un sistema desplegable, probado y documentado.
+Each phase must end with a deployable, tested and documented system.
 
-## 1.3 Alcance
+## 1.3 Scope
 
-| ✅ Dentro del alcance | ❌ Fuera del alcance |
-|----------------------|---------------------|
-| API REST documentada con OpenAPI | Interfaz gráfica, web o móvil ([ADR-0003](adr/0003-api-rest-sin-frontend.md)) |
-| Gestión del catálogo: películas, series, temporadas, episodios y géneros | Subir, almacenar, transcodificar o servir video ([ADR-0004](adr/0004-video-como-metadato.md)) |
-| Retiro de contenido sin perder la actividad asociada | Pagos, planes y facturación de suscripciones |
-| Registro e inicio de sesión, roles USER y ADMIN, desactivación de cuentas y reactivación aprobada por un admin | Perfiles múltiples por cuenta (una cuenta corresponde a un espectador) |
-| Historial y progreso de reproducción ("Seguir viendo") | Notificaciones por email |
-| Puntuaciones de películas y series | DRM, control parental y restricciones por región |
-| Recomendaciones basadas en géneros y puntuaciones | Recomendaciones basadas en machine learning |
-| Lista de seguimiento (`Watchlist`) y sagas (`Franchise`) | Funciones sociales: amigos, comentarios, compartir |
+| ✅ In scope | ❌ Out of scope |
+|------------|----------------|
+| REST API documented with OpenAPI | Graphical, web or mobile interface ([ADR-0003](adr/0003-rest-api-without-frontend.md)) |
+| Catalog management: movies, series, seasons, episodes and genres | Uploading, storing, transcoding or serving video ([ADR-0004](adr/0004-video-as-metadata.md)) |
+| Retiring content without losing the related activity | Payments, plans and subscription billing |
+| Sign-up and login, USER and ADMIN roles, account deactivation and reactivation approved by an admin | Several profiles per account (one account is one viewer) |
+| Watch history and progress ("continue watching") | Email notifications |
+| Ratings of movies and series | DRM, parental controls and regional restrictions |
+| Recommendations based on genres and ratings | Machine learning recommendations |
+| Watchlist (`Watchlist`) and franchises (`Franchise`) | Social features: friends, comments, sharing |
 
-## 1.4 Actores
+## 1.4 Actors
 
-| Actor | Descripción | Rol técnico |
-|-------|-------------|-------------|
-| **Visitante** | Persona sin sesión. Puede registrarse, iniciar sesión o pedir la reactivación de su cuenta. | — (anónimo) |
-| **Espectador** | Persona con cuenta activa. Explora el catálogo, mira contenido, califica y recibe recomendaciones. | `USER` |
-| **Administrador** | Gestiona el catálogo, las cuentas y las solicitudes de reactivación. | `ADMIN` |
-| **Cliente de la API** | Cualquier aplicación que consuma la API. | — |
+| Actor | Description | Technical role |
+|-------|-------------|----------------|
+| **Visitor** | A person without a session. Can sign up, log in or request the reactivation of their account. | — (anonymous) |
+| **Viewer** | A person with an active account. Browses the catalog, watches content, rates titles and gets recommendations. | `USER` |
+| **Administrator** | Manages the catalog, the accounts and the reactivation requests. | `ADMIN` |
+| **API client** | Any application that uses the API. | — |
 
-## 1.5 Capacidades
+## 1.5 Capabilities
 
-### Catálogo (`Catalog`)
+### Catalog (`Catalog`)
 
-El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
+The catalog holds the titles (`MediaItem`), which come in two formats:
 
-- **Película (`Movie`):** contenido de una sola entrega. Se gestiona y se reproduce como una unidad independiente.
-- **Serie (`Series`):** contenido episódico con jerarquía:
-  - **Serie (`Series`):** la obra completa, con título, sinopsis e imagen de portada.
-  - **Temporada (`Season`):** agrupación numerada dentro de una serie.
-  - **Episodio (`Episode`):** la unidad reproducible dentro de una temporada.
+- **Movie (`Movie`):** content released as a single piece. It is managed and played as an independent unit.
+- **Series (`Series`):** episodic content with a hierarchy:
+  - **Series (`Series`):** the whole work, with a title, a synopsis and a cover image.
+  - **Season (`Season`):** a numbered group within a series.
+  - **Episode (`Episode`):** the playable unit within a season.
 
-**Géneros (`Genre`):** cada película o serie puede tener **varios** géneros a la vez (por ejemplo, *Action* + *Sci-Fi*). Al explorar un género aparecen películas y series juntas.
+**Genres (`Genre`):** each movie or series can have **several** genres at once (for example, *Action* + *Sci-Fi*). Browsing a genre shows movies and series together.
 
-**Sagas (`Franchise`):** agrupan películas relacionadas en un orden, por ejemplo una trilogía en el orden en que conviene verla. Una película pertenece como máximo a una saga. La saga solo ordena: borrarla no borra sus películas, y quien no es administrador no ve las películas retiradas dentro de ella.
+**Franchises (`Franchise`):** group related movies in an order, for example a trilogy in the order it is best watched. A movie belongs to one franchise at most. A franchise only orders movies: deleting it does not delete them, and non-administrators do not see the retired movies within it.
 
-**Retiro de contenido:** el contenido no se borra cuando deja de ofrecerse. Se **retira**: ya no se puede reproducir ni se recomienda, pero se conservan todos sus datos y la actividad de los usuarios asociada a él. Se retiran películas, series o temporadas completas ([ADR-0011](adr/0011-retiro-por-temporada.md)).
+**Retiring content:** content is not deleted when it stops being offered. It is **retired**: it can no longer be played or recommended, but all its data and the related user activity are kept. Movies, series or whole seasons are retired ([ADR-0011](adr/0011-retiring-by-season.md)).
 
-> **Dos conceptos de diseño.** El sistema distingue:
-> - **Título** (`MediaItem`): lo que se *explora, clasifica y califica*. Es una película o una serie.
-> - **Contenido reproducible** (`Playable`): lo que se *mira* y tiene duración y progreso. Es una película o un episodio.
+> **Two design concepts.** The system distinguishes:
+> - **Title** (`MediaItem`): what is *browsed, classified and rated*. It is a movie or a series.
+> - **Playable content** (`Playable`): what is *watched*, with a duration and progress. It is a movie or an episode.
 >
-> Una película cumple los dos roles. Una serie solo es título y un episodio solo es reproducible. Ver [Modelo de dominio](03-modelo-de-dominio.md).
+> A movie plays both roles. A series is only a title, and an episode is only playable. See the [Domain model](03-domain-model.md).
 
-### Usuarios y cuentas (`Identity`)
+### Users and accounts (`Identity`)
 
-- Cada usuario tiene un **estado de cuenta** (`AccountStatus`): `ACTIVE` o `INACTIVE`.
-- Tras varias contraseñas incorrectas seguidas, el inicio de sesión de ese email se bloquea por unos minutos, para frenar los intentos de adivinar contraseñas ([Seguridad](05-seguridad.md)).
-- Una cuenta inactiva **no puede usar la plataforma**, pero **conserva íntegros** su historial y sus puntuaciones.
-- La cuenta la puede desactivar su titular o un administrador. **Solo un administrador puede reactivarla.** El usuario puede pedir la reactivación con sus credenciales, y un admin la aprueba o la rechaza ([ADR-0010](adr/0010-reactivacion-aprobada-por-admin.md)).
-- Cada usuario tiene un rol: `USER` o `ADMIN`.
+- Each user has an **account status** (`AccountStatus`): `ACTIVE` or `INACTIVE`.
+- After several wrong passwords in a row, logging in with that email is blocked for a few minutes, to slow down password guessing ([Security](05-security.md)).
+- An inactive account **cannot use the platform**, but its history and ratings are **kept intact**.
+- The account holder or an administrator can deactivate an account. **Only an administrator can reactivate it.** The user can request the reactivation with their credentials, and an admin approves or rejects it ([ADR-0010](adr/0010-admin-approved-reactivation.md)).
+- Each user has one role: `USER` or `ADMIN`.
 
-### Actividad (`Activity`)
+### Activity (`Activity`)
 
-- **Progreso de reproducción:** por cada película o episodio que el usuario empezó, se guardan el punto exacto de reproducción, la fecha y si lo terminó. Un contenido se considera **visto** al llegar al 90 % de su duración.
-- **Seguir viendo:** muestra las películas sin terminar, en el punto donde quedaron, y cada serie con el último episodio visto.
-- **Puntuaciones:** el usuario califica películas y series con un entero de **1 a 5**. Cada título muestra además su promedio general, con decimales.
-- **Lista de seguimiento:** el usuario guarda películas y series que quiere ver más adelante, como un "para ver después". Es una lista personal, independiente de lo que ya vio o calificó: guardar un título no lo marca como empezado ni cambia sus recomendaciones. Si un título guardado se retira, sigue en la lista marcado como no disponible.
+- **Watch progress:** for each movie or episode the user started, the exact playback position, the date and whether it was finished are saved. Content counts as **watched** once it reaches 90% of its duration.
+- **Continue watching:** shows the unfinished movies, where they were left, and each series with its last watched episode.
+- **Ratings:** the user rates movies and series with an integer from **1 to 5**. Each title also shows its overall average, with decimals.
+- **Watchlist:** the user saves movies and series to watch later. It is a personal list, independent of what they watched or rated: saving a title does not mark it as started or change their recommendations. If a saved title is retired, it stays in the list, marked as not available.
 
-### Recomendaciones (`Recommendation`)
+### Recommendations (`Recommendation`)
 
-Un motor que cruza el historial y las puntuaciones del usuario para detectar sus preferencias (géneros recurrentes, formato preferido) y sugerir títulos disponibles que todavía no vio.
+An engine that combines the user's history and ratings to find their preferences (recurring genres, favorite format) and suggest available titles they have not watched yet.
 
-## 1.6 Requisitos no funcionales
+## 1.6 Non-functional requirements
 
-| Atributo | Objetivo |
-|----------|----------|
-| **Mantenibilidad** | Código organizado por funcionalidad, con límites entre módulos verificados automáticamente. |
-| **Calidad** | Tests automatizados en todos los niveles y CI obligatoria en cada pull request. |
-| **Seguridad** | Contraseñas con hash, tokens de vida corta, ningún secreto en el repositorio y autorización por rol en el servidor. |
-| **Documentación** | API autodocumentada con OpenAPI, decisiones registradas en ADR y un README que permite levantar el proyecto en minutos. |
-| **Reproducibilidad** | Esquema de base de datos versionado con migraciones y entorno local levantado con Docker Compose. |
-| **Observabilidad** | Endpoint de salud y logs estructurados. |
+| Attribute | Goal |
+|-----------|------|
+| **Maintainability** | Code organized by feature, with module boundaries checked automatically. |
+| **Quality** | Automated tests at every level, and CI required on every pull request. |
+| **Security** | Hashed passwords, short-lived tokens, no secrets in the repository and role-based authorization on the server. |
+| **Documentation** | A self-documented API with OpenAPI, decisions recorded as ADRs and a README that gets the project running in minutes. |
+| **Reproducibility** | A database schema versioned with migrations, and a local environment started with Docker Compose. |
+| **Observability** | A health endpoint and structured logs. |
 
-## 1.7 Glosario
+## 1.7 Glossary
 
-| Término | Identificador | Significado |
-|---------|---------------|-------------|
-| Título | `MediaItem` | Película o serie. Se explora, se clasifica por género y se califica. |
-| Contenido reproducible | `Playable` | Película o episodio. Tiene duración y progreso. |
-| Disponibilidad | `Availability` | `AVAILABLE` o `RETIRED`. El contenido retirado no se reproduce ni se recomienda. |
-| Progreso de reproducción | `WatchProgress` | Hasta dónde vio un usuario un contenido reproducible, y cuándo. |
-| Historial | `WatchHistory` | Los registros de progreso de un usuario, ordenados por fecha. |
-| Puntuación | `Rating` | Calificación entera de 1 a 5 que un usuario da a un título. |
-| Solicitud de reactivación | `ReactivationRequest` | Pedido de un usuario inactivo para volver a usar la plataforma. Lo resuelve un admin. |
-| Lista de seguimiento | `Watchlist` | Títulos que el usuario guarda para ver después. |
-| Saga | `Franchise` | Agrupación ordenada de películas relacionadas. |
+| Term | Identifier | Meaning |
+|------|------------|---------|
+| Title | `MediaItem` | A movie or a series. It is browsed, classified by genre and rated. |
+| Playable content | `Playable` | A movie or an episode. It has a duration and progress. |
+| Availability | `Availability` | `AVAILABLE` or `RETIRED`. Retired content is neither played nor recommended. |
+| Watch progress | `WatchProgress` | How far, and when, a user watched a piece of playable content. |
+| History | `WatchHistory` | A user's progress records, ordered by date. |
+| Rating | `Rating` | An integer score from 1 to 5 that a user gives to a title. |
+| Reactivation request | `ReactivationRequest` | An inactive user's request to use the platform again. An admin resolves it. |
+| Watchlist | `Watchlist` | Titles the user saves to watch later. |
+| Franchise | `Franchise` | An ordered group of related movies. |

@@ -1,29 +1,29 @@
-# ADR-0005: Autenticación stateless con JWT y refresh tokens rotativos
+# ADR-0005: Stateless authentication with JWT and rotating refresh tokens
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-La API la consumen clientes HTTP de distintos tipos y no hay sesión de navegador. Hace falta autenticación sin estado en el servidor, con roles `USER` y `ADMIN`, y una cuenta desactivada tiene que perder el acceso de inmediato.
+Different kinds of HTTP clients use the API, and there is no browser session. It needs authentication without server-side state, with `USER` and `ADMIN` roles, and a deactivated account has to lose access immediately.
 
-## Decisión
+## Decision
 
-- **Access token JWT** firmado con HS256, de 15 minutos de vida, validado con [Spring Security OAuth2 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html).
-- **Refresh token** opaco, de 7 días de vida. En la base solo se guarda su hash. **Se rota** en cada uso y, si se detecta su reutilización, se revocan todos los tokens del usuario.
-- Un filtro verifica en cada request que el usuario siga `ACTIVE`.
-- Un rol por usuario. Cada cuenta corresponde a un espectador, sin perfiles múltiples.
+- **JWT access token** signed with HS256, with a 15-minute lifetime, validated with [Spring Security OAuth2 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html).
+- Opaque **refresh token** with a 7-day lifetime. The database only stores its hash. It **is rotated** on each use and, if its reuse is detected, all the user's tokens are revoked.
+- A filter checks on each request that the user is still `ACTIVE`.
+- One role per user. Each account is one viewer, without several profiles.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Sesión con cookie:** requiere protección CSRF y estado en el servidor, y es menos natural para una API.
-- **Un único access token de larga duración:** no se puede revocar y es un riesgo si se filtra.
-- **Proveedor de identidad externo** ([Keycloak](https://www.keycloak.org/), Auth0): agrega infraestructura que hoy no hace falta. Como el resource server es estándar, migrar más adelante solo implicaría cambiar el emisor de los tokens.
-- **RS256 (clave asimétrica):** aporta valor cuando terceros validan los tokens. Con un único emisor y verificador alcanza con HS256.
+- **Cookie session:** it needs CSRF protection and server-side state, and is less natural for an API.
+- **A single long-lived access token:** it cannot be revoked, and it is a risk if it leaks.
+- **External identity provider** ([Keycloak](https://www.keycloak.org/), Auth0): it adds infrastructure that is not needed today. Since the resource server is standard, migrating later would only mean changing who issues the tokens.
+- **RS256 (asymmetric key):** it adds value when third parties validate the tokens. With a single issuer and verifier, HS256 is enough.
 
-## Consecuencias
+## Consequences
 
-- ✅ Es un estándar de la industria, fácil de testear y sin sesión en el servidor.
-- ✅ La desactivación tiene efecto inmediato.
-- ⚠️ Verificar el estado de la cuenta agrega una consulta liviana por request, que se puede cachear.
-- ⚠️ El secreto HS256 debe tener al menos 256 bits y llegar solo por variable de entorno.
+- ✅ It is an industry standard, easy to test and without a server session.
+- ✅ Deactivation applies immediately.
+- ⚠️ Checking the account status adds a lightweight query per request, which can be cached.
+- ⚠️ The HS256 secret must have at least 256 bits and only come from an environment variable.

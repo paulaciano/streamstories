@@ -1,44 +1,44 @@
-# ADR-0011: El contenido se retira por película, serie o temporada completa
+# ADR-0011: Content is retired by whole movie, series or season
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-17
-- **Reemplaza a:** [ADR-0009](0009-retiro-de-contenido.md)
+- **Status:** Accepted
+- **Date:** 2026-11-17
+- **Supersedes:** [ADR-0009](0009-retiring-content.md)
 
-## Contexto
+## Context
 
-El catálogo cambia: hay películas, series o temporadas que dejan de ofrecerse. Pero tienen actividad asociada (progreso, historial, puntuaciones), y esa actividad es del usuario y alimenta los promedios y las recomendaciones.
+The catalog changes: some movies, series or seasons stop being offered. But they have related activity (progress, history, ratings), and that activity belongs to the users and feeds the averages and the recommendations.
 
-[ADR-0009](0009-retiro-de-contenido.md) permitía retirar películas, series y **episodios sueltos**. En la práctica, el contenido de una serie se deja de ofrecer por temporadas completas, igual que se licencia. Retirar episodios individuales deja temporadas con huecos, que el usuario no puede ver completas.
+[ADR-0009](0009-retiring-content.md) allowed retiring movies, series and **single episodes**. In practice, a series' content stops being offered by whole seasons, the same way it is licensed. Retiring individual episodes leaves seasons with gaps, which the user cannot watch complete.
 
-## Decisión
+## Decision
 
-El contenido tiene una **disponibilidad** (`availability`): `AVAILABLE` o `RETIRED`. Está en:
-- `media_item`, para películas y series completas;
-- `season`, para temporadas completas.
+Content has an **availability** (`availability`): `AVAILABLE` or `RETIRED`. It lives in:
+- `media_item`, for whole movies and series;
+- `season`, for whole seasons.
 
-Los episodios **no** tienen disponibilidad propia: un episodio es reproducible solo si su temporada y su serie están disponibles.
+Episodes have **no** availability of their own: an episode is playable only if its season and its series are available.
 
-El contenido retirado:
-- no se puede reproducir: reportar progreso devuelve `409 content-unavailable`;
-- no se recomienda y no aparece en los listados, las búsquedas ni el detalle de una serie que ve un `USER`;
-- no admite puntuaciones nuevas;
-- sigue accesible por id (o por número, en el caso de una temporada) y aparece en el historial del usuario, marcado como retirado;
-- conserva todos sus datos y su actividad asociada.
+Retired content:
+- cannot be played: reporting progress returns `409 content-unavailable`;
+- is not recommended and does not appear in the listings, the searches or the series detail that a `USER` sees;
+- accepts no new ratings;
+- is still reachable by id (or by number, for a season) and appears in the user's history, marked as retired;
+- keeps all its data and its related activity.
 
-El borrado físico solo se permite sobre contenido sin ninguna actividad, por ejemplo uno cargado por error.
+Physical deletion is only allowed for content without any activity, for example content loaded by mistake.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Mantener el retiro por episodio (ADR-0009):** es más granular, pero deja temporadas incompletas y no corresponde a cómo se deja de ofrecer el contenido.
-- **Permitir ambos niveles (temporada y episodio):** suma combinaciones que hay que filtrar y probar en "Seguir viendo" y en las recomendaciones, sin una necesidad real.
-- **Borrado en cascada:** destruye la actividad de los usuarios.
-- **Borrado lógico genérico (`deleted_at`) con filtros globales:** oculta el registro en todas partes, incluido el historial, y mezcla "retirado" con "eliminado".
-- **Ventanas de disponibilidad con fechas:** es más flexible, pero excede las necesidades actuales. Puede incorporarse más adelante.
+- **Keeping retirement by episode (ADR-0009):** it is finer-grained, but leaves incomplete seasons and does not match how content stops being offered.
+- **Allowing both levels (season and episode):** it adds combinations to filter and test in "continue watching" and the recommendations, without a real need.
+- **Cascading deletion:** it destroys the users' activity.
+- **Generic soft delete (`deleted_at`) with global filters:** it hides the row everywhere, including the history, and mixes "retired" with "deleted".
+- **Availability windows with dates:** more flexible, but beyond current needs. It can be added later.
 
-## Consecuencias
+## Consequences
 
-- ✅ No se pierde actividad de los usuarios.
-- ✅ Un contenido retirado puede volver a ofrecerse.
-- ✅ Una temporada nunca queda con episodios faltantes para el usuario.
-- ⚠️ Las consultas del catálogo, "Seguir viendo" y las recomendaciones tienen que filtrar por la disponibilidad de la serie y de la temporada. Se cubre con tests.
-- ⚠️ Si alguna vez hiciera falta retirar un episodio suelto, habría que volver a agregar la disponibilidad al episodio en un ADR nuevo.
+- ✅ No user activity is lost.
+- ✅ Retired content can be offered again.
+- ✅ A season never has missing episodes for the user.
+- ⚠️ The catalog queries, "continue watching" and the recommendations must filter by the availability of both the series and the season. Tests cover it.
+- ⚠️ If a single episode ever had to be retired, availability would have to be added back to episodes in a new ADR.

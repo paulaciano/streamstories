@@ -1,33 +1,33 @@
-# 8. Desarrollo asistido por IA
+# 8. AI-assisted development
 
-StreamStories se desarrolla con [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) como asistente de programación. Este documento describe cómo se integra al proceso y qué controles se aplican.
+StreamStories is developed with [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) as a programming assistant. This document describes how it fits into the process and which controls apply.
 
-## 8.1 Principios
+## 8.1 Principles
 
-1. **Primero el diseño, después el código.** Antes de implementar, el diseño se documenta y se acuerda. Esta documentación y los ADR son la referencia que sigue cada implementación.
-2. **Las decisiones son humanas.** El asistente propone alternativas, señala riesgos y pregunta ante cualquier ambigüedad. Las decisiones de arquitectura, alcance y producto las toman personas.
-3. **Todo el código se revisa.** El código generado pasa por el mismo proceso que cualquier otro: pull request, CI en verde y revisión humana.
-4. **Los tests son la evidencia.** Cada cambio incluye tests que demuestran el comportamiento esperado.
-5. **Transparencia.** Los commits en los que participó el asistente lo indican con el trailer [`Co-Authored-By`](https://docs.github.com/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors).
+1. **Design first, code second.** Before implementing, the design is documented and agreed on. This documentation and the ADRs are the reference every implementation follows.
+2. **Decisions are human.** The assistant proposes alternatives, points out risks and asks about any ambiguity. People make the architecture, scope and product decisions.
+3. **All code is reviewed.** Generated code goes through the same process as any other: a pull request, a green CI and a human review.
+4. **Tests are the evidence.** Every change includes tests that show the expected behavior.
+5. **Transparency.** Commits the assistant took part in say so with the [`Co-Authored-By`](https://docs.github.com/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) trailer.
 
-## 8.2 Flujo de trabajo
+## 8.2 Workflow
 
 ```mermaid
 flowchart LR
-    A["Definir la tarea<br/>(historia + criterios)"] --> B["El asistente propone<br/>un plan y hace preguntas"]
-    B --> C{"¿Acordado?"}
+    A["Define the task<br/>(story + criteria)"] --> B["The assistant proposes<br/>a plan and asks questions"]
+    B --> C{"Agreed?"}
     C -- no --> B
-    C -- sí --> D["El asistente implementa<br/>código + tests"]
-    D --> E["Revisión humana<br/>+ CI"]
-    E -- cambios --> D
-    E -- ok --> F["Merge + actualizar<br/>documentación y ADR"]
+    C -- yes --> D["The assistant implements<br/>code + tests"]
+    D --> E["Human review<br/>+ CI"]
+    E -- changes --> D
+    E -- ok --> F["Merge + update<br/>documentation and ADRs"]
 ```
 
-## 8.3 Puntos de revisión prioritarios
+## 8.3 Review priorities
 
-Al revisar el código generado se presta especial atención a:
+When reviewing generated code, special attention goes to:
 
-- **Seguridad:** reglas de autorización, validación de entrada y que no se filtren datos en errores o logs.
-- **Rendimiento de JPA:** consultas N+1, relaciones `EAGER` y transacciones demasiado amplias.
-- **Calidad de los tests:** que no tengan asserts débiles ni mocks que solo repitan la implementación.
-- **Alcance:** que no haya abstracciones ni dependencias que la tarea no necesita.
+- **Security:** authorization rules, input validation, and no data leaking in errors or logs.
+- **JPA performance:** N+1 queries, `EAGER` relations and transactions that are too wide.
+- **Test quality:** no weak assertions, and no mocks that just repeat the implementation.
+- **Scope:** no abstractions or dependencies the task does not need.

@@ -1,26 +1,26 @@
-# ADR-0006: Esquema de base de datos versionado con Flyway
+# ADR-0006: Database schema versioned with Flyway
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-El esquema evoluciona fase a fase. Si Hibernate lo genera (`ddl-auto=update`), el resultado no es reproducible, no es apto para producción y los cambios no aparecen en los PR.
+The schema evolves phase by phase. If Hibernate generates it (`ddl-auto=update`), the result is not reproducible, not fit for production, and the changes do not show up in PRs.
 
-## Decisión
+## Decision
 
-- Los cambios de esquema son migraciones SQL de [Flyway](https://documentation.red-gate.com/flyway) en `src/main/resources/db/migration`.
-- Hibernate corre con `ddl-auto=validate`: verifica que las entidades coincidan con el esquema, pero nunca lo modifica.
-- **Una migración ya mergeada no se edita nunca.** Cualquier cambio se hace con una migración nueva.
-- Las constraints (`CHECK`, `UNIQUE`, FK) se definen en la base, no solo en Java.
+- Schema changes are [Flyway](https://documentation.red-gate.com/flyway) SQL migrations in `src/main/resources/db/migration`.
+- Hibernate runs with `ddl-auto=validate`: it checks that the entities match the schema, but never changes it.
+- **A merged migration is never edited.** Any change is made with a new migration.
+- Constraints (`CHECK`, `UNIQUE`, foreign keys) are defined in the database, not only in Java.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **[Liquibase](https://docs.liquibase.com/):** igual de válido. Flyway es más directo con SQL plano, que se lee y se revisa con facilidad.
-- **`ddl-auto=update`:** se descarta por lo explicado en el contexto.
+- **[Liquibase](https://docs.liquibase.com/):** just as valid. Flyway is more direct with plain SQL, which is easy to read and review.
+- **`ddl-auto=update`:** discarded for the reasons in the context.
 
-## Consecuencias
+## Consequences
 
-- ✅ El esquema es reproducible en cualquier entorno, incluidos los tests con Testcontainers.
-- ✅ Los cambios de base se revisan como SQL legible.
-- ⚠️ El SQL se escribe a mano. `validate` detecta al arrancar cualquier diferencia con las entidades.
+- ✅ The schema is reproducible in any environment, including tests with Testcontainers.
+- ✅ Database changes are reviewed as readable SQL.
+- ⚠️ The SQL is written by hand. `validate` catches any mismatch with the entities on startup.

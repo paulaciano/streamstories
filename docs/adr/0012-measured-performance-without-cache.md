@@ -1,26 +1,26 @@
-# ADR-0012: Rendimiento medido, sin caché por ahora
+# ADR-0012: Measured performance, without a cache for now
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-19
+- **Status:** Accepted
+- **Date:** 2026-11-19
 
-## Contexto
+## Context
 
-La hoja de ruta pedía revisar los índices con `EXPLAIN ANALYZE` y cachear las recomendaciones y el catálogo si los datos lo justificaban. Para decidirlo con números, se cargó una base PostgreSQL 18 con un volumen generado:
+The roadmap asked to review the indexes with `EXPLAIN ANALYZE` and to cache the recommendations and the catalog if the data justified it. To decide with numbers, a PostgreSQL 18 database was loaded with a generated volume:
 
-| Datos | Cantidad |
-|-------|---------:|
-| Títulos (5.000 películas y 1.000 series) | 6.000 |
-| Episodios | 30.000 |
-| Usuarios | 20.000 |
-| Registros de progreso | 700.000 |
-| Puntuaciones | 300.000 |
+| Data | Amount |
+|------|-------:|
+| Titles (5,000 movies and 1,000 series) | 6,000 |
+| Episodes | 30,000 |
+| Users | 20,000 |
+| Progress records | 700,000 |
+| Ratings | 300,000 |
 
-Se midieron los endpoints con la aplicación empaquetada (mediana de varias llamadas, en una sola máquina) y las consultas con `EXPLAIN ANALYZE`.
+The endpoints were measured on the packaged application (median of several calls, on a single machine), and the queries with `EXPLAIN ANALYZE`.
 
-## Mediciones
+## Measurements
 
-| Endpoint | Mediana |
-|----------|--------:|
+| Endpoint | Median |
+|----------|-------:|
 | `GET /catalog` | 31 ms |
 | `GET /catalog?q=…` | 42 ms |
 | `GET /catalog?genre=…` | 26 ms |
@@ -29,23 +29,23 @@ Se midieron los endpoints con la aplicación empaquetada (mediana de varias llam
 | `GET /me/ratings` | 17 ms |
 | `GET /me/recommendations` | 386 ms → **146 ms** |
 
-- Todas las consultas por usuario (historial, "Seguir viendo", puntuaciones, señales para las recomendaciones) y por título (promedio, actividad para C11) usan su índice y tardan menos de 1 ms en la base.
-- La búsqueda por texto recorre la tabla de títulos (`unaccent` + `LIKE '%…%'`): 9 ms con 6.000 títulos. Un índice trigram no se justifica a este volumen.
-- Las recomendaciones leen todo el catálogo y todas las puntuaciones en cada consulta. El costo no estaba en SQL (7 ms y 34 ms) sino en Java: Hibernate armaba 6.000 entidades y cargaba los géneros en unas 120 consultas, y las proyecciones de Spring Data creaban un proxy por fila. Se reemplazaron por dos consultas que devuelven filas simples.
+- Every query by user (history, "continue watching", ratings, signals for the recommendations) and by title (average, activity for C11) uses its index and takes under 1 ms in the database.
+- Text search scans the titles table (`unaccent` + `LIKE '%…%'`): 9 ms with 6,000 titles. A trigram index is not justified at this volume.
+- The recommendations read the whole catalog and every rating on each request. The cost was not in SQL (7 ms and 34 ms) but in Java: Hibernate built 6,000 entities and loaded genres in about 120 queries, and Spring Data projections created a proxy per row. They were replaced with two queries that return plain rows.
 
-## Decisión
+## Decision
 
-- **No se agrega caché.** Con este volumen, ningún endpoint supera los 150 ms, y un caché sumaría invalidación (retiros, puntuaciones nuevas) y estado por instancia sin una necesidad medida.
-- **No se agregan índices**: los existentes cubren todas las consultas.
-- Las lecturas masivas (todo el catálogo, todos los promedios) usan consultas de filas simples, sin entidades ni proyecciones.
+- **No cache is added.** At this volume no endpoint goes over 150 ms, and a cache would add invalidation (retirements, new ratings) and per-instance state without a measured need.
+- **No indexes are added**: the existing ones cover every query.
+- Bulk reads (the whole catalog, every average) use queries that return plain rows, without entities or projections.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Caché en memoria del catálogo y de los promedios:** bajaría las recomendaciones a unos 30 ms, pero cada instancia tendría su copia y habría que invalidarla al retirar contenido o al puntuar.
-- **Tabla de promedios precalculados:** evita agregar todas las puntuaciones en cada consulta, a cambio de mantenerla actualizada en cada puntuación.
-- **Índice trigram (`pg_trgm`) para la búsqueda:** necesita una función `unaccent` inmutable propia y no cambia nada a este volumen.
+- **In-memory cache of the catalog and the averages:** it would bring the recommendations to about 30 ms, but each instance would have its own copy, to invalidate whenever content is retired or rated.
+- **A table of precomputed averages:** it avoids aggregating every rating on each request, in exchange for keeping it up to date on each rating.
+- **Trigram index (`pg_trgm`) for search:** it needs a custom immutable `unaccent` function, and changes nothing at this volume.
 
-## Consecuencias
+## Consequences
 
-- ✅ Sin estado extra ni invalidaciones: todo sale siempre de la base.
-- ⚠️ Las recomendaciones crecen con el tamaño del catálogo y la cantidad de puntuaciones. Si el catálogo o las puntuaciones crecen un orden de magnitud, conviene retomar la tabla de promedios precalculados o un caché con vencimiento corto.
+- ✅ No extra state and no invalidation: everything always comes from the database.
+- ⚠️ The recommendations grow with the size of the catalog and the number of ratings. If either grows by an order of magnitude, the table of precomputed averages or a short-lived cache should be revisited.

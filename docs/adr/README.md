@@ -1,25 +1,25 @@
-# Registro de decisiones de arquitectura (ADR)
+# Architecture decision records (ADR)
 
-Un **ADR** ([*Architecture Decision Record*](https://adr.github.io/)) documenta una decisión importante: el contexto en que se tomó, la decisión, las alternativas que se descartaron y sus consecuencias.
+An **ADR** ([*Architecture Decision Record*](https://adr.github.io/)) documents an important decision: the context it was made in, the decision itself, the alternatives that were discarded and its consequences.
 
-**Cuándo se escribe uno:** cuando la decisión es costosa de revertir, afecta a varios módulos o una persona razonable podría haber elegido otra opción.
+**When to write one:** when the decision is expensive to reverse, affects several modules, or a reasonable person could have chosen another option.
 
-**Reglas:**
-- Cada ADR tiene un número que no se reutiliza.
-- Un ADR aceptado **no se edita** en lo sustancial. Si la decisión cambia, se escribe uno nuevo que lo reemplaza, y el anterior pasa a estado *Reemplazado por ADR-XXXX*.
-- Los nuevos ADR parten de la [plantilla](plantilla.md).
+**Rules:**
+- Each ADR has a number that is never reused.
+- An accepted ADR is **not edited** in substance. If the decision changes, a new one replaces it, and the old one becomes *Superseded by ADR-XXXX*.
+- New ADRs start from the [template](template.md).
 
-| ADR | Título | Estado |
-|-----|--------|--------|
-| [0001](0001-registrar-decisiones-con-adr.md) | Registrar las decisiones de arquitectura con ADR | Aceptado |
-| [0002](0002-monolito-modular.md) | Monolito modular organizado por funcionalidad | Aceptado |
-| [0003](0003-api-rest-sin-frontend.md) | El sistema es exclusivamente una API REST | Aceptado |
-| [0004](0004-video-como-metadato.md) | El video se gestiona como metadato | Aceptado |
-| [0005](0005-autenticacion-jwt.md) | Autenticación stateless con JWT y refresh tokens rotativos | Aceptado |
-| [0006](0006-migraciones-flyway.md) | Esquema de base de datos versionado con Flyway | Aceptado |
-| [0007](0007-modelo-herencia-y-progreso.md) | Herencia `JOINED` para títulos y FK excluyentes para el progreso | Aceptado |
-| [0008](0008-documentacion-markdown-mermaid.md) | Documentación en Markdown con diagramas Mermaid | Aceptado |
-| [0009](0009-retiro-de-contenido.md) | El contenido se retira, no se borra | Reemplazado por ADR-0011 |
-| [0010](0010-reactivacion-aprobada-por-admin.md) | La reactivación de cuentas requiere aprobación de un admin | Aceptado |
-| [0011](0011-retiro-por-temporada.md) | El contenido se retira por película, serie o temporada completa | Aceptado |
-| [0012](0012-rendimiento-sin-cache.md) | Rendimiento medido, sin caché por ahora | Aceptado |
+| ADR | Title | Status |
+|-----|-------|--------|
+| [0001](0001-record-decisions-with-adrs.md) | Record architecture decisions as ADRs | Accepted |
+| [0002](0002-modular-monolith.md) | A modular monolith organized by feature | Accepted |
+| [0003](0003-rest-api-without-frontend.md) | The system is only a REST API | Accepted |
+| [0004](0004-video-as-metadata.md) | Video is handled as metadata | Accepted |
+| [0005](0005-jwt-authentication.md) | Stateless authentication with JWT and rotating refresh tokens | Accepted |
+| [0006](0006-flyway-migrations.md) | Database schema versioned with Flyway | Accepted |
+| [0007](0007-inheritance-and-progress-model.md) | `JOINED` inheritance for titles and exclusive foreign keys for progress | Accepted |
+| [0008](0008-markdown-and-mermaid-docs.md) | Documentation in Markdown with Mermaid diagrams | Accepted |
+| [0009](0009-retiring-content.md) | Content is retired, not deleted | Superseded by ADR-0011 |
+| [0010](0010-admin-approved-reactivation.md) | Account reactivation requires an admin's approval | Accepted |
+| [0011](0011-retiring-by-season.md) | Content is retired by whole movie, series or season | Accepted |
+| [0012](0012-measured-performance-without-cache.md) | Measured performance, without a cache for now | Accepted |

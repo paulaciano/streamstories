@@ -1,23 +1,23 @@
-# ADR-0001: Registrar las decisiones de arquitectura con ADR
+# ADR-0001: Record architecture decisions as ADRs
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-11-16
+- **Status:** Accepted
+- **Date:** 2026-11-16
 
-## Contexto
+## Context
 
-El código muestra *qué* se construyó, pero no *por qué*. Sin un registro, el razonamiento detrás de cada decisión se pierde y las mismas discusiones vuelven a aparecer. Esto es especialmente importante en un proyecto que se desarrolla con asistencia de IA, porque el asistente necesita conocer las decisiones vigentes para no contradecirlas.
+The code shows *what* was built, but not *why*. Without a record, the reasoning behind each decision gets lost and the same discussions come back. This matters even more in a project developed with AI assistance, because the assistant needs to know the decisions in force so it does not contradict them.
 
-## Decisión
+## Decision
 
-Cada decisión de arquitectura significativa se registra como un ADR en `docs/adr/`, con un formato breve (contexto, decisión, alternativas y consecuencias) basado en el [propuesto por Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
+Each significant architecture decision is recorded as an ADR in `docs/adr/`, with a short format (context, decision, alternatives and consequences) based on the one [proposed by Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Solo comentarios en los PR:** quedan dispersos y son difíciles de encontrar.
-- **Wiki de GitHub:** está separada del código y no se versiona junto con él.
+- **Only PR comments:** they end up scattered and are hard to find.
+- **GitHub wiki:** it is separate from the code and not versioned with it.
 
-## Consecuencias
+## Consequences
 
-- ✅ Las decisiones se revisan en el mismo PR que el código que las implementa.
-- ✅ El contexto queda disponible para quien se sume al proyecto.
-- ⚠️ Escribir el ADR agrega un pequeño costo a cada decisión importante.
+- ✅ Decisions are reviewed in the same PR as the code that implements them.
+- ✅ The context is available to anyone who joins the project.
+- ⚠️ Writing the ADR adds a small cost to each important decision.
