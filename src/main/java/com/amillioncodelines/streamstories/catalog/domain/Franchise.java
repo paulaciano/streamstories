@@ -1,11 +1,12 @@
 package com.amillioncodelines.streamstories.catalog.domain;
 
-import com.amillioncodelines.streamstories.shared.error.ConflictException;
 import com.amillioncodelines.streamstories.shared.persistence.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OrderColumn;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +17,12 @@ public class Franchise extends AuditableEntity {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "franchise")
-    @OrderBy("franchiseOrder")
+    @ManyToMany
+    @JoinTable(
+            name = "franchise_movie",
+            joinColumns = @JoinColumn(name = "franchise_id"),
+            inverseJoinColumns = @JoinColumn(name = "movie_id"))
+    @OrderColumn(name = "position")
     private List<Movie> movies = new ArrayList<>();
 
     protected Franchise() {}
@@ -35,23 +40,15 @@ public class Franchise extends AuditableEntity {
         if (new HashSet<>(newMovies).size() != newMovies.size()) {
             throw new IllegalArgumentException("A movie appears more than once");
         }
-        for (Movie movie : newMovies) {
-            if (movie.getFranchise() != null && !equals(movie.getFranchise())) {
-                throw new ConflictException("Movie %s already belongs to franchise '%s'."
-                        .formatted(movie.getId(), movie.getFranchise().getName()));
-            }
-        }
-        movies.stream().filter(movie -> !newMovies.contains(movie)).forEach(Movie::leaveFranchise);
         movies.clear();
-        for (int position = 0; position < newMovies.size(); position++) {
-            Movie movie = newMovies.get(position);
-            movie.joinFranchise(this, position + 1);
-            movies.add(movie);
-        }
+        movies.addAll(newMovies);
+    }
+
+    public void removeMovie(Movie movie) {
+        movies.remove(movie);
     }
 
     public void removeAllMovies() {
-        movies.forEach(Movie::leaveFranchise);
         movies.clear();
     }
 

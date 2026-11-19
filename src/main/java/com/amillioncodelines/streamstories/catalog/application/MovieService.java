@@ -4,6 +4,7 @@ import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.application.CatalogViews.MovieView;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.CatalogFilter;
+import com.amillioncodelines.streamstories.catalog.domain.FranchiseRepository;
 import com.amillioncodelines.streamstories.catalog.domain.MediaItemSpecifications;
 import com.amillioncodelines.streamstories.catalog.domain.MediaType;
 import com.amillioncodelines.streamstories.catalog.domain.Movie;
@@ -20,11 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class MovieService {
 
     private final MovieRepository movies;
+    private final FranchiseRepository franchises;
     private final GenreResolver genres;
     private final ContentActivityGuard activity;
 
-    MovieService(MovieRepository movies, GenreResolver genres, ContentActivityGuard activity) {
+    MovieService(
+            MovieRepository movies,
+            GenreResolver genres,
+            ContentActivityGuard activity,
+            FranchiseRepository franchises) {
         this.movies = movies;
+        this.franchises = franchises;
         this.genres = genres;
         this.activity = activity;
     }
@@ -80,6 +87,7 @@ public class MovieService {
     public void delete(UUID id) {
         Movie movie = find(id);
         activity.ensureNoActivity(ContentKind.MOVIE, id);
+        franchises.findContaining(id).ifPresent(franchise -> franchise.removeMovie(movie));
         movies.delete(movie);
     }
 

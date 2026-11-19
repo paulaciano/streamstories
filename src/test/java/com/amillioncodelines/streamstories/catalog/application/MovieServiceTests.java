@@ -23,7 +23,7 @@ class MovieServiceTests {
     private final MovieRepository movies = mock();
     private final ContentActivity activity = mock();
     private final MovieService service =
-            new MovieService(movies, new GenreResolver(mock()), new ContentActivityGuard(List.of(activity)));
+            new MovieService(movies, new GenreResolver(mock()), new ContentActivityGuard(List.of(activity)), mock());
 
     @Test
     void shouldRefuseToDeleteAMovieWithActivity() {

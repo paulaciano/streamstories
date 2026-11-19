@@ -1,0 +1,1 @@
+ALTER TABLE app_user ADD COLUMN version bigint NOT NULL DEFAULT 0;

@@ -43,7 +43,7 @@ sequenceDiagram
 
 After **5 wrong passwords** for the same email within **15 minutes**, login and reactivation requests for that email answer `429 too-many-requests` with a `Retry-After` header until the window ends. While the block lasts, the right password is not accepted either. A successful login before reaching the limit resets the count.
 
-- **Persistent:** attempts are stored in the database (`login_attempt`), so the limit holds even with several application instances.
+- **Persistent and atomic:** attempts are stored in the database (`login_attempt`), so the limit holds even with several application instances. Each attempt is counted in one statement before the password is checked, so simultaneous attempts cannot check more than 5 passwords either.
 - **Without revealing emails:** emails without an account are counted too. If only real accounts were blocked, the `429` would reveal which emails exist. That is also why the table does not store the email but an HMAC of it, computed with the server key.
 - **Accepted cost:** anyone can block the login of someone else's email for 15 minutes. That is preferred to limiting by IP, which is unreliable behind a proxy.
 - A daily task deletes the attempts of finished windows.
@@ -83,12 +83,13 @@ While the account is inactive:
 
 | Role | Permissions |
 |------|-------------|
-| Anonymous | Sign up, log in, refresh the token, request reactivation. Read `/actuator/health` and the API documentation. |
+| Anonymous | Sign up, log in, refresh the token, request reactivation. Read `/actuator/health`, `/actuator/info` (application name and version) and the API documentation. |
 | `USER` | Read the available catalog and manage **their own** activity, ratings and account. |
 | `ADMIN` | Everything a `USER` can do, plus managing the catalog, the users and the reactivation requests. |
 
 - Rules by route and method are declared in the `SecurityFilterChain`. Rules finer than the route (for example, by resource owner) are resolved in the service.
 - **Deny by default:** every endpoint not explicitly listed requires authentication.
+- The public authentication endpoints (sign-up, login, refresh and reactivation requests) ignore the `Authorization` header. Clients often attach the access token to every request, and an expired token must not block a refresh, nor an inactive account's reactivation request.
 - The user's resources are **always** resolved from the token (`/me/...`). That prevents [access to other people's data by manipulating identifiers (IDOR)](https://owasp.org/www-community/attacks/Insecure_Direct_Object_Reference).
 - A test matrix calls each protected endpoint without a token (401) and, for administration endpoints, with the `USER` role (403). The authorized path of each endpoint is covered by its feature's tests.
 
@@ -111,6 +112,6 @@ These practices follow the recommendations of the [OWASP API Security Top 10](ht
 
 ## 5.5 Initial administrator
 
-The first `ADMIN` is created on startup if none exists yet, with the email and password from the `STREAMSTORIES_ADMIN_EMAIL` and `STREAMSTORIES_ADMIN_PASSWORD` environment variables. If they are not set, no administrator is created and a warning is logged. The password follows the same rules as sign-up (8 characters to 72 bytes) and cannot be the example value of `.env.example`: otherwise, the application does not start. **There are no default credentials.**
+The first `ADMIN` is created on startup if none exists yet, with the email and password from the `STREAMSTORIES_ADMIN_EMAIL` and `STREAMSTORIES_ADMIN_PASSWORD` environment variables. If they are not set, no administrator is created and a warning is logged. The password follows the same rules as sign-up (8 characters to 72 bytes) and cannot be `change-me`, the placeholder used in `.env.example`: otherwise, the application does not start. **There are no default credentials.**
 
 The only exception is the `dev` profile, which only `./mvnw spring-boot:run` enables: it defines a development administrator (`admin@streamstories.local`) to explore the API on a local database. Its configuration is not in the jar, so the packaged application cannot use it.

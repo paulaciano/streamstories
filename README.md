@@ -44,6 +44,7 @@ flowchart LR
     activity --> identity
     reco --> activity
     reco --> catalog
+    reco --> identity
 ```
 
 **Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 6 · Testcontainers · GitHub Actions.
@@ -146,6 +147,8 @@ It runs the format check, the unit and integration tests, and the module verific
 ```bash
 docker run -p 8080:8080 --env-file .env streamstories:<version>
 ```
+
+Inside the container, `localhost` is the container itself: if PostgreSQL runs on your machine, use `host.docker.internal` in `SPRING_DATASOURCE_URL` (Docker Desktop), or put both containers on the same Docker network.
 
 ## Documentation
 

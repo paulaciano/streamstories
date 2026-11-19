@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class FranchiseService {
             throw new ConflictException("Franchise '%s' already exists.".formatted(name.strip()));
         }
         Franchise franchise = franchises.save(new Franchise(name));
-        franchise.replaceMovies(resolve(movieIds));
+        franchise.replaceMovies(resolve(franchise, movieIds));
         return view(franchises.saveAndFlush(franchise), Audience.ADMIN);
     }
 
@@ -62,7 +63,7 @@ public class FranchiseService {
             throw new ConflictException("Franchise '%s' already exists.".formatted(name.strip()));
         }
         franchise.rename(name);
-        franchise.replaceMovies(resolve(movieIds));
+        franchise.replaceMovies(resolve(franchise, movieIds));
         return view(franchises.saveAndFlush(franchise), Audience.ADMIN);
     }
 
@@ -74,7 +75,7 @@ public class FranchiseService {
         franchises.delete(franchise);
     }
 
-    private List<Movie> resolve(List<UUID> movieIds) {
+    private List<Movie> resolve(Franchise franchise, List<UUID> movieIds) {
         Set<UUID> distinct = new LinkedHashSet<>(movieIds);
         if (distinct.size() != movieIds.size()) {
             throw new InvalidRequestException("A movie cannot appear twice in a franchise.");
@@ -87,6 +88,13 @@ public class FranchiseService {
             throw new InvalidRequestException("These movies do not exist: %s."
                     .formatted(missing.stream().map(UUID::toString).sorted().collect(Collectors.joining(", "))));
         }
+        franchises.findContainingAny(distinct).stream()
+                .filter(other -> !other.equals(franchise))
+                .findFirst()
+                .ifPresent(other -> {
+                    throw new ConflictException(
+                            "A movie already belongs to franchise '%s'.".formatted(other.getName()));
+                });
         return movieIds.stream().map(found::get).toList();
     }
 
@@ -97,15 +105,17 @@ public class FranchiseService {
     }
 
     private static FranchiseView view(Franchise franchise, Audience audience) {
-        List<FranchiseMovieView> movies = franchise.getMovies().stream()
-                .filter(movie -> audience.seesRetiredContent() || movie.isAvailable())
-                .map(movie -> new FranchiseMovieView(
-                        movie.getId(),
-                        movie.getFranchiseOrder(),
-                        movie.getTitle(),
-                        movie.getReleaseYear(),
-                        movie.getCoverImageUrl(),
-                        movie.getAvailability()))
+        List<Movie> ordered = franchise.getMovies();
+        List<FranchiseMovieView> movies = IntStream.range(0, ordered.size())
+                .filter(index ->
+                        audience.seesRetiredContent() || ordered.get(index).isAvailable())
+                .mapToObj(index -> new FranchiseMovieView(
+                        ordered.get(index).getId(),
+                        index + 1,
+                        ordered.get(index).getTitle(),
+                        ordered.get(index).getReleaseYear(),
+                        ordered.get(index).getCoverImageUrl(),
+                        ordered.get(index).getAvailability()))
                 .toList();
         return new FranchiseView(
                 franchise.getId(), franchise.getName(), movies, franchise.getCreatedAt(), franchise.getUpdatedAt());

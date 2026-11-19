@@ -73,9 +73,10 @@ class SeriesController {
     @Operation(summary = "Creates a series (ADMIN)")
     ResponseEntity<SeriesResponse> create(@Valid @RequestBody SeriesRequest request) {
         SeriesView created = series.create(request.toCommand());
+        SeriesResponse body = SeriesResponse.from(created);
         return ResponseEntity.created(URI.create("/api/v1/series/" + created.id()))
-                .eTag(String.valueOf(created.version()))
-                .body(SeriesResponse.from(created));
+                .eTag(ETags.of(created.version(), body))
+                .body(body);
     }
 
     @PutMapping("/{id}")

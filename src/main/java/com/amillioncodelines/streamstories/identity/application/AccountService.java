@@ -46,6 +46,7 @@ public class AccountService {
     @Transactional
     public void deactivateOwnAccount(UUID userId) {
         deactivate(findUser(userId));
+        users.flush();
     }
 
     @Transactional(readOnly = true)

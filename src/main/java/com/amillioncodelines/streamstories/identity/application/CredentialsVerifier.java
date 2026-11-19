@@ -34,18 +34,16 @@ class CredentialsVerifier {
         this.dummyHash = passwordEncoder.encode("dummy-password-for-timing-safety");
     }
 
-    /** Blocked emails are rejected before the password is checked, whether the account exists or not. */
+    /** Each attempt is counted before the password is checked, whether the account exists or not. */
     User verify(String email, String password) {
-        attempts.ensureNotBlocked(email);
+        attempts.reserve(email);
         if (exceedsMaxLength(password)) {
-            attempts.recordFailure(email);
             throw new UnauthorizedException(INVALID_CREDENTIALS);
         }
         Optional<User> user = users.findByEmail(User.normalizeEmail(email));
         String hash = user.map(User::getPasswordHash).orElse(dummyHash);
         boolean matches = passwordEncoder.matches(password, hash);
         if (user.isEmpty() || !matches) {
-            attempts.recordFailure(email);
             throw new UnauthorizedException(INVALID_CREDENTIALS);
         }
         attempts.reset(email);

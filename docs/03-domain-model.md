@@ -80,8 +80,6 @@ erDiagram
         uuid id PK, FK "= media_item.id"
         int duration_seconds
         varchar video_url
-        uuid franchise_id FK "optional"
-        smallint franchise_order "position in the franchise"
     }
     SERIES {
         uuid id PK, FK "= media_item.id"
@@ -128,6 +126,11 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+    FRANCHISE_MOVIE {
+        uuid franchise_id PK, FK
+        integer position PK "0-based order"
+        uuid movie_id FK, UK "one franchise per movie"
+    }
     WATCHLIST_ENTRY {
         uuid user_id PK, FK
         uuid media_item_id PK, FK
@@ -147,7 +150,8 @@ erDiagram
     EPISODE ||--o{ WATCH_PROGRESS : "progress of"
     APP_USER ||--o{ RATING : "rates"
     MEDIA_ITEM ||--o{ RATING : "receives"
-    FRANCHISE ||--o{ MOVIE : "groups"
+    FRANCHISE ||--o{ FRANCHISE_MOVIE : "orders"
+    MOVIE ||--o| FRANCHISE_MOVIE : "belongs to"
     APP_USER ||--o{ WATCHLIST_ENTRY : "saves"
     MEDIA_ITEM ||--o{ WATCHLIST_ENTRY : "saved in"
 ```
@@ -182,6 +186,10 @@ Content that stops being offered is not deleted: its `availability` changes to `
 Content is **playable** when:
 - **Movie:** its `availability` is `AVAILABLE`.
 - **Episode:** its season **and** its series have `availability = AVAILABLE`.
+
+### Franchise membership lives in the franchise
+
+The order of a franchise's movies is stored in `franchise_movie`, not in the `movie` table. Joining or leaving a franchise therefore does not change the movie, nor its version, which clients use with `If-Match`.
 
 ### Spanish alphabetical order
 
@@ -218,7 +226,7 @@ Each reactivation request is a `REACTIVATION_REQUEST` row with its resolution (w
 | C11 | Only content without any related activity (progress, ratings or watchlist entries) can be **deleted**, for example content loaded by mistake. Content with activity must be retired. A season can only be deleted if it has no episodes. | Service → `409 Conflict`, through the `ContentActivity` interface |
 | C12 | Retired content can be made available again. | — |
 | C13 | A franchise's name is unique, ignoring case. | Unique index on `lower(name)` |
-| C14 | A franchise only groups movies, in the order they are given, and each movie belongs to one franchise at most. | FK in `movie` + `UNIQUE (franchise_id, franchise_order)` |
+| C14 | A franchise only groups movies, in the order they are given, and each movie belongs to one franchise at most. | `franchise_movie`: PK `(franchise_id, position)` + `UNIQUE (movie_id)` |
 | C15 | Deleting a franchise does not delete its movies: it only releases them. A `USER` does not see the retired movies of a franchise; an `ADMIN` sees them all. | Service |
 
 ### Identity
