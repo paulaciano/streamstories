@@ -44,7 +44,7 @@ sequenceDiagram
 1. El cliente envía su refresh token a `POST /auth/refresh`.
 2. El servidor busca su hash. Si el token está vigente, no fue revocado y el usuario sigue `ACTIVE`, **revoca ese token** (motivo: rotado) y emite un par nuevo.
 3. **Detección de reutilización:** si llega un refresh token que ya había sido **rotado**, se asume que pudo ser robado y se revocan **todos** los refresh tokens del usuario.
-4. Un token vencido, o revocado por logout o por desactivación de la cuenta, solo se rechaza con `401`. Así, un cliente viejo que reintenta con un token inválido no cierra las sesiones vigentes del usuario.
+4. Un token vencido, o revocado por logout o por desactivación de la cuenta, solo se rechaza con `401`. Si la cuenta está inactiva, el refresh también responde el mismo `401` genérico: `account-inactive` solo lo informan el login y la reactivación, que reciben la contraseña. Así, un cliente viejo que reintenta con un token inválido no cierra las sesiones vigentes del usuario.
 
 Cada revocación guarda su motivo (`ROTATED`, `LOGOUT`, `ACCOUNT_DEACTIVATED`, `REUSE_DETECTED`), que es lo que permite distinguir estos casos.
 
@@ -79,7 +79,7 @@ Mientras la cuenta está inactiva:
 - Las reglas por ruta y método se declaran en el `SecurityFilterChain`. Si aparecen reglas más finas que la ruta (por ejemplo, según el dueño de un recurso), se resuelven en el servicio.
 - **Denegación por defecto:** todo endpoint que no esté listado explícitamente exige autenticación.
 - Los recursos del usuario se resuelven **siempre** a partir del token (`/me/...`). Esto evita el [acceso a datos ajenos manipulando identificadores (IDOR)](https://owasp.org/www-community/attacks/Insecure_Direct_Object_Reference).
-- Cada endpoint protegido tiene tests de autorización: sin token (401), con el rol incorrecto (403) y con el rol correcto.
+- Una matriz de tests recorre cada endpoint protegido sin token (401) y, si es de administración, con el rol `USER` (403). El camino autorizado de cada endpoint lo cubren los tests de su funcionalidad.
 
 ## 5.4 Prácticas de seguridad
 
@@ -100,6 +100,6 @@ Las prácticas siguen las recomendaciones de [OWASP API Security Top 10](https:/
 
 ## 5.5 Administrador inicial
 
-El primer `ADMIN` se crea al iniciar la aplicación si todavía no existe ninguno, con el email y la contraseña de las variables de entorno `STREAMSTORIES_ADMIN_EMAIL` y `STREAMSTORIES_ADMIN_PASSWORD`. Si esas variables no están definidas, no se crea y se registra una advertencia en el log. **No existen credenciales por defecto.**
+El primer `ADMIN` se crea al iniciar la aplicación si todavía no existe ninguno, con el email y la contraseña de las variables de entorno `STREAMSTORIES_ADMIN_EMAIL` y `STREAMSTORIES_ADMIN_PASSWORD`. Si esas variables no están definidas, no se crea y se registra una advertencia en el log. La contraseña sigue las mismas reglas que el registro (de 8 caracteres a 72 bytes) y no puede ser el valor de ejemplo de `.env.example`: si no las cumple, la aplicación no arranca. **No existen credenciales por defecto.**
 
-La única excepción es el perfil `dev`, que solo activa `./mvnw spring-boot:run`: define un administrador de desarrollo (`admin@streamstories.local`) para explorar la API en una base local. La aplicación empaquetada nunca activa ese perfil.
+La única excepción es el perfil `dev`, que solo activa `./mvnw spring-boot:run`: define un administrador de desarrollo (`admin@streamstories.local`) para explorar la API en una base local. Su configuración no entra en el jar, así que la aplicación empaquetada no puede usarla.

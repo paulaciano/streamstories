@@ -42,4 +42,20 @@ class PageablesTests {
                 .hasMessageContaining("passwordHash")
                 .hasMessageContaining("releaseYear, title");
     }
+
+    @Test
+    void shouldRejectOffsetsBeyondTheLargestInteger() {
+        assertThatThrownBy(() -> Pageables.restrictSort(PageRequest.of(30_000_000, 100), ALLOWED, DEFAULT_SORT))
+                .isInstanceOf(InvalidRequestException.class);
+        assertThatThrownBy(() -> Pageables.fixedOrder(PageRequest.of(30_000_000, 100), DEFAULT_SORT))
+                .isInstanceOf(InvalidRequestException.class);
+    }
+
+    @Test
+    void shouldIgnoreTheRequestedSortWhenTheOrderIsFixed() {
+        Pageable result = Pageables.fixedOrder(PageRequest.of(1, 10, Sort.by("passwordHash")), DEFAULT_SORT);
+
+        assertThat(result.getSort()).isEqualTo(DEFAULT_SORT.and(Sort.by("id")));
+        assertThat(result.getPageNumber()).isEqualTo(1);
+    }
 }

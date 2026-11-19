@@ -70,7 +70,8 @@ class RatingIntegrationTests {
         Session user = api.newUserSession();
         String movie = newMovie(admin);
 
-        for (String body : new String[] {"{}", "{\"score\": 0}", "{\"score\": 6}", "{\"score\": 4.5}"}) {
+        for (String body :
+                new String[] {"{}", "{\"score\": 0}", "{\"score\": 6}", "{\"score\": 4.5}", "{\"score\": \"4\"}"}) {
             assertThat(catalog.send(user, "PUT", "/api/v1/me/ratings/" + movie, body))
                     .as(body)
                     .hasStatus(HttpStatus.BAD_REQUEST);

@@ -3,12 +3,12 @@ package com.amillioncodelines.streamstories.activity.api;
 import com.amillioncodelines.streamstories.activity.application.RatingService;
 import com.amillioncodelines.streamstories.identity.CurrentUser;
 import com.amillioncodelines.streamstories.shared.web.PageResponse;
+import com.amillioncodelines.streamstories.shared.web.Pageables;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 class RatingController {
 
     /** The order is fixed and a {@code sort} is ignored. */
-    private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "updatedAt", "id");
+    private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "updatedAt");
 
     private final RatingService ratings;
 
@@ -61,7 +61,7 @@ class RatingController {
             summary = "Ratings of the current user",
             description = "Most recent first. Retired titles have available set to false.")
     PageResponse<RatingResponse> list(@AuthenticationPrincipal Jwt jwt, @ParameterObject Pageable pageable) {
-        Pageable mostRecentFirst = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), MOST_RECENT_FIRST);
+        Pageable mostRecentFirst = Pageables.fixedOrder(pageable, MOST_RECENT_FIRST);
         return PageResponse.of(ratings.list(CurrentUser.id(jwt), mostRecentFirst), RatingResponse::from);
     }
 }

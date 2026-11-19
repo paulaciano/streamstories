@@ -20,6 +20,7 @@ public final class Pageables {
      * @throws InvalidRequestException if the request sorts by a property that is not allowed
      */
     public static Pageable restrictSort(Pageable pageable, Set<String> allowedProperties, Sort defaultSort) {
+        checkOffset(pageable);
         for (Sort.Order order : pageable.getSort()) {
             if (!allowedProperties.contains(order.getProperty())) {
                 throw new InvalidRequestException("Cannot sort by '%s'. Allowed fields: %s."
@@ -32,5 +33,23 @@ public final class Pageables {
         }
         Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : defaultSort;
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
+    }
+
+    /**
+     * For lists with a fixed order: any requested sort is ignored, and the identifier breaks ties.
+     *
+     * @throws InvalidRequestException if the page starts beyond the largest supported offset
+     */
+    public static Pageable fixedOrder(Pageable pageable, Sort sort) {
+        checkOffset(pageable);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
+    }
+
+    /** The database offset is an int: a larger one would fail deep inside Spring Data instead of answering 400. */
+    private static void checkOffset(Pageable pageable) {
+        if (pageable.getOffset() + pageable.getPageSize() > Integer.MAX_VALUE) {
+            throw new InvalidRequestException(
+                    "The page is too far: page × size cannot exceed %d.".formatted(Integer.MAX_VALUE));
+        }
     }
 }

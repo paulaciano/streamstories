@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 class InitialAdminProvisioner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(InitialAdminProvisioner.class);
+    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final String PLACEHOLDER_PASSWORD = "change-me";
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
@@ -41,6 +43,7 @@ class InitialAdminProvisioner implements ApplicationRunner {
                     + " no administrator was created");
             return;
         }
+        requireStrongPassword(properties.password());
         String email = User.normalizeEmail(properties.email());
         if (users.existsByEmail(email)) {
             log.warn("Cannot create the initial administrator: a user with the configured email already exists");
@@ -48,5 +51,19 @@ class InitialAdminProvisioner implements ApplicationRunner {
         }
         users.save(User.administrator(email, passwordEncoder.encode(properties.password()), properties.displayName()));
         log.info("Initial administrator created");
+    }
+
+    /**
+     * The same limits as a sign-up (8 characters to 72 bytes), and never the placeholder of {@code .env.example}.
+     * A weak password stops the startup instead of creating an administrator anyone could guess.
+     */
+    static void requireStrongPassword(String password) {
+        if (password.length() < MIN_PASSWORD_LENGTH
+                || CredentialsVerifier.exceedsMaxLength(password)
+                || PLACEHOLDER_PASSWORD.equals(password)) {
+            throw new IllegalStateException("STREAMSTORIES_ADMIN_PASSWORD must have from %d characters to %d bytes,"
+                            .formatted(MIN_PASSWORD_LENGTH, CredentialsVerifier.MAX_PASSWORD_BYTES)
+                    + " and cannot be the example value");
+        }
     }
 }
