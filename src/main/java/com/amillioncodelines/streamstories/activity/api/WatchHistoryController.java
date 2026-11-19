@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Activity", description = "Watch progress, continue watching and history of the current user")
 class WatchHistoryController {
 
-    /** Both lists go from the most recently watched content: the order is fixed and a {@code sort} is ignored. */
     private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "lastWatchedAt");
 
     private final WatchHistoryService history;

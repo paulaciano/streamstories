@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** Series, seasons and episodes (rules C4, C5, C7, C9 and C11). */
 @IntegrationTest
 class SeriesIntegrationTests {
 

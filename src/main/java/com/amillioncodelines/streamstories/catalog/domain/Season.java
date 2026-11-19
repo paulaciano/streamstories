@@ -20,11 +20,9 @@ import java.util.Optional;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/** A numbered season of a series, starting at 1. It can be retired as a whole, together with its episodes. */
 @Entity
 public class Season extends BaseEntity {
 
-    /** Highest season or episode number. Numbers are stored as {@code smallint}, so they must stay in that range. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "series_id", nullable = false, updatable = false)
     private Series series;
@@ -52,7 +50,6 @@ public class Season extends BaseEntity {
         this.title = normalize(title);
     }
 
-    /** A blank title means no title. */
     public void rename(String newTitle) {
         this.title = normalize(newTitle);
     }
@@ -61,7 +58,6 @@ public class Season extends BaseEntity {
         return title == null || title.isBlank() ? null : title.strip();
     }
 
-    /** Retires the whole season or offers it again. Episodes are never retired one by one. */
     public void changeAvailability(Availability newAvailability) {
         this.availability = Objects.requireNonNull(newAvailability);
     }
@@ -74,7 +70,6 @@ public class Season extends BaseEntity {
         return availability;
     }
 
-    /** Episode numbers are unique within the season (rule C5). */
     public Episode addEpisode(int episodeNumber, EpisodeDetails details) {
         ensureNumberIsFree(episodeNumber, null);
         Episode episode = new Episode(this, episodeNumber, details);
@@ -83,7 +78,6 @@ public class Season extends BaseEntity {
         return episode;
     }
 
-    /** Changes the number and data of one of the season's episodes. */
     public void updateEpisode(Episode episode, int newNumber, EpisodeDetails details) {
         ensureNumberIsFree(newNumber, episode);
         episode.update(newNumber, details);

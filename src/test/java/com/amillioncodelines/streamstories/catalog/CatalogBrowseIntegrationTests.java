@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-/** The mixed catalog of movies and series. */
 @IntegrationTest
 class CatalogBrowseIntegrationTests {
 

@@ -6,7 +6,6 @@ import com.amillioncodelines.streamstories.identity.domain.User;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Read-only view of a user, safe to return from the application layer. Never contains the password hash. */
 public record UserView(
         UUID id,
         String email,

@@ -16,7 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/** Reactivation requests: inactive users ask for their account back and an administrator decides (ADR-0010). */
 @Service
 public class ReactivationService {
 
@@ -39,12 +38,7 @@ public class ReactivationService {
         this.clock = clock;
     }
 
-    /**
-     * Creates a pending request, or returns the one already pending (rule I6).
-     *
-     * <p>The password is checked before the transaction starts, so it does not hold a database connection. The user
-     * row is then locked: two simultaneous requests get the same pending request instead of a conflict.
-     */
+    /** The password is checked before the transaction starts, so the hashing does not hold a database connection. */
     public ReactivationView request(String email, String password) {
         UUID userId = credentials.verify(email, password).getId();
         return transaction.execute(status -> {
@@ -63,7 +57,6 @@ public class ReactivationService {
         return requests.findByStatus(status, pageable).map(ReactivationView::of);
     }
 
-    /** Approves a pending request and reactivates the account. */
     @Transactional
     public ReactivationView approve(UUID requestId, UUID adminId) {
         ReactivationRequest request = find(requestId);
@@ -72,7 +65,6 @@ public class ReactivationService {
         return ReactivationView.of(request);
     }
 
-    /** Rejects a pending request. The account stays inactive. */
     @Transactional
     public ReactivationView reject(UUID requestId, UUID adminId) {
         ReactivationRequest request = find(requestId);

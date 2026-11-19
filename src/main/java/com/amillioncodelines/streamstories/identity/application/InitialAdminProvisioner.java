@@ -11,10 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Creates the first administrator on startup when none exists yet, using the configured credentials. Without
- * credentials, no administrator is created and a warning is logged: there are no default credentials.
- */
 @Component
 class InitialAdminProvisioner implements ApplicationRunner {
 
@@ -53,10 +49,7 @@ class InitialAdminProvisioner implements ApplicationRunner {
         log.info("Initial administrator created");
     }
 
-    /**
-     * The same limits as a sign-up (8 characters to 72 bytes), and never the placeholder of {@code .env.example}.
-     * A weak password stops the startup instead of creating an administrator anyone could guess.
-     */
+    /** A weak password stops the startup instead of creating an administrator anyone could guess. */
     static void requireStrongPassword(String password) {
         if (password.length() < MIN_PASSWORD_LENGTH
                 || CredentialsVerifier.exceedsMaxLength(password)

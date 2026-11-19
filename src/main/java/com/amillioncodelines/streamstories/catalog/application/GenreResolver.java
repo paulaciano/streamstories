@@ -10,7 +10,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
-/** Turns the genre ids of a request into genres, rejecting ids that do not exist. */
 @Component
 class GenreResolver {
 

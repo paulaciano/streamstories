@@ -37,7 +37,6 @@ public class MovieService {
                 .map(movie -> MovieView.of(movie, audience));
     }
 
-    /** Retired movies are still reachable by id, flagged as such (rule C9). */
     @Transactional(readOnly = true)
     public MovieView get(UUID id, Audience audience) {
         return MovieView.of(find(id), audience);
@@ -55,7 +54,6 @@ public class MovieService {
         return replace(id, command, null);
     }
 
-    /** @param expectedVersion the version the client read, or {@code null} for an unconditional change */
     @Transactional
     public MovieView replace(UUID id, MovieCommand command, Long expectedVersion) {
         Movie movie = find(id);
@@ -78,7 +76,6 @@ public class MovieService {
         return MovieView.of(movies.saveAndFlush(movie), Audience.ADMIN);
     }
 
-    /** Only movies without activity can be deleted (rule C11). */
     @Transactional
     public void delete(UUID id) {
         Movie movie = find(id);

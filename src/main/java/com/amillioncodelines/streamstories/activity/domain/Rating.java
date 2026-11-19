@@ -8,11 +8,7 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * The score from 1 to 5 that a user gives to a title (rules A9 and A10).
- *
- * <p>Rows are written with an atomic upsert ({@link RatingRepository}), so the entity is only read.
- */
+/** Written only through the atomic upsert of {@link RatingRepository}. */
 @Entity
 public class Rating extends BaseEntity {
 

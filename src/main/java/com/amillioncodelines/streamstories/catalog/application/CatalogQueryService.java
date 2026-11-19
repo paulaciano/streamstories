@@ -76,7 +76,6 @@ class CatalogQueryService implements CatalogQueries {
                 .collect(Collectors.toMap(MovieSummary::id, Function.identity()));
     }
 
-    /** Seasons and episodes of each series are loaded in batches (default_batch_fetch_size), not one by one. */
     @Override
     @Transactional(readOnly = true)
     public Map<UUID, EpisodeSummary> findEpisodes(Collection<UUID> ids) {
@@ -99,7 +98,6 @@ class CatalogQueryService implements CatalogQueries {
                 .collect(Collectors.toMap(TitleSummary::id, Function.identity()));
     }
 
-    /** Genres are loaded in batches (default_batch_fetch_size), not one query per title. */
     @Override
     @Transactional(readOnly = true)
     public List<CatalogTitle> findAllTitles() {

@@ -2,7 +2,6 @@ package com.amillioncodelines.streamstories.identity.domain;
 
 import org.springframework.data.jpa.domain.Specification;
 
-/** Optional filters for the user administration listing. */
 public final class UserSpecifications {
 
     private UserSpecifications() {}

@@ -21,10 +21,6 @@ import java.util.Set;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * A title: what users browse, classify by genre and rate. Mapped with {@code JOINED} inheritance, so a single query
- * over {@code media_item} returns the mixed catalog of movies and series (ADR-0007).
- */
 @Entity
 @Table(name = "media_item")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -66,7 +62,6 @@ public abstract class MediaItem extends AuditableEntity {
 
     public abstract MediaType getType();
 
-    /** Replaces the descriptive data and the genres (rules C1 and C2). */
     public final void update(TitleDetails details, Collection<Genre> newGenres) {
         this.title = details.title().strip();
         this.synopsis = details.synopsis();
@@ -76,16 +71,10 @@ public abstract class MediaItem extends AuditableEntity {
         this.genres.addAll(newGenres);
     }
 
-    /** Retires the title or offers it again (rules C10 and C12). No related data is touched. */
     public void changeAvailability(Availability newAvailability) {
         this.availability = Objects.requireNonNull(newAvailability);
     }
 
-    /**
-     * Optimistic locking for clients: a title is only changed if the client read its current version.
-     *
-     * @param expectedVersion {@code null} for an unconditional change
-     */
     public void requireVersion(Long expectedVersion) {
         if (expectedVersion != null && expectedVersion != version) {
             throw new PreconditionFailedException(

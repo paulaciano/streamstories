@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/** The ratings that the catalog shows in the detail of a title (rule A11). */
 @Component
 class RatingSummaries implements TitleRatings {
 

@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Scores from 1 to 5 that users give to movies and series (rules A9 to A12). */
 @Service
 public class RatingService {
 
@@ -28,10 +27,6 @@ public class RatingService {
         this.clock = clock;
     }
 
-    /**
-     * Creates or replaces the user's rating. A title can be rated without watching it, but not while it is retired
-     * (rule A12).
-     */
     @Transactional
     public RatingView rate(UUID userId, UUID titleId, int score) {
         Rating.requireValidScore(score);
@@ -44,7 +39,6 @@ public class RatingService {
         return view(ratings.findByUserIdAndMediaItemId(userId, titleId).orElseThrow(), title);
     }
 
-    /** Removing a rating is always allowed, even on a retired title. Without a rating, nothing changes. */
     @Transactional
     public void remove(UUID userId, UUID titleId) {
         ratings.deleteByUserIdAndMediaItemId(userId, titleId);

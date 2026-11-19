@@ -30,13 +30,6 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-/**
- * Stateless security: every request is authenticated with a bearer JWT, validated by Spring Security's OAuth2
- * Resource Server support. Anything not listed explicitly requires authentication (deny by default).
- *
- * <p>Authorities are not read from the token: {@link ActiveAccountFilter} takes them from the current role in the
- * database on every request.
- */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({SecurityProperties.class, AdminProperties.class})
 class SecurityConfiguration {

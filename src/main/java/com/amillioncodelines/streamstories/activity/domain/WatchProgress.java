@@ -6,12 +6,7 @@ import jakarta.persistence.Entity;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * The current progress of a user on a movie or an episode: exactly one of {@code movieId} and {@code episodeId} is
- * set. Only the latest position is kept, and once completed it stays completed (rules A1 and A3).
- *
- * <p>Rows are written with an atomic upsert ({@link WatchProgressRepository}), so the entity is only read.
- */
+/** Written only through the atomic upsert of {@link WatchProgressRepository}. */
 @Entity
 public class WatchProgress extends BaseEntity {
 

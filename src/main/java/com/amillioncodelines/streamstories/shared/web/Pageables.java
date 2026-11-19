@@ -9,19 +9,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-/** Helpers to keep client-controlled pagination within the documented limits. */
 public final class Pageables {
 
     private static final Sort TIE_BREAKER = Sort.by("id");
 
     private Pageables() {}
 
-    /**
-     * Validates that every sort property is in the allowed list and applies a default sort when none was requested.
-     * The identifier is always added as the last criterion, so pages are stable when values tie.
-     *
-     * @throws InvalidRequestException if the request sorts by a property that is not allowed
-     */
     public static Pageable restrictSort(Pageable pageable, Set<String> allowedProperties, Sort defaultSort) {
         checkOffset(pageable);
         for (Sort.Order order : pageable.getSort()) {
@@ -38,17 +31,11 @@ public final class Pageables {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
     }
 
-    /**
-     * For lists with a fixed order: any requested sort is ignored, and the identifier breaks ties.
-     *
-     * @throws InvalidRequestException if the page starts beyond the largest supported offset
-     */
     public static Pageable fixedOrder(Pageable pageable, Sort sort) {
         checkOffset(pageable);
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
     }
 
-    /** Cuts a page from a list that is already in its final order, for results computed in memory. */
     public static <T> Page<T> slice(List<T> all, Pageable pageable) {
         int from = (int) Math.min(pageable.getOffset(), all.size());
         int to = Math.min(from + pageable.getPageSize(), all.size());

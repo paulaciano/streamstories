@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.hibernate.validator.constraints.URL;
 
-/** Seasons are not part of the series request: they are managed with their own endpoints. */
 record SeriesRequest(
         @NotBlank @Size(max = 200) String title,
         @Size(max = 4000) String synopsis,

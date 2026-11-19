@@ -18,12 +18,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
-/**
- * Issues signed access tokens and opaque refresh tokens.
- *
- * <p>The access token only carries the user id ({@code sub}) and role; no personal data. The refresh token is a random
- * 256-bit value: it is returned to the client once and only its SHA-256 hash is stored.
- */
+/** The access token carries only the user id and role, never personal data. Refresh tokens are stored as hashes. */
 @Component
 class TokenIssuer {
 

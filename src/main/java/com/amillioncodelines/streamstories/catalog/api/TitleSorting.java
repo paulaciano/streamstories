@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-/** Sort fields accepted by every title listing. */
 final class TitleSorting {
 
     private static final Set<String> SORTABLE = Set.of("title", "releaseYear", "createdAt");

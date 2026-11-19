@@ -13,10 +13,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Read-only views returned by the catalog. Video URLs are only included when the content can be played, or for
- * administrators.
- */
 public final class CatalogViews {
 
     private CatalogViews() {}
@@ -28,7 +24,6 @@ public final class CatalogViews {
         }
     }
 
-    /** A title in a mixed listing of movies and series. */
     public record CatalogItemView(
             UUID id,
             MediaType type,
@@ -82,7 +77,6 @@ public final class CatalogViews {
         }
     }
 
-    /** A series without its seasons, as shown in listings. */
     public record SeriesSummaryView(
             UUID id,
             String title,
@@ -145,7 +139,6 @@ public final class CatalogViews {
 
     public record EpisodeSummaryView(UUID id, int number, String title, int durationSeconds) {}
 
-    /** A season is reachable by its number even when retired, flagged as such (rule C9). */
     public record SeasonView(
             UUID seriesId, int number, String title, Availability availability, List<EpisodeSummaryView> episodes) {
 
@@ -163,9 +156,6 @@ public final class CatalogViews {
         }
     }
 
-    /**
-     * @param playable whether the episode's season and series are both available
-     */
     public record EpisodeView(
             UUID id,
             UUID seriesId,

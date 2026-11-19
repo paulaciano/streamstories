@@ -27,8 +27,6 @@ class WatchHistoryIntegrationTests {
     @Autowired
     CatalogApi catalog;
 
-    // Continue watching
-
     @Test
     void shouldListUnfinishedMoviesMostRecentlyWatchedFirst() {
         Session admin = api.adminSession();
@@ -170,8 +168,6 @@ class WatchHistoryIntegrationTests {
                 {"content": [{"titleId": "%s"}], "page": {"number": 1, "size": 1, "totalElements": 2, "totalPages": 2}}
                 """.formatted(older));
     }
-
-    // History
 
     @Test
     void shouldListEverythingWatchedIncludingRetiredContent() {

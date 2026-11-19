@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
-/** Rule C11: content with user activity cannot be deleted, only retired. */
 @Component
 class ContentActivityGuard {
 

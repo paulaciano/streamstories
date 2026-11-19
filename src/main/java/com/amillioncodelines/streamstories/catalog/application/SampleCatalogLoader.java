@@ -23,10 +23,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Loads a sample catalog in the {@code dev} profile, so the API can be explored right away. It only runs when the
- * catalog is empty, and goes through the same services as the API, so the sample data follows every business rule.
- */
 @Component
 @Profile("dev")
 class SampleCatalogLoader implements ApplicationRunner {
@@ -68,7 +64,6 @@ class SampleCatalogLoader implements ApplicationRunner {
         log.info("Sample catalog loaded: {} titles", loaded);
     }
 
-    /** Loads the whole sample catalog in a single transaction and returns how many titles it created. */
     int load() {
         SampleCatalog catalog = read();
         return transaction.execute(status -> {
@@ -149,7 +144,6 @@ class SampleCatalogLoader implements ApplicationRunner {
                 .collect(Collectors.toSet());
     }
 
-    /** {@code retired} is optional in the sample file: when absent, the content is available. */
     private static boolean isTrue(Boolean flag) {
         return Boolean.TRUE.equals(flag);
     }

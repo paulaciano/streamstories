@@ -12,10 +12,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * A request from an inactive user to get their account back. Only an administrator can resolve it, and each
- * resolution records who took it and when.
- */
 @Entity
 public class ReactivationRequest extends BaseEntity {
 

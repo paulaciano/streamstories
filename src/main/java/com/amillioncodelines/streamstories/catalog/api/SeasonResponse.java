@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import java.util.List;
 import java.util.UUID;
 
-/** A season with its episodes. */
 record SeasonResponse(
         UUID seriesId, int number, String title, Availability availability, List<EpisodeSummary> episodes) {
 

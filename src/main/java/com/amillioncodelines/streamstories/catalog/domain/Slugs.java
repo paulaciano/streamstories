@@ -3,7 +3,6 @@ package com.amillioncodelines.streamstories.catalog.domain;
 import java.text.Normalizer;
 import java.util.Locale;
 
-/** Builds URL-friendly identifiers: {@code "Ciencia Ficción"} becomes {@code "ciencia-ficcion"}. */
 public final class Slugs {
 
     private Slugs() {}

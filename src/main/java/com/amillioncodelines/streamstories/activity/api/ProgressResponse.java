@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Progress on a movie ({@code movieId}) or an episode ({@code episodeId}): only one of them is present. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 record ProgressResponse(
         UUID movieId,

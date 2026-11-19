@@ -28,12 +28,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-/**
- * Translates exceptions into RFC 9457 Problem Details responses.
- *
- * <p>Framework exceptions are handled by {@link ResponseEntityExceptionHandler}; the overrides below only
- * assign StreamStories problem types where they add meaning for API clients.
- */
 @RestControllerAdvice
 class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 

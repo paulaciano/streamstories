@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Registration, login, token refresh with rotation, and logout. */
 @Service
 public class AuthenticationService {
 
@@ -51,12 +50,7 @@ public class AuthenticationService {
         this.clock = clock;
     }
 
-    /**
-     * Creates an active {@code USER} account (rules I1, I2 and I8).
-     *
-     * <p>Not transactional on purpose: hashing the password takes about 100 ms and must not hold a database connection.
-     * Two concurrent registrations with the same email are still caught by the unique constraint.
-     */
+    /** Not transactional: hashing the password takes about 100 ms and must not hold a database connection. */
     public UserView register(String email, String password, String displayName) {
         if (CredentialsVerifier.exceedsMaxLength(password)) {
             throw new InvalidRequestException(
@@ -71,13 +65,7 @@ public class AuthenticationService {
         return UserView.of(user);
     }
 
-    /**
-     * Issues a token pair for valid credentials of an active account. For an inactive account, the
-     * {@code account-inactive} problem is only returned once the credentials are known to be correct.
-     *
-     * <p>Not transactional on purpose, so the password check does not hold a database connection; each repository
-     * call runs in its own short transaction.
-     */
+    /** {@code account-inactive} is only returned once the password matched, so it never reveals that an email exists. */
     public IssuedTokens login(String email, String password) {
         User user = credentials.verify(email, password);
         if (!user.isActive()) {
@@ -87,16 +75,7 @@ public class AuthenticationService {
         return tokenIssuer.issueFor(user);
     }
 
-    /**
-     * Exchanges a valid refresh token for a new pair and revokes the old one.
-     *
-     * <p>Presenting a token that was already <em>rotated</em> is treated as theft: every refresh token of the user is
-     * revoked. Tokens that are expired, or were revoked by a logout or a deactivation, are just rejected, so a stale
-     * client cannot end the sessions of the legitimate one.
-     *
-     * <p>The transaction must commit even when the request is rejected, so the revocation of a stolen token family is
-     * not rolled back.
-     */
+    /** Presenting a rotated token again is treated as theft: every refresh token of the user is revoked. */
     @Transactional(noRollbackFor = UnauthorizedException.class)
     public IssuedTokens refresh(String refreshToken) {
         Instant now = clock.instant();

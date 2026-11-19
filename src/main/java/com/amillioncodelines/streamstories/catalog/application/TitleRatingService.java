@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
-/** The ratings shown in the detail of a title, from the module that records them (if any). */
 @Service
 public class TitleRatingService {
 

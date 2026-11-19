@@ -20,7 +20,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-/** Refresh token rotation: only the reuse of a rotated token is treated as theft. */
 class AuthenticationServiceTests {
 
     private static final String TOKEN = "raw-refresh-token";

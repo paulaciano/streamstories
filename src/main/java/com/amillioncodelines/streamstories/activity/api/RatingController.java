@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Ratings", description = "Scores from 1 to 5 that the current user gives to movies and series")
 class RatingController {
 
-    /** The order is fixed and a {@code sort} is ignored. */
     private static final Sort MOST_RECENT_FIRST = Sort.by(Sort.Direction.DESC, "updatedAt");
 
     private final RatingService ratings;

@@ -8,10 +8,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Rule C11: a movie or an episode with watch progress cannot be deleted. A series is covered through its episodes,
- * which the catalog checks together.
- */
+/** A series has no progress of its own: the catalog checks its episodes. */
 @Component
 class ProgressActivity implements ContentActivity {
 

@@ -4,7 +4,6 @@ import com.amillioncodelines.streamstories.catalog.application.Audience;
 import java.util.UUID;
 import org.springframework.security.core.Authentication;
 
-/** Derives the catalog audience from the authenticated user's role, and who is looking at the catalog. */
 final class Audiences {
 
     private static final String ADMIN_AUTHORITY = "ROLE_ADMIN";
