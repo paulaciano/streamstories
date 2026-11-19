@@ -11,6 +11,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Lista de seguimiento (`/me/watchlist`): películas y series para ver después. Agregar y quitar son idempotentes, y un título retirado no se puede agregar, pero sigue en las listas donde ya estaba.
 - Sagas (`/franchises`): películas agrupadas en orden. Una película pertenece como máximo a una saga, y borrar la saga no borra sus películas.
 
+### Security
+
+- Límite de intentos de login: tras 5 contraseñas incorrectas para un email en 15 minutos, el login y la reactivación de ese email responden `429`. Los intentos se guardan en la base, así el límite vale para todas las instancias.
+
 ## [0.3.0] - 2026-11-19
 
 ### Added

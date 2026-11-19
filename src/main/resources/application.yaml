@@ -56,3 +56,6 @@ streamstories:
       issuer: streamstories
       access-token-ttl: 15m
     refresh-token-ttl: 7d
+    login:
+      max-failures: 5
+      window: 15m

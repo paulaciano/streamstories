@@ -72,10 +72,10 @@ Todas las rutas son relativas a `/api/v1`.
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
 | `POST` | `/auth/register` | 🔓 | Crea una cuenta `USER` activa. |
-| `POST` | `/auth/login` | 🔓 | Recibe email y contraseña y devuelve un access token y un refresh token. Si la cuenta está inactiva, responde `403` (`account-inactive`). |
+| `POST` | `/auth/login` | 🔓 | Recibe email y contraseña y devuelve un access token y un refresh token. Si la cuenta está inactiva, responde `403` (`account-inactive`). Tras 5 contraseñas incorrectas en 15 minutos, `429` (`too-many-requests`). |
 | `POST` | `/auth/refresh` | 🔓 | Cambia un refresh token por un par nuevo (con rotación). |
 | `POST` | `/auth/logout` | 👤 | Revoca el refresh token enviado. |
-| `POST` | `/auth/reactivation-requests` | 🔓 | Con las credenciales de una cuenta inactiva, crea una solicitud de reactivación o devuelve la pendiente. Responde `202`, o `409` si la cuenta ya está activa. |
+| `POST` | `/auth/reactivation-requests` | 🔓 | Con las credenciales de una cuenta inactiva, crea una solicitud de reactivación o devuelve la pendiente. Responde `202`, o `409` si la cuenta ya está activa. Comparte el límite de intentos del login. |
 | `GET` | `/me` | 👤 | Datos del usuario actual. |
 | `POST` | `/me/deactivate` | 👤 | Desactiva la propia cuenta y revoca sus tokens. Responde `204`. |
 | `GET` | `/admin/users` | 🛠️ | Usuarios, filtrables por `status` y `role`. |
@@ -331,6 +331,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso, violación de una constraint de la base o modificación concurrente del mismo recurso. |
 | `content-unavailable` | 409 | Se intenta reproducir, calificar o agregar a la lista de seguimiento contenido retirado. |
 | `precondition-failed` | 412 | El `If-Match` no coincide con la versión actual del título. |
+| `too-many-requests` | 429 | Demasiadas contraseñas incorrectas para el email. `Retry-After` indica cuántos segundos faltan. |
 | `unsupported-media-type` | 415 | El cuerpo no se envía como `application/json`. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 

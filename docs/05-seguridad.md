@@ -39,6 +39,15 @@ sequenceDiagram
     end
 ```
 
+### Límite de intentos
+
+Después de **5 contraseñas incorrectas** para un mismo email en **15 minutos**, el login y la solicitud de reactivación de ese email responden `429 too-many-requests` con un header `Retry-After`, hasta que termine la ventana. Mientras dura el bloqueo, tampoco se acepta la contraseña correcta. Un login correcto antes de llegar al límite reinicia el contador.
+
+- **Persistente:** los intentos se guardan en la base (`login_attempt`), así el límite se cumple aunque haya varias instancias de la aplicación.
+- **Sin revelar emails:** se cuentan también los emails que no tienen cuenta. Si solo se bloquearan las cuentas reales, el `429` revelaría qué emails existen. Por eso la tabla no guarda el email sino un HMAC, calculado con la clave del servidor.
+- **Costo aceptado:** cualquiera puede bloquear por 15 minutos el login de un email ajeno. Se prefiere a limitar por IP, que detrás de un proxy no es confiable.
+- Una tarea diaria borra los intentos de ventanas ya terminadas.
+
 ### Renovación con rotación
 
 1. El cliente envía su refresh token a `POST /auth/refresh`.
@@ -89,7 +98,7 @@ Mientras la cuenta está inactiva:
 |------|----------|
 | Contraseñas | Hash con BCrypt a través de [`DelegatingPasswordEncoder`](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html), que permite migrar de algoritmo. Longitud: de 8 caracteres a 72 bytes, el máximo que BCrypt procesa. |
 | Secretos | La clave de firma JWT (`STREAMSTORIES_SECURITY_JWT_SECRET`, al menos 32 caracteres) y las credenciales de la base se reciben solo por variables de entorno. Fuera del perfil de desarrollo no hay valores por defecto: si falta la clave, la aplicación no arranca. Los archivos `.env` no se versionan. |
-| Fuerza bruta | Límite de intentos de login (fase 4). |
+| Fuerza bruta | Límite de contraseñas incorrectas por email (ver §5.2, "Límite de intentos"). |
 | CORS | Desactivado por defecto. Se habilita con una lista explícita de orígenes si hace falta. |
 | CSRF | Desactivado: la autenticación va por header `Bearer`, no por cookies de sesión ([referencia](https://docs.spring.io/spring-security/reference/features/exploits/csrf.html#csrf-when)). |
 | Actuator | Solo se exponen `health` e `info`. |

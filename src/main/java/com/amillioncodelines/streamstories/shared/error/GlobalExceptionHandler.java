@@ -36,6 +36,14 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String SQL_STATE_DATA_EXCEPTION = "22";
     private static final URI ABOUT_BLANK = URI.create("about:blank");
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    ResponseEntity<ProblemDetail> handleTooManyRequests(TooManyRequestsException ex) {
+        long seconds = Math.max(1, ex.retryAfter().toSeconds());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(seconds))
+                .body(problem(ex.type(), ex.getMessage()));
+    }
+
     @ExceptionHandler(ProblemException.class)
     ProblemDetail handleProblem(ProblemException ex) {
         ProblemDetail body = problem(ex.type(), ex.getMessage());
