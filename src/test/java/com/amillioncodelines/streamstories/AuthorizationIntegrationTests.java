@@ -48,7 +48,10 @@ class AuthorizationIntegrationTests {
                 Arguments.of(HttpMethod.GET, "/api/v1/me/ratings"),
                 Arguments.of(HttpMethod.PUT, "/api/v1/me/ratings/" + ID),
                 Arguments.of(HttpMethod.DELETE, "/api/v1/me/ratings/" + ID),
-                Arguments.of(HttpMethod.GET, "/api/v1/me/recommendations"));
+                Arguments.of(HttpMethod.GET, "/api/v1/me/recommendations"),
+                Arguments.of(HttpMethod.GET, "/api/v1/me/watchlist"),
+                Arguments.of(HttpMethod.PUT, "/api/v1/me/watchlist/" + ID),
+                Arguments.of(HttpMethod.DELETE, "/api/v1/me/watchlist/" + ID));
     }
 
     static Stream<Arguments> adminEndpoints() {

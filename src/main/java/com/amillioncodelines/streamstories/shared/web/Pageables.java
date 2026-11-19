@@ -32,8 +32,12 @@ public final class Pageables {
     }
 
     public static Pageable fixedOrder(Pageable pageable, Sort sort) {
+        return fixedOrder(pageable, sort, TIE_BREAKER);
+    }
+
+    public static Pageable fixedOrder(Pageable pageable, Sort sort, Sort tieBreaker) {
         checkOffset(pageable);
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(TIE_BREAKER));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort.and(tieBreaker));
     }
 
     public static <T> Page<T> slice(List<T> all, Pageable pageable) {

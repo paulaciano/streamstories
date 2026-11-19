@@ -150,7 +150,7 @@ erDiagram
     MEDIA_ITEM ||--o{ WATCHLIST_ENTRY : "guardado en"
 ```
 
-`FRANCHISE` y `WATCHLIST_ENTRY` se incorporan en la fase 4. El resto forma el núcleo de las fases 1 a 3.
+`FRANCHISE` se incorpora en la fase 4. El resto forma el núcleo de las fases 1 a 4.
 
 ## 3.3 Decisiones de modelado
 
@@ -213,7 +213,7 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C8 | Un género con títulos asociados no se puede borrar. | Servicio → `409 Conflict` |
 | C9 | El contenido retirado no aparece en los listados, búsquedas ni detalles de serie que ve un `USER`, pero sigue siendo accesible por ID (una temporada, por su número), indicando su `availability`. Un `ADMIN` ve todo. | Consultas del servicio |
 | C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
-| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada (progreso o puntuaciones), por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
+| C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada (progreso, puntuaciones o lista de seguimiento), por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
 | C12 | Un contenido retirado puede volver a estar disponible. | — |
 
 ### Identidad
@@ -246,6 +246,8 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | A10 | La puntuación es un **entero de 1 a 5**. Solo se califican títulos (películas y series), nunca episodios sueltos. |
 | A11 | El promedio de un título se calcula sobre todas sus puntuaciones, incluidas las de cuentas desactivadas, y se expresa con un decimal (por ejemplo, `4.3`). |
 | A12 | Se puede calificar un título que no se vio. Sobre un título retirado no se puede crear ni cambiar una puntuación, pero sí borrarla. Las existentes se conservan y siguen contando para el promedio. |
+| A13 | La lista de seguimiento tiene películas y series, nunca episodios sueltos, cada una como máximo una vez. Volver a agregar un título no cambia su fecha. |
+| A14 | No se puede agregar un título retirado. Uno que se retira después de agregarlo sigue en la lista, marcado como no disponible, y se puede quitar. |
 
 ## 3.5 Motor de recomendaciones (fase 3)
 

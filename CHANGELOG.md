@@ -6,6 +6,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+### Added
+
+- Lista de seguimiento (`/me/watchlist`): películas y series para ver después. Agregar y quitar son idempotentes, y un título retirado no se puede agregar, pero sigue en las listas donde ya estaba.
+
 ## [0.3.0] - 2026-11-19
 
 ### Added
