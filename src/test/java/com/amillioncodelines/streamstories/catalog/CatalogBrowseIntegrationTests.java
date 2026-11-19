@@ -85,6 +85,19 @@ class CatalogBrowseIntegrationTests {
     }
 
     @Test
+    void shouldSearchIgnoringAccentsAndCase() {
+        Session admin = api.adminSession();
+        String tag = token();
+        String movie = catalog.createMovie(admin, tag + " Órbita Ñandú", 2000);
+
+        assertThat(catalog.get(admin, "/api/v1/catalog?q=" + tag + " ORBITA nandu"))
+                .bodyJson()
+                .extractingPath("$.content[*].id")
+                .asArray()
+                .containsExactly(movie);
+    }
+
+    @Test
     void shouldTreatSearchWildcardsLiterally() {
         Session admin = api.adminSession();
         String tag = token();

@@ -31,7 +31,7 @@ class MovieServiceTests {
         UUID id = UUID.randomUUID();
         Movie movie = new Movie(new TitleDetails("Arrival", null, 2016, null), List.of(), 6960, "https://v/1");
         when(movies.findById(id)).thenReturn(Optional.of(movie));
-        when(activity.exists(ContentKind.MOVIE, id)).thenReturn(true);
+        when(activity.existsForAny(ContentKind.MOVIE, List.of(id))).thenReturn(true);
 
         assertThatThrownBy(() -> service.delete(id)).isInstanceOf(ConflictException.class);
         verify(movies, never()).delete(any(Movie.class));

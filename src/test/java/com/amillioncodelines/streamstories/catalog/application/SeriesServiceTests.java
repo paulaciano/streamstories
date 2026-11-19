@@ -38,7 +38,7 @@ class SeriesServiceTests {
         UUID episodeId = UUID.randomUUID();
         ReflectionTestUtils.setField(episode, "id", episodeId);
         when(seriesRepository.findById(seriesId)).thenReturn(Optional.of(series));
-        when(activity.exists(ContentKind.EPISODE, episodeId)).thenReturn(true);
+        when(activity.existsForAny(ContentKind.EPISODE, List.of(episodeId))).thenReturn(true);
 
         assertThatThrownBy(() -> service.delete(seriesId)).isInstanceOf(ConflictException.class);
         verify(seriesRepository, never()).delete(any(Series.class));

@@ -61,7 +61,8 @@ public final class CatalogViews {
             Availability availability,
             List<GenreView> genres,
             Instant createdAt,
-            Instant updatedAt) {
+            Instant updatedAt,
+            long version) {
 
         static MovieView of(Movie movie, Audience audience) {
             boolean showVideo = movie.isPlayable() || audience.seesRetiredContent();
@@ -76,7 +77,8 @@ public final class CatalogViews {
                     movie.getAvailability(),
                     genreViews(movie),
                     movie.getCreatedAt(),
-                    movie.getUpdatedAt());
+                    movie.getUpdatedAt(),
+                    movie.getVersion());
         }
     }
 
@@ -114,7 +116,8 @@ public final class CatalogViews {
             List<GenreView> genres,
             List<SeasonSummaryView> seasons,
             Instant createdAt,
-            Instant updatedAt) {
+            Instant updatedAt,
+            long version) {
 
         static SeriesView of(Series series, Audience audience) {
             List<SeasonSummaryView> seasons = series.getSeasons().stream()
@@ -135,7 +138,8 @@ public final class CatalogViews {
                     genreViews(series),
                     seasons,
                     series.getCreatedAt(),
-                    series.getUpdatedAt());
+                    series.getUpdatedAt(),
+                    series.getVersion());
         }
     }
 

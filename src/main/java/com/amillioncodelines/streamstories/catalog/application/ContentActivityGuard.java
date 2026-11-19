@@ -3,6 +3,7 @@ package com.amillioncodelines.streamstories.catalog.application;
 import com.amillioncodelines.streamstories.catalog.ContentActivity;
 import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.shared.error.ConflictException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,14 @@ class ContentActivityGuard {
     }
 
     void ensureNoActivity(ContentKind kind, UUID contentId) {
-        boolean inUse = activities.stream().anyMatch(activity -> activity.exists(kind, contentId));
+        ensureNoActivity(kind, List.of(contentId));
+    }
+
+    void ensureNoActivity(ContentKind kind, Collection<UUID> contentIds) {
+        if (contentIds.isEmpty()) {
+            return;
+        }
+        boolean inUse = activities.stream().anyMatch(activity -> activity.existsForAny(kind, contentIds));
         if (inUse) {
             throw new ConflictException("The content has user activity: retire it instead of deleting it.");
         }

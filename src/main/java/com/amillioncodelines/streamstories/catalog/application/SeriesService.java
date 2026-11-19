@@ -17,6 +17,7 @@ import com.amillioncodelines.streamstories.catalog.domain.Series;
 import com.amillioncodelines.streamstories.catalog.domain.SeriesRepository;
 import com.amillioncodelines.streamstories.catalog.domain.TitleDetails;
 import com.amillioncodelines.streamstories.shared.error.ResourceNotFoundException;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,7 +69,14 @@ public class SeriesService {
 
     @Transactional
     public SeriesView replace(UUID id, SeriesCommand command) {
+        return replace(id, command, null);
+    }
+
+    /** @param expectedVersion the version the client read, or {@code null} for an unconditional change */
+    @Transactional
+    public SeriesView replace(UUID id, SeriesCommand command, Long expectedVersion) {
         Series series = findSeries(id);
+        series.requireVersion(expectedVersion);
         series.update(details(command), genres.resolve(command.genreIds()));
         return SeriesView.of(seriesRepository.saveAndFlush(series), Audience.ADMIN);
     }
@@ -76,7 +84,13 @@ public class SeriesService {
     /** Retiring a series makes all its episodes unplayable, without touching them. */
     @Transactional
     public SeriesView changeAvailability(UUID id, Availability availability) {
+        return changeAvailability(id, availability, null);
+    }
+
+    @Transactional
+    public SeriesView changeAvailability(UUID id, Availability availability, Long expectedVersion) {
         Series series = findSeries(id);
+        series.requireVersion(expectedVersion);
         series.changeAvailability(availability);
         return SeriesView.of(seriesRepository.saveAndFlush(series), Audience.ADMIN);
     }
@@ -86,9 +100,11 @@ public class SeriesService {
     public void delete(UUID id) {
         Series series = findSeries(id);
         activity.ensureNoActivity(ContentKind.SERIES, id);
-        series.getSeasons().stream()
+        List<UUID> episodeIds = series.getSeasons().stream()
                 .flatMap(season -> season.getEpisodes().stream())
-                .forEach(episode -> activity.ensureNoActivity(ContentKind.EPISODE, episode.getId()));
+                .map(Episode::getId)
+                .toList();
+        activity.ensureNoActivity(ContentKind.EPISODE, episodeIds);
         seriesRepository.delete(series);
     }
 

@@ -8,11 +8,9 @@ import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
 import com.amillioncodelines.streamstories.catalog.MovieSummary;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,13 +34,13 @@ public class WatchHistoryService {
      * Movies not completed and one entry per series with its most recently watched episode. A series leaves once
      * that episode is completed and no playable episode comes after it. Retired movies and series are left out.
      *
-     * <p>Built in memory from the user's own progress, which is small enough; the page is cut at the end.
+     * <p>The database returns one candidate per series and per unfinished movie. Which of them stay depends on the
+     * catalog (availability, following episodes), so the page is cut in memory from those candidates.
      */
     @Transactional(readOnly = true)
     public Page<WatchedItemView> continueWatching(UUID userId, Pageable pageable) {
         List<WatchProgress> candidates = progress.findContinueWatchingCandidates(userId);
         Catalog content = lookUp(candidates);
-        Set<UUID> seenSeries = new HashSet<>();
         List<WatchedItemView> entries = new ArrayList<>();
         for (WatchProgress saved : candidates) {
             if (saved.getMovieId() != null) {
@@ -52,8 +50,8 @@ public class WatchHistoryService {
                 }
             } else {
                 EpisodeSummary episode = content.episodes().get(saved.getEpisodeId());
-                // Only the most recently watched episode of each series counts (rule A6).
-                if (episode != null && seenSeries.add(episode.seriesId()) && resumable(saved, episode)) {
+                // The repository already returns only the most recent episode of each series (rule A6).
+                if (episode != null && resumable(saved, episode)) {
                     entries.add(view(saved, episode));
                 }
             }

@@ -1,6 +1,7 @@
 package com.amillioncodelines.streamstories.activity.domain;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,8 +37,8 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
     /** Same as {@link #upsertMovieProgress}, for an episode. */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(nativeQuery = true, value = """
-            INSERT INTO watch_progress (id, user_id, episode_id, position_seconds, completed, last_watched_at)
-            VALUES (uuidv7(), :userId, :episodeId, :positionSeconds, :completed, :now)
+            INSERT INTO watch_progress (id, user_id, episode_id, series_id, position_seconds, completed, last_watched_at)
+            VALUES (uuidv7(), :userId, :episodeId, :seriesId, :positionSeconds, :completed, :now)
             ON CONFLICT (user_id, episode_id) WHERE episode_id IS NOT NULL DO UPDATE
             SET position_seconds = EXCLUDED.position_seconds,
                 completed = watch_progress.completed OR EXCLUDED.completed,
@@ -46,6 +47,7 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
     void upsertEpisodeProgress(
             @Param("userId") UUID userId,
             @Param("episodeId") UUID episodeId,
+            @Param("seriesId") UUID seriesId,
             @Param("positionSeconds") int positionSeconds,
             @Param("completed") boolean completed,
             @Param("now") Instant now);
@@ -54,20 +56,28 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
 
     Optional<WatchProgress> findByUserIdAndEpisodeId(UUID userId, UUID episodeId);
 
-    boolean existsByMovieId(UUID movieId);
+    boolean existsByMovieIdIn(Collection<UUID> movieIds);
 
-    boolean existsByEpisodeId(UUID episodeId);
+    boolean existsByEpisodeIdIn(Collection<UUID> episodeIds);
 
     Page<WatchProgress> findByUserId(UUID userId, Pageable pageable);
 
     /**
-     * What "continue watching" starts from: movies not completed and every episode, most recently watched first.
-     * Completed episodes are kept because a series can still continue after them.
+     * What "continue watching" starts from, most recently watched first: movies not completed, and the most recent
+     * episode of each series (rule A6), completed or not, because a series can still continue after it.
      */
-    @Query("""
-            select p from WatchProgress p
-            where p.userId = :userId and (p.episodeId is not null or p.completed = false)
-            order by p.lastWatchedAt desc, p.id desc
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM (
+                SELECT DISTINCT ON (series_id) *
+                FROM watch_progress
+                WHERE user_id = :userId AND series_id IS NOT NULL
+                ORDER BY series_id, last_watched_at DESC, id DESC
+            ) latest_episode
+            UNION ALL
+            SELECT *
+            FROM watch_progress
+            WHERE user_id = :userId AND movie_id IS NOT NULL AND completed = false
+            ORDER BY last_watched_at DESC, id DESC
             """)
     List<WatchProgress> findContinueWatchingCandidates(@Param("userId") UUID userId);
 }

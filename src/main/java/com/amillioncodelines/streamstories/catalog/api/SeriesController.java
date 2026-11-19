@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.catalog.api;
 
+import com.amillioncodelines.streamstories.catalog.application.CatalogViews.SeriesView;
 import com.amillioncodelines.streamstories.catalog.application.SeriesService;
 import com.amillioncodelines.streamstories.catalog.application.TitleRatingService;
 import com.amillioncodelines.streamstories.catalog.domain.Availability;
@@ -13,6 +14,7 @@ import java.net.URI;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,6 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/series")
 @Tag(name = "Series", description = "Series, seasons and episodes")
 class SeriesController {
+
+    private static final String IF_MATCH =
+            "Send the ETag of the detail in If-Match to change it only if nobody changed it"
+                    + " since you read it: otherwise the answer is 412. Without If-Match, the change is not conditional.";
 
     private final SeriesService series;
     private final TitleRatingService ratings;
@@ -56,30 +63,39 @@ class SeriesController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Series detail, with its seasons and ratings")
-    SeriesResponse get(@PathVariable UUID id, Authentication authentication) {
-        return SeriesResponse.from(
-                series.get(id, Audiences.of(authentication)),
-                ratings.summarize(id, Audiences.viewerId(authentication)));
+    ResponseEntity<SeriesResponse> get(@PathVariable UUID id, Authentication authentication) {
+        SeriesView view = series.get(id, Audiences.of(authentication));
+        return ETags.withVersion(
+                view.version(), SeriesResponse.from(view, ratings.summarize(id, Audiences.viewerId(authentication))));
     }
 
     @PostMapping
     @Operation(summary = "Creates a series (ADMIN)")
     ResponseEntity<SeriesResponse> create(@Valid @RequestBody SeriesRequest request) {
-        SeriesResponse created = SeriesResponse.from(series.create(request.toCommand()));
+        SeriesView created = series.create(request.toCommand());
         return ResponseEntity.created(URI.create("/api/v1/series/" + created.id()))
-                .body(created);
+                .eTag(String.valueOf(created.version()))
+                .body(SeriesResponse.from(created));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Replaces a series' data, including its genres (ADMIN)")
-    SeriesResponse replace(@PathVariable UUID id, @Valid @RequestBody SeriesRequest request) {
-        return SeriesResponse.from(series.replace(id, request.toCommand()));
+    @Operation(summary = "Replaces a series' data, including its genres (ADMIN)", description = IF_MATCH)
+    ResponseEntity<SeriesResponse> replace(
+            @PathVariable UUID id,
+            @RequestHeader(name = HttpHeaders.IF_MATCH, required = false) String ifMatch,
+            @Valid @RequestBody SeriesRequest request) {
+        SeriesView view = series.replace(id, request.toCommand(), ETags.expectedVersion(ifMatch));
+        return ETags.withVersion(view.version(), SeriesResponse.from(view));
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Retires a whole series or makes it available again (ADMIN)")
-    SeriesResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
-        return SeriesResponse.from(series.changeAvailability(id, request.availability()));
+    @Operation(summary = "Retires a whole series or makes it available again (ADMIN)", description = IF_MATCH)
+    ResponseEntity<SeriesResponse> changeAvailability(
+            @PathVariable UUID id,
+            @RequestHeader(name = HttpHeaders.IF_MATCH, required = false) String ifMatch,
+            @Valid @RequestBody AvailabilityRequest request) {
+        SeriesView view = series.changeAvailability(id, request.availability(), ETags.expectedVersion(ifMatch));
+        return ETags.withVersion(view.version(), SeriesResponse.from(view));
     }
 
     @DeleteMapping("/{id}")

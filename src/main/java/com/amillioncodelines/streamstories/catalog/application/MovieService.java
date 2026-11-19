@@ -52,7 +52,14 @@ public class MovieService {
 
     @Transactional
     public MovieView replace(UUID id, MovieCommand command) {
+        return replace(id, command, null);
+    }
+
+    /** @param expectedVersion the version the client read, or {@code null} for an unconditional change */
+    @Transactional
+    public MovieView replace(UUID id, MovieCommand command, Long expectedVersion) {
         Movie movie = find(id);
+        movie.requireVersion(expectedVersion);
         movie.update(details(command), genres.resolve(command.genreIds()));
         movie.changeMedia(command.durationSeconds(), command.videoUrl());
         return MovieView.of(movies.saveAndFlush(movie), Audience.ADMIN);
@@ -60,7 +67,13 @@ public class MovieService {
 
     @Transactional
     public MovieView changeAvailability(UUID id, Availability availability) {
+        return changeAvailability(id, availability, null);
+    }
+
+    @Transactional
+    public MovieView changeAvailability(UUID id, Availability availability, Long expectedVersion) {
         Movie movie = find(id);
+        movie.requireVersion(expectedVersion);
         movie.changeAvailability(availability);
         return MovieView.of(movies.saveAndFlush(movie), Audience.ADMIN);
     }

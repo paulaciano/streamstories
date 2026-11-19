@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.catalog;
 
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -11,5 +12,6 @@ import java.util.UUID;
  */
 public interface ContentActivity {
 
-    boolean exists(ContentKind kind, UUID contentId);
+    /** Whether any of the given contents of that kind has activity. Checked in one go, not one by one. */
+    boolean existsForAny(ContentKind kind, Collection<UUID> contentIds);
 }

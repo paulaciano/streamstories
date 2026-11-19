@@ -41,7 +41,12 @@ public class ProgressService {
         PlayableContent episode = playable(ContentKind.EPISODE, episodeId, "Episode %s does not exist.");
         PlaybackPosition position = PlaybackPosition.of(positionSeconds, episode.durationSeconds());
         progress.upsertEpisodeProgress(
-                userId, episodeId, position.positionSeconds(), position.completed(), clock.instant());
+                userId,
+                episodeId,
+                episode.seriesId(),
+                position.positionSeconds(),
+                position.completed(),
+                clock.instant());
         return view(
                 episode, progress.findByUserIdAndEpisodeId(userId, episodeId).orElseThrow());
     }

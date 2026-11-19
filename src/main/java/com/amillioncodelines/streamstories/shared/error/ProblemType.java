@@ -14,6 +14,7 @@ public enum ProblemType {
     METHOD_NOT_ALLOWED("method-not-allowed", "Method not allowed", HttpStatus.METHOD_NOT_ALLOWED),
     NOT_ACCEPTABLE("not-acceptable", "Not acceptable", HttpStatus.NOT_ACCEPTABLE),
     CONFLICT("conflict", "Conflict", HttpStatus.CONFLICT),
+    PRECONDITION_FAILED("precondition-failed", "Precondition failed", HttpStatus.PRECONDITION_FAILED),
     CONTENT_UNAVAILABLE("content-unavailable", "Content unavailable", HttpStatus.CONFLICT),
     UNSUPPORTED_MEDIA_TYPE("unsupported-media-type", "Unsupported media type", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     INTERNAL_ERROR("internal-error", "Internal error", HttpStatus.INTERNAL_SERVER_ERROR);
