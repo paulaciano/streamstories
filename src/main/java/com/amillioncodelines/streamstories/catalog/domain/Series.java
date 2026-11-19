@@ -35,7 +35,7 @@ public class Series extends MediaItem {
     /** Season numbers are unique within the series (rule C4). */
     public Season addSeason(int number, String title) {
         if (findSeason(number).isPresent()) {
-            throw new ConflictException("La serie ya tiene una temporada %d.".formatted(number));
+            throw new ConflictException("The series already has a season %d.".formatted(number));
         }
         Season season = new Season(this, number, title);
         seasons.add(season);
@@ -46,8 +46,7 @@ public class Series extends MediaItem {
     /** Only an empty season can be removed; its episodes have to be deleted first. */
     public void removeSeason(Season season) {
         if (!season.getEpisodes().isEmpty()) {
-            throw new ConflictException(
-                    "La temporada %d tiene episodios: hay que borrarlos primero.".formatted(season.getNumber()));
+            throw new ConflictException("Season %d has episodes: delete them first.".formatted(season.getNumber()));
         }
         seasons.remove(season);
     }

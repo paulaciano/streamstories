@@ -54,7 +54,7 @@ class GlobalExceptionHandlerTests {
                 .extractingPath("$.errors[*].field")
                 .asArray()
                 .containsExactly("durationSeconds", "title");
-        assertThat(result).bodyJson().extractingPath("$.errors[1].message").isEqualTo("no debe estar vacío");
+        assertThat(result).bodyJson().extractingPath("$.errors[1].message").isEqualTo("must not be blank");
     }
 
     @Test
@@ -172,7 +172,41 @@ class GlobalExceptionHandlerTests {
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .bodyJson()
                 .extractingPath("$.detail")
-                .isEqualTo("El parámetro 'number' tiene un valor inválido.");
+                .isEqualTo("Parameter 'number' has an invalid value.");
+    }
+
+    @Test
+    void shouldGiveAProblemTypeToUnsupportedMethods() {
+        assertThat(mvc.delete().uri("/probe"))
+                .hasStatus(HttpStatus.METHOD_NOT_ALLOWED)
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"type": "urn:streamstories:problem:method-not-allowed", "title": "Method not allowed"}
+                        """);
+    }
+
+    @Test
+    void shouldGiveAProblemTypeToUnsupportedMediaTypes() {
+        assertThat(mvc.post().uri("/probe").contentType(MediaType.TEXT_PLAIN).content("title"))
+                .hasStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .bodyJson()
+                .extractingPath("$.type")
+                .isEqualTo("urn:streamstories:problem:unsupported-media-type");
+    }
+
+    @Test
+    void shouldAnswerInEnglishWhateverLanguageTheClientAsksFor() {
+        assertThat(mvc.post()
+                        .uri("/probe")
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "es-AR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title": "", "durationSeconds": 1}
+                                """))
+                .bodyJson()
+                .isLenientlyEqualTo("""
+                        {"title": "Invalid data", "errors": [{"field": "title", "message": "must not be blank"}]}
+                        """);
     }
 
     record ProbeRequest(@NotBlank String title, @Positive int durationSeconds) {}

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/episodes")
-@Tag(name = "Series", description = "Series, temporadas y alta de episodios")
+@Tag(name = "Series", description = "Series, seasons and episodes")
 class EpisodeController {
 
     private final SeriesService series;
@@ -29,21 +29,21 @@ class EpisodeController {
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Detalle de un episodio",
-            description = "`playable` indica si la temporada y la serie del episodio están disponibles.")
+            summary = "Episode detail",
+            description = "`playable` tells whether the episode's season and series are available.")
     EpisodeResponse get(@PathVariable UUID id, Authentication authentication) {
         return EpisodeResponse.from(series.getEpisode(id, Audiences.of(authentication)));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Reemplaza los datos de un episodio (ADMIN)")
+    @Operation(summary = "Replaces an episode's data (ADMIN)")
     EpisodeResponse replace(@PathVariable UUID id, @Valid @RequestBody EpisodeRequest request) {
         return EpisodeResponse.from(series.replaceEpisode(id, request.toCommand()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Borra un episodio sin actividad de usuarios (ADMIN)")
+    @Operation(summary = "Deletes an episode without user activity (ADMIN)")
     void delete(@PathVariable UUID id) {
         series.deleteEpisode(id);
     }

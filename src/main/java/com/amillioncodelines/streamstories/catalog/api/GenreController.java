@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/genres")
-@Tag(name = "Géneros")
+@Tag(name = "Genres")
 class GenreController {
 
     private static final Set<String> SORTABLE = Set.of("name");
@@ -39,20 +39,20 @@ class GenreController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista de géneros")
+    @Operation(summary = "Lists genres")
     PageResponse<GenreResponse> list(@ParameterObject Pageable pageable) {
         return PageResponse.of(
                 genres.list(Pageables.restrictSort(pageable, SORTABLE, DEFAULT_SORT)), GenreResponse::from);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Detalle de un género")
+    @Operation(summary = "Genre detail")
     GenreResponse get(@PathVariable UUID id) {
         return GenreResponse.from(genres.get(id));
     }
 
     @PostMapping
-    @Operation(summary = "Crea un género (ADMIN). El slug se genera a partir del nombre.")
+    @Operation(summary = "Creates a genre (ADMIN). The slug is derived from the name.")
     ResponseEntity<GenreResponse> create(@Valid @RequestBody GenreRequest request) {
         GenreResponse genre = GenreResponse.from(genres.create(request.name()));
         return ResponseEntity.created(URI.create("/api/v1/genres/" + genre.id()))
@@ -60,14 +60,14 @@ class GenreController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Cambia el nombre de un género (ADMIN)")
+    @Operation(summary = "Renames a genre (ADMIN)")
     GenreResponse rename(@PathVariable UUID id, @Valid @RequestBody GenreRequest request) {
         return GenreResponse.from(genres.rename(id, request.name()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Borra un género sin títulos asociados (ADMIN)")
+    @Operation(summary = "Deletes a genre without titles (ADMIN)")
     void delete(@PathVariable UUID id) {
         genres.delete(id);
     }

@@ -20,7 +20,7 @@ class CredentialsVerifier {
     /** BCrypt only uses the first 72 bytes of a password; longer values are rejected instead of silently truncated. */
     static final int MAX_PASSWORD_BYTES = 72;
 
-    private static final String INVALID_CREDENTIALS = "Credenciales inválidas.";
+    private static final String INVALID_CREDENTIALS = "Invalid credentials.";
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;

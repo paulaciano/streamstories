@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
-@Tag(name = "Administración de usuarios")
+@Tag(name = "User administration")
 class AdminUserController {
 
     private static final Set<String> SORTABLE = Set.of("email", "displayName", "createdAt");
@@ -39,7 +39,7 @@ class AdminUserController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista usuarios, filtrables por estado y rol")
+    @Operation(summary = "Lists users, filterable by status and role")
     PageResponse<UserResponse> list(
             @RequestParam(required = false) AccountStatus status,
             @RequestParam(required = false) Role role,
@@ -50,8 +50,8 @@ class AdminUserController {
 
     @PatchMapping("/{id}")
     @Operation(
-            summary = "Cambia el estado o el rol de un usuario",
-            description = "No se puede desactivar ni degradar al último administrador activo.")
+            summary = "Changes a user's status or role",
+            description = "The last active administrator cannot be deactivated or demoted.")
     UserResponse update(
             @PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request, @AuthenticationPrincipal Jwt jwt) {
         return UserResponse.from(accounts.updateUser(id, request.status(), request.role(), CurrentUser.id(jwt)));

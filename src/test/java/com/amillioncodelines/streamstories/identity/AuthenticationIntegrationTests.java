@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 @IntegrationTest
 class AuthenticationIntegrationTests {
 
-    private static final String INVALID_CREDENTIALS = "Credenciales inválidas.";
+    private static final String INVALID_CREDENTIALS = "Invalid credentials.";
 
     @Autowired
     MockMvcTester mvc;

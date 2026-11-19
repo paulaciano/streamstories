@@ -100,12 +100,12 @@ public class AccountService {
         List<User> activeAdmins = users.lockActiveAdmins();
         boolean isTheOnlyOne = activeAdmins.size() == 1 && activeAdmins.contains(admin);
         if (isTheOnlyOne) {
-            throw new ConflictException("No se puede desactivar ni degradar al último administrador activo.");
+            throw new ConflictException("The last active administrator cannot be deactivated or demoted.");
         }
     }
 
     private User findUser(UUID userId) {
         return users.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario %s.".formatted(userId)));
+                .orElseThrow(() -> new ResourceNotFoundException("User %s does not exist.".formatted(userId)));
     }
 }

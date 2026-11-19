@@ -26,7 +26,7 @@ class OpenApiConfiguration {
         return new OpenAPI()
                 .info(new Info()
                         .title("StreamStories API")
-                        .description("API REST para una plataforma de catálogo audiovisual bajo demanda.")
+                        .description("REST API for an on-demand streaming catalog.")
                         .version(version)
                         .license(new License().name("MIT").url("https://opensource.org/license/mit")))
                 .components(new Components()
@@ -36,7 +36,7 @@ class OpenApiConfiguration {
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
-                                        .description("Access token obtenido en `POST /api/v1/auth/login`.")))
+                                        .description("Access token from `POST /api/v1/auth/login`.")))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
     }
 }

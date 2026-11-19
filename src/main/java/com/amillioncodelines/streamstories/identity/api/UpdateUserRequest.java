@@ -7,7 +7,7 @@ import jakarta.validation.constraints.AssertTrue;
 /** Partial update: only the fields that are present change. */
 record UpdateUserRequest(AccountStatus status, Role role) {
 
-    @AssertTrue(message = "se debe indicar status o role")
+    @AssertTrue(message = "status or role is required")
     boolean isAnyFieldPresent() {
         return status != null || role != null;
     }

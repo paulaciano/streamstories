@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/series")
-@Tag(name = "Series", description = "Series, temporadas y alta de episodios")
+@Tag(name = "Series", description = "Series, seasons and episodes")
 class SeriesController {
 
     private final SeriesService series;
@@ -42,11 +42,11 @@ class SeriesController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista series, filtrables por género y texto")
+    @Operation(summary = "Lists series, filterable by genre and text")
     PageResponse<SeriesSummaryResponse> list(
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String q,
-            @Parameter(description = "Solo para ADMIN") @RequestParam(required = false) Availability availability,
+            @Parameter(description = "ADMIN only") @RequestParam(required = false) Availability availability,
             @ParameterObject Pageable pageable,
             Authentication authentication) {
         var filter = new CatalogFilter(genre, null, q, availability);
@@ -55,7 +55,7 @@ class SeriesController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Detalle de una serie con el resumen de sus temporadas")
+    @Operation(summary = "Series detail, with its seasons and ratings")
     SeriesResponse get(@PathVariable UUID id, Authentication authentication) {
         return SeriesResponse.from(
                 series.get(id, Audiences.of(authentication)),
@@ -63,7 +63,7 @@ class SeriesController {
     }
 
     @PostMapping
-    @Operation(summary = "Crea una serie (ADMIN)")
+    @Operation(summary = "Creates a series (ADMIN)")
     ResponseEntity<SeriesResponse> create(@Valid @RequestBody SeriesRequest request) {
         SeriesResponse created = SeriesResponse.from(series.create(request.toCommand()));
         return ResponseEntity.created(URI.create("/api/v1/series/" + created.id()))
@@ -71,32 +71,32 @@ class SeriesController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Reemplaza los datos de una serie, incluidos sus géneros (ADMIN)")
+    @Operation(summary = "Replaces a series' data, including its genres (ADMIN)")
     SeriesResponse replace(@PathVariable UUID id, @Valid @RequestBody SeriesRequest request) {
         return SeriesResponse.from(series.replace(id, request.toCommand()));
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Retira una serie completa o la vuelve a ofrecer (ADMIN)")
+    @Operation(summary = "Retires a whole series or makes it available again (ADMIN)")
     SeriesResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
         return SeriesResponse.from(series.changeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Borra una serie sin actividad, con sus temporadas y episodios (ADMIN)")
+    @Operation(summary = "Deletes a series without activity, with its seasons and episodes (ADMIN)")
     void delete(@PathVariable UUID id) {
         series.delete(id);
     }
 
     @GetMapping("/{id}/seasons/{number}")
-    @Operation(summary = "Una temporada con sus episodios")
+    @Operation(summary = "A season with its episodes")
     SeasonResponse getSeason(@PathVariable UUID id, @PathVariable int number) {
         return SeasonResponse.from(series.getSeason(id, number));
     }
 
     @PostMapping("/{id}/seasons")
-    @Operation(summary = "Agrega una temporada (ADMIN)")
+    @Operation(summary = "Adds a season (ADMIN)")
     ResponseEntity<SeasonResponse> addSeason(@PathVariable UUID id, @Valid @RequestBody SeasonRequest request) {
         SeasonResponse season = SeasonResponse.from(series.addSeason(id, request.number(), request.title()));
         return ResponseEntity.created(URI.create("/api/v1/series/%s/seasons/%d".formatted(id, season.number())))
@@ -104,14 +104,14 @@ class SeriesController {
     }
 
     @PutMapping("/{id}/seasons/{number}")
-    @Operation(summary = "Modifica el título de una temporada (ADMIN)")
+    @Operation(summary = "Changes a season's title (ADMIN)")
     SeasonResponse updateSeason(
             @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody SeasonUpdateRequest request) {
         return SeasonResponse.from(series.updateSeason(id, number, request.title()));
     }
 
     @PatchMapping("/{id}/seasons/{number}")
-    @Operation(summary = "Retira una temporada completa o la vuelve a ofrecer (ADMIN)")
+    @Operation(summary = "Retires a whole season or makes it available again (ADMIN)")
     SeasonResponse changeSeasonAvailability(
             @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody AvailabilityRequest request) {
         return SeasonResponse.from(series.changeSeasonAvailability(id, number, request.availability()));
@@ -119,13 +119,13 @@ class SeriesController {
 
     @DeleteMapping("/{id}/seasons/{number}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Borra una temporada sin episodios (ADMIN)")
+    @Operation(summary = "Deletes a season without episodes (ADMIN)")
     void deleteSeason(@PathVariable UUID id, @PathVariable int number) {
         series.deleteSeason(id, number);
     }
 
     @PostMapping("/{id}/seasons/{number}/episodes")
-    @Operation(summary = "Agrega un episodio a una temporada (ADMIN)")
+    @Operation(summary = "Adds an episode to a season (ADMIN)")
     ResponseEntity<EpisodeResponse> addEpisode(
             @PathVariable UUID id, @PathVariable int number, @Valid @RequestBody EpisodeRequest request) {
         EpisodeResponse episode = EpisodeResponse.from(series.addEpisode(id, number, request.toCommand()));

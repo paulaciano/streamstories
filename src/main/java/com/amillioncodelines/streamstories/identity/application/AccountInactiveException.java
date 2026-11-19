@@ -13,7 +13,7 @@ public class AccountInactiveException extends ProblemException {
     public AccountInactiveException(boolean reactivationRequestPending) {
         super(
                 ProblemType.ACCOUNT_INACTIVE,
-                "La cuenta está inactiva. Solo un administrador puede reactivarla.",
+                "The account is inactive. Only an administrator can reactivate it.",
                 Map.of("reactivationRequestPending", reactivationRequestPending));
     }
 }

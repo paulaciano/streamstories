@@ -22,7 +22,7 @@ Para una lectura rápida, alcanza con **Visión y alcance** y **Arquitectura**. 
 
 ## Convenciones
 
-- **Idioma:** el texto está en español. Los identificadores técnicos (entidades, clases, endpoints, campos) están en inglés y se escriben `así`, igual que en el código.
+- **Idioma:** esta documentación está en español. La API y el código están en inglés, incluidos los mensajes de error y la especificación OpenAPI. Los identificadores técnicos (entidades, clases, endpoints, campos) se escriben `así`, igual que en el código.
 - **Formato:** Markdown con diagramas [Mermaid](https://mermaid.js.org/), que GitHub muestra de forma nativa ([ADR-0008](adr/0008-documentacion-markdown-mermaid.md)).
 - **Decisiones:** toda decisión que sea costosa de revertir se registra como un [ADR](adr/README.md).
 - **Palabras clave:** "debe" indica un requisito obligatorio, "debería" una recomendación fuerte y "puede" algo opcional.

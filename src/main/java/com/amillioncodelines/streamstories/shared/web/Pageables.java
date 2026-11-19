@@ -22,7 +22,7 @@ public final class Pageables {
     public static Pageable restrictSort(Pageable pageable, Set<String> allowedProperties, Sort defaultSort) {
         for (Sort.Order order : pageable.getSort()) {
             if (!allowedProperties.contains(order.getProperty())) {
-                throw new InvalidRequestException("No se puede ordenar por '%s'. Campos permitidos: %s."
+                throw new InvalidRequestException("Cannot sort by '%s'. Allowed fields: %s."
                         .formatted(
                                 order.getProperty(),
                                 String.join(

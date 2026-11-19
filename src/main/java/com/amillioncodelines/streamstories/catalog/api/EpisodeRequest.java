@@ -16,7 +16,7 @@ record EpisodeRequest(
         @Size(max = 4000) String synopsis,
         @NotNull @Positive Integer durationSeconds,
 
-        @NotBlank @Size(max = 2048) @URL(protocol = "https", message = "debe ser una URL https")
+        @NotBlank @Size(max = 2048) @URL(protocol = "https", message = "must be an https URL")
         String videoUrl) {
 
     EpisodeCommand toCommand() {

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/catalog")
-@Tag(name = "Catálogo", description = "Exploración del catálogo mixto de películas y series")
+@Tag(name = "Catalog", description = "Browsing the mixed catalog of movies and series")
 class CatalogController {
 
     private final CatalogService catalog;
@@ -28,13 +28,12 @@ class CatalogController {
     }
 
     @GetMapping
-    @Operation(summary = "Catálogo mixto de películas y series, filtrable y paginado")
+    @Operation(summary = "Mixed catalog of movies and series, filterable and paginated")
     PageResponse<CatalogItemResponse> browse(
-            @Parameter(description = "Slug del género, por ejemplo `sci-fi`") @RequestParam(required = false)
-                    String genre,
+            @Parameter(description = "Genre slug, for example `sci-fi`") @RequestParam(required = false) String genre,
             @RequestParam(required = false) MediaType type,
-            @Parameter(description = "Texto a buscar en el título") @RequestParam(required = false) String q,
-            @Parameter(description = "Solo para ADMIN. Un USER siempre ve únicamente el contenido disponible.")
+            @Parameter(description = "Text to search for in the title") @RequestParam(required = false) String q,
+            @Parameter(description = "ADMIN only. A USER always sees available content only.")
                     @RequestParam(required = false)
                     Availability availability,
             @ParameterObject Pageable pageable,
