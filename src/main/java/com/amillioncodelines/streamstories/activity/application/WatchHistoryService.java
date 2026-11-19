@@ -7,13 +7,13 @@ import com.amillioncodelines.streamstories.catalog.CatalogQueries;
 import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
 import com.amillioncodelines.streamstories.catalog.MovieSummary;
+import com.amillioncodelines.streamstories.shared.web.Pageables;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +56,7 @@ public class WatchHistoryService {
                 }
             }
         }
-        return page(entries, pageable);
+        return Pageables.slice(entries, pageable);
     }
 
     /** Every movie and episode watched, including retired content, marked as not playable (rule A8). */
@@ -113,12 +113,6 @@ public class WatchHistoryService {
                 saved.isCompleted(),
                 episode.playable(),
                 saved.getLastWatchedAt());
-    }
-
-    private static <T> Page<T> page(List<T> all, Pageable pageable) {
-        int from = (int) Math.min(pageable.getOffset(), all.size());
-        int to = Math.min(from + pageable.getPageSize(), all.size());
-        return new PageImpl<>(all.subList(from, to), pageable, all.size());
     }
 
     /** Content cannot be deleted while it has progress (rule C11), so every saved row is found in the catalog. */

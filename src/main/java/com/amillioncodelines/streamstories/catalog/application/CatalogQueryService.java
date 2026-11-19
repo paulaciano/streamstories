@@ -1,6 +1,8 @@
 package com.amillioncodelines.streamstories.catalog.application;
 
 import com.amillioncodelines.streamstories.catalog.CatalogQueries;
+import com.amillioncodelines.streamstories.catalog.CatalogTitle;
+import com.amillioncodelines.streamstories.catalog.CatalogTitle.GenreRef;
 import com.amillioncodelines.streamstories.catalog.ContentKind;
 import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
 import com.amillioncodelines.streamstories.catalog.MovieSummary;
@@ -14,6 +16,8 @@ import com.amillioncodelines.streamstories.catalog.domain.MediaType;
 import com.amillioncodelines.streamstories.catalog.domain.MovieRepository;
 import com.amillioncodelines.streamstories.catalog.domain.Series;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -95,9 +99,35 @@ class CatalogQueryService implements CatalogQueries {
                 .collect(Collectors.toMap(TitleSummary::id, Function.identity()));
     }
 
+    /** Genres are loaded in batches (default_batch_fetch_size), not one query per title. */
+    @Override
+    @Transactional(readOnly = true)
+    public List<CatalogTitle> findAllTitles() {
+        return titles.findAll().stream().map(CatalogQueryService::catalogTitle).toList();
+    }
+
+    private static CatalogTitle catalogTitle(MediaItem title) {
+        List<GenreRef> genres = title.getGenres().stream()
+                .map(genre -> new GenreRef(genre.getId(), genre.getName()))
+                .sorted(Comparator.comparing(GenreRef::name))
+                .toList();
+        return new CatalogTitle(
+                title.getId(),
+                kind(title),
+                title.getTitle(),
+                title.getCoverImageUrl(),
+                title.getReleaseYear(),
+                title.isAvailable(),
+                genres);
+    }
+
+    private static ContentKind kind(MediaItem title) {
+        return title.getType() == MediaType.MOVIE ? ContentKind.MOVIE : ContentKind.SERIES;
+    }
+
     private static TitleSummary summary(MediaItem title) {
-        ContentKind type = title.getType() == MediaType.MOVIE ? ContentKind.MOVIE : ContentKind.SERIES;
-        return new TitleSummary(title.getId(), type, title.getTitle(), title.getCoverImageUrl(), title.isAvailable());
+        return new TitleSummary(
+                title.getId(), kind(title), title.getTitle(), title.getCoverImageUrl(), title.isAvailable());
     }
 
     private static EpisodeSummary summary(Episode episode) {

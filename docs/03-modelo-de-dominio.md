@@ -251,12 +251,18 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 
 Es un enfoque **basado en contenido**: simple, explicable y testeable.
 
-1. **Afinidad por género.** Para cada género se suman señales del usuario:
-   - puntuación de 4 o 5 → +2 por título; puntuación de 1 o 2 → −2;
-   - película o episodio completado → +1 para el título correspondiente.
-2. **Candidatos.** Títulos **disponibles**, con al menos un género de afinidad positiva, que el usuario **no calificó ni empezó a ver**.
-3. **Puntaje del candidato.** Suma de las afinidades de sus géneros, más un ajuste menor por el formato preferido (película o serie).
-4. **Usuarios sin actividad.** Reciben los títulos disponibles mejor calificados por la comunidad.
-5. **Explicabilidad.** Cada recomendación incluye su motivo, por ejemplo `"Porque te gustan Sci-Fi y Action"`.
+1. **Señales del usuario.** Cada título que el usuario calificó o terminó da una señal:
+   - puntuación de 4 o 5 → +2; puntuación de 1 o 2 → −2; una puntuación de 3 es neutra;
+   - título completado → +1. Una película cuenta si está completa, y una serie si tiene al menos un episodio completo. Cada título cuenta una sola vez, sin importar cuántos episodios se vieron.
+
+   Los títulos retirados también dan señales: siguen mostrando lo que le gusta al usuario, aunque nunca se recomienden.
+2. **Afinidad por género.** La señal de cada título se suma a cada uno de sus géneros.
+3. **Candidatos.** Títulos **disponibles**, con al menos un género de afinidad positiva, que el usuario **no calificó ni empezó a ver**. Una serie cuenta como empezada si tiene progreso en cualquiera de sus episodios.
+4. **Puntaje del candidato.** Suma de las afinidades de sus géneros, más **0,5** si es del formato preferido: película o serie, el que tenga más títulos con señal positiva. Si hay empate entre los formatos, no hay ajuste.
+5. **Orden.** Por puntaje; a igual puntaje, por el promedio de la comunidad (los títulos sin puntuaciones van al final), después por cantidad de puntuaciones, después los más recientes y, por último, por título.
+6. **Sin candidatos.** Un usuario nuevo, o uno sin afinidades positivas o que ya vio todo lo de sus géneros, recibe los títulos disponibles que no vio ni calificó, ordenados por el promedio de la comunidad, la cantidad de puntuaciones y los más recientes. Así la lista nunca queda vacía si hay catálogo.
+7. **Explicabilidad.** Cada recomendación incluye su motivo (`reason`), en inglés como el resto de la API:
+   - con candidatos, los dos géneros del título que más le gustan al usuario: `"Because you like Drama and Comedia"`;
+   - sin candidatos, `"Top rated by other viewers"`, o `"New on StreamStories"` si el título no tiene puntuaciones.
 
 El cálculo se hace al momento de la consulta. Si el volumen de datos lo requiere, se puede cachear o precalcular en la fase 4.

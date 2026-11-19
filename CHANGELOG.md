@@ -6,6 +6,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-19
+
+### Added
+
+- Recomendaciones personalizadas (`GET /me/recommendations`), basadas en los géneros de los títulos que el usuario calificó y terminó, con el motivo de cada una. Sin actividad, se recomiendan los títulos mejor calificados por la comunidad. El contenido retirado nunca se recomienda.
+
 ## [0.2.0] - 2026-11-18
 
 ### Added
@@ -102,7 +108,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
   - CI con GitHub Actions, formato automático con Spotless y cobertura con JaCoCo.
   - Dependabot, plantilla de pull request y EditorConfig.
 
-[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/paulaciano/streamstories/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/paulaciano/streamstories/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/paulaciano/streamstories/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/paulaciano/streamstories/releases/tag/v0.0.1
