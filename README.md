@@ -44,9 +44,19 @@ flowchart LR
 
 **Stack:** Java 25 · Spring Boot 4 (Web MVC, Data JPA, Security, Validation, Actuator) · PostgreSQL · Flyway · Spring Modulith · springdoc-openapi · JUnit 6 · Testcontainers · GitHub Actions.
 
-## Cómo ejecutarlo
+## Cómo probarlo en tu máquina
 
-**Requisitos:** [JDK 25](https://adoptium.net/temurin/releases/?version=25) y [Docker](https://docs.docker.com/get-started/get-docker/).
+### 1. Requisitos
+
+| Herramienta | Para qué | Cómo verificarlo |
+|-------------|----------|------------------|
+| [JDK 25](https://adoptium.net/temurin/releases/?version=25) | Compilar y ejecutar la aplicación | `java -version` muestra `25` |
+| [Docker](https://docs.docker.com/get-started/get-docker/) (Docker Desktop o Docker Engine), **en ejecución** | Levantar PostgreSQL | `docker info` responde sin errores |
+| [Git](https://git-scm.com/downloads) | Clonar el repositorio | `git --version` |
+
+No hace falta instalar Maven ni PostgreSQL: el proyecto trae el wrapper de Maven (`./mvnw`), y la base corre en un contenedor. Los puertos `8080` (la API) y `5432` (PostgreSQL) tienen que estar libres.
+
+### 2. Clonar y arrancar
 
 ```bash
 git clone https://github.com/paulaciano/streamstories.git
@@ -54,16 +64,13 @@ cd streamstories
 ./mvnw spring-boot:run
 ```
 
-Spring Boot levanta PostgreSQL automáticamente con Docker Compose, con el perfil de desarrollo (`dev`). Ese perfil:
+En Windows, usá `mvnw.cmd spring-boot:run`. La primera vez tarda unos minutos, porque descarga las dependencias y la imagen de PostgreSQL. La aplicación está lista cuando el log muestra `Started StreamstoriesApplication`.
 
-- carga un **catálogo de ejemplo**: 8 películas y 3 series con temporadas y episodios, en 6 géneros. Incluye una película y una temporada retiradas;
-- crea un **administrador de desarrollo**: `admin@streamstories.local` con la contraseña `dev-admin-password`.
+Al arrancar con `./mvnw spring-boot:run` se activa el perfil de desarrollo (`dev`), que:
 
-Para explorar la API, iniciá sesión con `POST /api/v1/auth/login` y usá el access token en el botón *Authorize* de Swagger UI. Para ver el catálogo como usuario, registrá una cuenta con `POST /api/v1/auth/register`.
-
-Los datos de ejemplo y el administrador se crean solo si todavía no existen. Para empezar de cero, `docker compose down -v` borra la base local. Para otros entornos, las variables necesarias están en [`.env.example`](.env.example).
-
-Con la aplicación en marcha:
+- levanta PostgreSQL con [Docker Compose](compose.yaml) y crea las tablas;
+- carga un **catálogo de ejemplo**: 8 películas y 3 series con temporadas y episodios, en 6 géneros, con una película y una temporada retiradas;
+- crea un **administrador de desarrollo**: `admin@streamstories.local`, con la contraseña `dev-admin-password`.
 
 | | URL |
 |---|---|
@@ -71,15 +78,70 @@ Con la aplicación en marcha:
 | Especificación OpenAPI | http://localhost:8080/v3/api-docs |
 | Estado de salud | http://localhost:8080/actuator/health |
 
-**Imagen de contenedor:** `./mvnw spring-boot:build-image` arma la imagen `streamstories:<versión>` con [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html), sin `Dockerfile`. Se ejecuta con las variables de [`.env.example`](.env.example), apuntando a un PostgreSQL propio:
+### 3. Probar la API desde Swagger UI
+
+1. Abrí http://localhost:8080/swagger-ui.html.
+2. En **Authentication**, abrí `POST /api/v1/auth/login`, tocá **Try it out** y enviá:
+   ```json
+   { "email": "admin@streamstories.local", "password": "dev-admin-password" }
+   ```
+3. Copiá el valor de `accessToken` de la respuesta.
+4. Tocá **Authorize** (arriba a la derecha), pegá el token **sin** escribir `Bearer` delante y confirmá.
+5. Ya podés usar cualquier endpoint, por ejemplo `GET /api/v1/catalog`.
+
+El administrador ve todo, incluido el contenido retirado. Para ver la API como un usuario común, registrá una cuenta con `POST /api/v1/auth/register`, iniciá sesión con ella y autorizá con ese token. El access token dura 15 minutos: cuando vence, volvé a iniciar sesión.
+
+### 4. Probar la API desde la terminal
+
+```bash
+# Registrar un usuario e iniciar sesión
+curl -s -X POST localhost:8080/api/v1/auth/register -H 'Content-Type: application/json' \
+  -d '{"email": "ana@example.com", "password": "una-clave-segura", "displayName": "Ana"}'
+TOKEN=$(curl -s -X POST localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
+  -d '{"email": "ana@example.com", "password": "una-clave-segura"}' | sed -E 's/.*"accessToken":"([^"]+)".*/\1/')
+
+# Explorar el catálogo y buscar un título
+curl -s localhost:8080/api/v1/catalog -H "Authorization: Bearer $TOKEN"
+curl -s "localhost:8080/api/v1/catalog?q=orbita" -H "Authorization: Bearer $TOKEN"
+
+# Puntuar un título (reemplazá TITLE_ID por un id del catálogo) y pedir recomendaciones
+curl -s -X PUT localhost:8080/api/v1/me/ratings/TITLE_ID -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' -d '{"score": 5}'
+curl -s localhost:8080/api/v1/me/recommendations -H "Authorization: Bearer $TOKEN"
+```
+
+Todos los endpoints, con sus parámetros y ejemplos, están en [Diseño de la API](docs/04-api.md).
+
+### 5. Detener y empezar de cero
+
+- **Detener:** `Ctrl+C` en la terminal donde corre la aplicación. Si el contenedor de PostgreSQL sigue corriendo (`docker ps` lo muestra), `docker compose stop` lo detiene. Los datos se conservan para la próxima vez.
+- **Empezar de cero:** `docker compose down -v` borra la base local. Al volver a arrancar, se cargan de nuevo el catálogo de ejemplo y el administrador.
+
+### 6. Correr los tests
+
+```bash
+./mvnw verify
+```
+
+Ejecuta el chequeo de formato, los tests unitarios y de integración, y la verificación de módulos. Los tests de integración usan un PostgreSQL real con [Testcontainers](https://testcontainers.com/), así que **Docker tiene que estar en ejecución**: si no, se omiten sin fallar. Para formatear el código: `./mvnw spotless:apply`.
+
+### Problemas frecuentes
+
+| Síntoma | Causa y solución |
+|---------|------------------|
+| `release version 25 not supported` o un error de versión de Java | Hay otro JDK activo. Instalá el JDK 25 y verificá con `java -version`; si tenés varios, configurá `JAVA_HOME` para que apunte al 25. |
+| La aplicación no arranca y menciona Docker Compose | Docker no está en ejecución. Abrí Docker Desktop (o iniciá el servicio) y verificá con `docker info`. |
+| `port is already allocated` o `Address already in use` | Otro proceso usa el puerto `5432` o el `8080`, por ejemplo un PostgreSQL instalado localmente. Detenelo antes de arrancar. |
+| `401` en todos los endpoints de Swagger UI | Falta el token o venció. Volvé a iniciar sesión y cargalo en **Authorize**. |
+| `429` al iniciar sesión | Hubo 5 contraseñas incorrectas para ese email en 15 minutos. Esperá los segundos que indica `Retry-After`. |
+
+### Imagen de contenedor
+
+`./mvnw spring-boot:build-image` arma la imagen `streamstories:<versión>` con [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html), sin `Dockerfile`. Está pensada para otros entornos: no incluye el perfil `dev`, así que necesita un PostgreSQL propio y las variables de [`.env.example`](.env.example):
 
 ```bash
 docker run -p 8080:8080 --env-file .env streamstories:<versión>
 ```
-
-La imagen no incluye el perfil `dev`: necesita la clave JWT y la conexión a la base.
-
-**Tests:** `./mvnw verify` ejecuta el formato, los tests unitarios y de integración (con [Testcontainers](https://testcontainers.com/)) y la verificación de módulos. Para formatear el código: `./mvnw spotless:apply`.
 
 ## Documentación
 
