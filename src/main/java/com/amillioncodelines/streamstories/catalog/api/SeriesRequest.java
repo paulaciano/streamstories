@@ -16,7 +16,7 @@ record SeriesRequest(
         @Size(max = 4000) String synopsis,
         @NotNull @Min(1888) @Max(2100) Integer releaseYear,
 
-        @Size(max = 2048) @URL(protocol = "https", message = "debe ser una URL https")
+        @Size(max = 2048) @URL(protocol = "https", message = "must be an https URL")
         String coverImageUrl,
 
         Set<UUID> genreIds) {

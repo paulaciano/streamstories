@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
-    private static final String INVALID_REFRESH_TOKEN = "El refresh token es inválido o está vencido.";
+    private static final String INVALID_REFRESH_TOKEN = "The refresh token is invalid or expired.";
 
     private final UserRepository users;
     private final RefreshTokenRepository refreshTokens;
@@ -60,11 +60,11 @@ public class AuthenticationService {
     public UserView register(String email, String password, String displayName) {
         if (CredentialsVerifier.exceedsMaxLength(password)) {
             throw new InvalidRequestException(
-                    "La contraseña no puede superar los %d bytes.".formatted(CredentialsVerifier.MAX_PASSWORD_BYTES));
+                    "The password cannot exceed %d bytes.".formatted(CredentialsVerifier.MAX_PASSWORD_BYTES));
         }
         String normalizedEmail = User.normalizeEmail(email);
         if (users.existsByEmail(normalizedEmail)) {
-            throw new ConflictException("Ya existe una cuenta con ese email.");
+            throw new ConflictException("An account with that email already exists.");
         }
         String passwordHash = passwordEncoder.encode(password);
         User user = users.saveAndFlush(User.register(normalizedEmail, passwordHash, displayName));

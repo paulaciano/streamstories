@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/movies")
-@Tag(name = "Películas")
+@Tag(name = "Movies")
 class MovieController {
 
     private final MovieService movies;
@@ -42,11 +42,11 @@ class MovieController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista películas, filtrables por género y texto")
+    @Operation(summary = "Lists movies, filterable by genre and text")
     PageResponse<MovieResponse> list(
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String q,
-            @Parameter(description = "Solo para ADMIN") @RequestParam(required = false) Availability availability,
+            @Parameter(description = "ADMIN only") @RequestParam(required = false) Availability availability,
             @ParameterObject Pageable pageable,
             Authentication authentication) {
         var filter = new CatalogFilter(genre, null, q, availability);
@@ -56,8 +56,8 @@ class MovieController {
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Detalle de una película",
-            description = "Una película retirada sigue accesible por id, sin URL de video para un USER.")
+            summary = "Movie detail, with its ratings",
+            description = "A retired movie is still reachable by id, without a video URL for a USER.")
     MovieResponse get(@PathVariable UUID id, Authentication authentication) {
         return MovieResponse.from(
                 movies.get(id, Audiences.of(authentication)),
@@ -65,7 +65,7 @@ class MovieController {
     }
 
     @PostMapping
-    @Operation(summary = "Crea una película (ADMIN)")
+    @Operation(summary = "Creates a movie (ADMIN)")
     ResponseEntity<MovieResponse> create(@Valid @RequestBody MovieRequest request) {
         MovieResponse movie = MovieResponse.from(movies.create(request.toCommand()));
         return ResponseEntity.created(URI.create("/api/v1/movies/" + movie.id()))
@@ -73,20 +73,20 @@ class MovieController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Reemplaza los datos de una película, incluidos sus géneros (ADMIN)")
+    @Operation(summary = "Replaces a movie's data, including its genres (ADMIN)")
     MovieResponse replace(@PathVariable UUID id, @Valid @RequestBody MovieRequest request) {
         return MovieResponse.from(movies.replace(id, request.toCommand()));
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Retira una película o la vuelve a ofrecer (ADMIN)")
+    @Operation(summary = "Retires a movie or makes it available again (ADMIN)")
     MovieResponse changeAvailability(@PathVariable UUID id, @Valid @RequestBody AvailabilityRequest request) {
         return MovieResponse.from(movies.changeAvailability(id, request.availability()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Borra una película sin actividad de usuarios (ADMIN)")
+    @Operation(summary = "Deletes a movie without user activity (ADMIN)")
     void delete(@PathVariable UUID id) {
         movies.delete(id);
     }

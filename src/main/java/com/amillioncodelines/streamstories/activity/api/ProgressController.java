@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me/progress")
-@Tag(name = "Actividad", description = "Progreso de reproducción, Seguir viendo e historial del usuario actual")
+@Tag(name = "Activity", description = "Watch progress, continue watching and history of the current user")
 class ProgressController {
 
     private static final String DESCRIPTION =
-            "Guarda la posición exacta. Una posición mayor que la duración se recorta,"
-                    + " y el contenido queda visto al llegar al 90 %, aunque después se reporte una posición menor."
-                    + " Responde 409 si el contenido está retirado.";
+            "Saves the exact position. A position beyond the duration is capped, and the"
+                    + " content is completed at 90%, even if a shorter position is reported later."
+                    + " Answers 409 if the content is retired.";
 
     private final ProgressService progress;
 
@@ -31,14 +31,14 @@ class ProgressController {
     }
 
     @PutMapping("/movies/{movieId}")
-    @Operation(summary = "Reporta la posición de reproducción de una película", description = DESCRIPTION)
+    @Operation(summary = "Reports the playback position of a movie", description = DESCRIPTION)
     ProgressResponse reportMovie(
             @AuthenticationPrincipal Jwt jwt, @PathVariable UUID movieId, @Valid @RequestBody ProgressRequest request) {
         return ProgressResponse.from(progress.reportMovie(CurrentUser.id(jwt), movieId, request.positionSeconds()));
     }
 
     @PutMapping("/episodes/{episodeId}")
-    @Operation(summary = "Reporta la posición de reproducción de un episodio", description = DESCRIPTION)
+    @Operation(summary = "Reports the playback position of an episode", description = DESCRIPTION)
     ProgressResponse reportEpisode(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID episodeId,

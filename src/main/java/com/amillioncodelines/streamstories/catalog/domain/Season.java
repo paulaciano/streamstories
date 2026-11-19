@@ -101,7 +101,7 @@ public class Season extends BaseEntity {
 
     private void ensureNumberIsFree(int episodeNumber, Episode except) {
         findEpisode(episodeNumber).filter(existing -> existing != except).ifPresent(existing -> {
-            throw new ConflictException("La temporada %d ya tiene un episodio %d.".formatted(number, episodeNumber));
+            throw new ConflictException("Season %d already has an episode %d.".formatted(number, episodeNumber));
         });
     }
 

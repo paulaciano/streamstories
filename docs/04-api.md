@@ -154,9 +154,9 @@ Si la cuenta está inactiva y las credenciales son correctas:
 ```json
 {
   "type": "urn:streamstories:problem:account-inactive",
-  "title": "Cuenta inactiva",
+  "title": "Inactive account",
   "status": 403,
-  "detail": "La cuenta está inactiva. Solo un administrador puede reactivarla.",
+  "detail": "The account is inactive. Only an administrator can reactivate it.",
   "reactivationRequestPending": false
 }
 ```
@@ -273,13 +273,13 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 ```json
 {
   "type": "urn:streamstories:problem:validation-error",
-  "title": "Datos inválidos",
+  "title": "Invalid data",
   "status": 400,
-  "detail": "La solicitud contiene 2 error(es) de validación.",
+  "detail": "The request has 2 validation error(s).",
   "instance": "/api/v1/movies",
   "errors": [
-    { "field": "title", "message": "no debe estar vacío" },
-    { "field": "durationSeconds", "message": "debe ser mayor que 0" }
+    { "field": "title", "message": "must not be blank" },
+    { "field": "durationSeconds", "message": "must be greater than 0" }
   ]
 }
 ```
@@ -292,10 +292,15 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `forbidden` | 403 | El rol no alcanza para la operación. |
 | `account-inactive` | 403 | La cuenta está desactivada. La respuesta indica si hay una solicitud de reactivación pendiente. |
 | `not-found` | 404 | El recurso no existe. |
+| `method-not-allowed` | 405 | El endpoint existe, pero no admite ese método HTTP. |
+| `not-acceptable` | 406 | El cliente pide en `Accept` un formato que la API no ofrece. |
 | `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso, violación de una constraint de la base o modificación concurrente del mismo recurso. |
 | `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
+| `unsupported-media-type` | 415 | El cuerpo no se envía como `application/json`. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 
-Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "credenciales inválidas", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
+La API está en inglés: `title`, `detail` y los mensajes de validación salen siempre en inglés, sin importar el `Accept-Language` del cliente. El contenido del catálogo (títulos, sinopsis, géneros) se devuelve tal como se cargó.
+
+Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "Invalid credentials.", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
 
 `content-unavailable` lo usan el progreso de reproducción y las puntuaciones.

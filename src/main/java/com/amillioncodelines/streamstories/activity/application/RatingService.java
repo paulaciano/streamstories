@@ -36,10 +36,9 @@ public class RatingService {
     public RatingView rate(UUID userId, UUID titleId, int score) {
         Rating.requireValidScore(score);
         TitleSummary title = catalog.findTitle(titleId)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el título %s.".formatted(titleId)));
+                .orElseThrow(() -> new ResourceNotFoundException("Title %s does not exist.".formatted(titleId)));
         if (!title.available()) {
-            throw new ContentUnavailableException(
-                    "El título %s está retirado: no se puede puntuar.".formatted(titleId));
+            throw new ContentUnavailableException("Title %s is retired and cannot be rated.".formatted(titleId));
         }
         ratings.upsert(userId, titleId, score, clock.instant());
         return view(ratings.findByUserIdAndMediaItemId(userId, titleId).orElseThrow(), title);

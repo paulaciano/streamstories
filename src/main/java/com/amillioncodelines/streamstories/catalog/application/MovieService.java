@@ -75,7 +75,7 @@ public class MovieService {
 
     private Movie find(UUID id) {
         return movies.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe la película %s.".formatted(id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie %s does not exist.".formatted(id)));
     }
 
     private static TitleDetails details(MovieCommand command) {

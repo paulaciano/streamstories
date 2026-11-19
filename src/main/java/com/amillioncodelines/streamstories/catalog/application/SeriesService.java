@@ -168,18 +168,18 @@ public class SeriesService {
     private Series findSeries(UUID id) {
         return seriesRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe la serie %s.".formatted(id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Series %s does not exist.".formatted(id)));
     }
 
     private static Season findSeason(Series series, int number) {
         return series.findSeason(number)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "La serie %s no tiene una temporada %d.".formatted(series.getId(), number)));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Series %s has no season %d.".formatted(series.getId(), number)));
     }
 
     private Episode findEpisode(UUID id) {
         return episodes.findWithSeasonAndSeriesById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el episodio %s.".formatted(id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Episode %s does not exist.".formatted(id)));
     }
 
     private static TitleDetails details(SeriesCommand command) {

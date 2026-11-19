@@ -20,8 +20,7 @@ class ContentActivityGuard {
     void ensureNoActivity(ContentKind kind, UUID contentId) {
         boolean inUse = activities.stream().anyMatch(activity -> activity.exists(kind, contentId));
         if (inUse) {
-            throw new ConflictException(
-                    "El contenido tiene actividad de usuarios: en lugar de borrarlo, hay que retirarlo.");
+            throw new ConflictException("The content has user activity: retire it instead of deleting it.");
         }
     }
 }

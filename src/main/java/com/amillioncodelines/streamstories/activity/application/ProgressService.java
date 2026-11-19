@@ -29,7 +29,7 @@ public class ProgressService {
 
     @Transactional
     public ProgressView reportMovie(UUID userId, UUID movieId, int positionSeconds) {
-        PlayableContent movie = playable(ContentKind.MOVIE, movieId, "No existe la película %s.");
+        PlayableContent movie = playable(ContentKind.MOVIE, movieId, "Movie %s does not exist.");
         PlaybackPosition position = PlaybackPosition.of(positionSeconds, movie.durationSeconds());
         progress.upsertMovieProgress(
                 userId, movieId, position.positionSeconds(), position.completed(), clock.instant());
@@ -38,7 +38,7 @@ public class ProgressService {
 
     @Transactional
     public ProgressView reportEpisode(UUID userId, UUID episodeId, int positionSeconds) {
-        PlayableContent episode = playable(ContentKind.EPISODE, episodeId, "No existe el episodio %s.");
+        PlayableContent episode = playable(ContentKind.EPISODE, episodeId, "Episode %s does not exist.");
         PlaybackPosition position = PlaybackPosition.of(positionSeconds, episode.durationSeconds());
         progress.upsertEpisodeProgress(
                 userId, episodeId, position.positionSeconds(), position.completed(), clock.instant());
@@ -51,8 +51,7 @@ public class ProgressService {
         PlayableContent content = catalog.findPlayable(kind, id)
                 .orElseThrow(() -> new ResourceNotFoundException(notFoundMessage.formatted(id)));
         if (!content.playable()) {
-            throw new ContentUnavailableException(
-                    "El contenido %s está retirado y no se puede reproducir.".formatted(id));
+            throw new ContentUnavailableException("Content %s is retired and cannot be played.".formatted(id));
         }
         return content;
     }

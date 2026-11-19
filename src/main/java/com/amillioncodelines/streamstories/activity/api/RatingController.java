@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me/ratings")
-@Tag(name = "Puntuaciones", description = "Puntuaciones de 1 a 5 del usuario actual sobre películas y series")
+@Tag(name = "Ratings", description = "Scores from 1 to 5 that the current user gives to movies and series")
 class RatingController {
 
     /** The order is fixed and a {@code sort} is ignored. */
@@ -39,9 +39,9 @@ class RatingController {
 
     @PutMapping("/{titleId}")
     @Operation(
-            summary = "Puntúa una película o una serie",
-            description = "Crea la puntuación o reemplaza la anterior. No hace falta haber visto el título."
-                    + " Responde 409 si el título está retirado.")
+            summary = "Rates a movie or a series",
+            description = "Creates the rating or replaces the previous one. The title does not need to be"
+                    + " watched first. Answers 409 if the title is retired.")
     RatingResponse rate(
             @AuthenticationPrincipal Jwt jwt, @PathVariable UUID titleId, @Valid @RequestBody RatingRequest request) {
         return RatingResponse.from(ratings.rate(CurrentUser.id(jwt), titleId, request.score()));
@@ -50,16 +50,16 @@ class RatingController {
     @DeleteMapping("/{titleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Quita la puntuación de un título",
-            description = "Se puede hacer aunque el título esté retirado. Si no había puntuación, no cambia nada.")
+            summary = "Removes the rating of a title",
+            description = "Allowed even if the title is retired. Without a rating, nothing changes.")
     void remove(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID titleId) {
         ratings.remove(CurrentUser.id(jwt), titleId);
     }
 
     @GetMapping
     @Operation(
-            summary = "Puntuaciones del usuario actual",
-            description = "De la más reciente a la más antigua. Los títulos retirados aparecen con available en false.")
+            summary = "Ratings of the current user",
+            description = "Most recent first. Retired titles have available set to false.")
     PageResponse<RatingResponse> list(@AuthenticationPrincipal Jwt jwt, @ParameterObject Pageable pageable) {
         Pageable mostRecentFirst = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), MOST_RECENT_FIRST);
         return PageResponse.of(ratings.list(CurrentUser.id(jwt), mostRecentFirst), RatingResponse::from);

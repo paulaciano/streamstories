@@ -50,7 +50,7 @@ public class ReactivationService {
         return transaction.execute(status -> {
             User user = users.lockById(userId).orElseThrow();
             if (user.isActive()) {
-                throw new ConflictException("La cuenta ya está activa.");
+                throw new ConflictException("The account is already active.");
             }
             ReactivationRequest request = requests.findByUserIdAndStatus(userId, ReactivationStatus.PENDING)
                     .orElseGet(() -> requests.saveAndFlush(ReactivationRequest.pending(user, clock.instant())));
@@ -82,7 +82,7 @@ public class ReactivationService {
 
     private ReactivationRequest find(UUID requestId) {
         return requests.lockById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No existe la solicitud de reactivación %s.".formatted(requestId)));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Reactivation request %s does not exist.".formatted(requestId)));
     }
 }

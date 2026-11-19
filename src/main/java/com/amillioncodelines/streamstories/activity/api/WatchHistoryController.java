@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me")
-@Tag(name = "Actividad", description = "Progreso de reproducción, Seguir viendo e historial del usuario actual")
+@Tag(name = "Activity", description = "Watch progress, continue watching and history of the current user")
 class WatchHistoryController {
 
     /** Both lists go from the most recently watched content: the order is fixed and a {@code sort} is ignored. */
@@ -31,11 +31,9 @@ class WatchHistoryController {
 
     @GetMapping("/continue-watching")
     @Operation(
-            summary = "Lo que se puede retomar",
-            description =
-                    "Películas sin terminar y una entrada por serie con el último episodio visto, de lo más reciente a lo"
-                            + " más antiguo. Una serie deja de aparecer cuando ese episodio está visto y no hay otro reproducible"
-                            + " después.")
+            summary = "What can be resumed",
+            description = "Unfinished movies and one entry per series with its last watched episode, most recent"
+                    + " first. A series leaves once that episode is completed and no playable episode follows it.")
     PageResponse<WatchedItemResponse> continueWatching(
             @AuthenticationPrincipal Jwt jwt, @ParameterObject Pageable pageable) {
         var page = history.continueWatching(CurrentUser.id(jwt), mostRecentFirst(pageable));
@@ -44,9 +42,9 @@ class WatchHistoryController {
 
     @GetMapping("/history")
     @Operation(
-            summary = "Historial de reproducción",
-            description = "Cada película o episodio visto, con la fecha de la última vez, de lo más reciente a lo más"
-                    + " antiguo. El contenido retirado aparece con playable en false.")
+            summary = "Watch history",
+            description = "Every movie and episode watched, with the last watched date, most recent first."
+                    + " Retired content has playable set to false.")
     PageResponse<WatchedItemResponse> history(@AuthenticationPrincipal Jwt jwt, @ParameterObject Pageable pageable) {
         var page = history.history(CurrentUser.id(jwt), mostRecentFirst(pageable));
         return PageResponse.of(page, WatchedItemResponse::from);

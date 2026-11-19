@@ -6,6 +6,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+### Changed
+
+- La API responde en inglés: mensajes de error, títulos de los Problem Details, validaciones y la especificación OpenAPI. El contenido del catálogo no cambia.
+- Los errores del framework, como `405` y `415`, también tienen un `type` de StreamStories (`method-not-allowed`, `unsupported-media-type`, `not-acceptable`).
+
 ## [0.2.0] - 2026-11-18
 
 ### Added

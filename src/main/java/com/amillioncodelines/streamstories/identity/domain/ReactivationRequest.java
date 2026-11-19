@@ -56,7 +56,7 @@ public class ReactivationRequest extends BaseEntity {
 
     private void resolve(ReactivationStatus resolution, UUID adminId, Instant now) {
         if (status != ReactivationStatus.PENDING) {
-            throw new ConflictException("La solicitud ya fue resuelta (%s).".formatted(status));
+            throw new ConflictException("The request was already resolved (%s).".formatted(status));
         }
         status = resolution;
         resolvedBy = adminId;

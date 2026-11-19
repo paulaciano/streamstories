@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/reactivation-requests")
-@Tag(name = "Administración de usuarios")
+@Tag(name = "User administration")
 class AdminReactivationController {
 
     private static final Set<String> SORTABLE = Set.of("requestedAt", "resolvedAt");
@@ -36,7 +36,7 @@ class AdminReactivationController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista las solicitudes de reactivación (por defecto, las pendientes)")
+    @Operation(summary = "Lists reactivation requests (pending ones by default)")
     PageResponse<AdminReactivationResponse> list(
             @RequestParam(defaultValue = "PENDING") ReactivationStatus status, @ParameterObject Pageable pageable) {
         var page = reactivation.list(status, Pageables.restrictSort(pageable, SORTABLE, DEFAULT_SORT));
@@ -44,13 +44,13 @@ class AdminReactivationController {
     }
 
     @PostMapping("/{id}/approve")
-    @Operation(summary = "Aprueba la solicitud y reactiva la cuenta")
+    @Operation(summary = "Approves the request and reactivates the account")
     AdminReactivationResponse approve(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         return AdminReactivationResponse.from(reactivation.approve(id, CurrentUser.id(jwt)));
     }
 
     @PostMapping("/{id}/reject")
-    @Operation(summary = "Rechaza la solicitud; la cuenta sigue inactiva")
+    @Operation(summary = "Rejects the request; the account stays inactive")
     AdminReactivationResponse reject(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
         return AdminReactivationResponse.from(reactivation.reject(id, CurrentUser.id(jwt)));
     }

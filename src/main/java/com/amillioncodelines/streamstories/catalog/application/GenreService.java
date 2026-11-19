@@ -40,7 +40,7 @@ public class GenreService {
     public GenreView create(String name) {
         String slug = slugOf(name);
         if (genres.existsBySlug(slug)) {
-            throw new ConflictException("Ya existe un género '%s'.".formatted(name.strip()));
+            throw new ConflictException("Genre '%s' already exists.".formatted(name.strip()));
         }
         return GenreView.of(genres.saveAndFlush(new Genre(name)));
     }
@@ -50,7 +50,7 @@ public class GenreService {
         Genre genre = find(id);
         String slug = slugOf(name);
         if (genres.existsBySlugAndIdNot(slug, id)) {
-            throw new ConflictException("Ya existe un género '%s'.".formatted(name.strip()));
+            throw new ConflictException("Genre '%s' already exists.".formatted(name.strip()));
         }
         genre.rename(name);
         return GenreView.of(genres.saveAndFlush(genre));
@@ -61,7 +61,7 @@ public class GenreService {
     public void delete(UUID id) {
         Genre genre = find(id);
         if (titles.existsWithGenre(id)) {
-            throw new ConflictException("El género '%s' tiene títulos asociados.".formatted(genre.getName()));
+            throw new ConflictException("Genre '%s' has titles.".formatted(genre.getName()));
         }
         genres.delete(genre);
     }
@@ -69,13 +69,13 @@ public class GenreService {
     private static String slugOf(String name) {
         String slug = Slugs.from(name);
         if (slug.isEmpty()) {
-            throw new InvalidRequestException("El nombre del género tiene que incluir letras o números.");
+            throw new InvalidRequestException("The genre name must include letters or digits.");
         }
         return slug;
     }
 
     private Genre find(UUID id) {
         return genres.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el género %s.".formatted(id)));
+                .orElseThrow(() -> new ResourceNotFoundException("Genre %s does not exist.".formatted(id)));
     }
 }

@@ -28,7 +28,7 @@ class GenreResolver {
         if (found.size() != genreIds.size()) {
             Set<UUID> missing = new HashSet<>(genreIds);
             found.forEach(genre -> missing.remove(genre.getId()));
-            throw new InvalidRequestException("No existen los géneros: %s."
+            throw new InvalidRequestException("These genres do not exist: %s."
                     .formatted(missing.stream().map(UUID::toString).sorted().collect(Collectors.joining(", "))));
         }
         return found;

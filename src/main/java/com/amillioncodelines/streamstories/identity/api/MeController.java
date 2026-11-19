@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me")
-@Tag(name = "Cuenta", description = "Datos y estado de la cuenta del usuario actual")
+@Tag(name = "Account", description = "Data and status of the current user's account")
 class MeController {
 
     private final AccountService accounts;
@@ -25,7 +25,7 @@ class MeController {
     }
 
     @GetMapping
-    @Operation(summary = "Datos del usuario actual")
+    @Operation(summary = "Current user's data")
     UserResponse me(@AuthenticationPrincipal Jwt jwt) {
         return UserResponse.from(accounts.currentUser(CurrentUser.id(jwt)));
     }
@@ -33,8 +33,8 @@ class MeController {
     @PostMapping("/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Desactiva la propia cuenta",
-            description = "Se pierde el acceso de inmediato y se revocan los tokens. La actividad se conserva.")
+            summary = "Deactivates your own account",
+            description = "Access is lost immediately and tokens are revoked. Activity is kept.")
     void deactivate(@AuthenticationPrincipal Jwt jwt) {
         accounts.deactivateOwnAccount(CurrentUser.id(jwt));
     }

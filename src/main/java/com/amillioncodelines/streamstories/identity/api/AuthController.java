@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Autenticación", description = "Registro, inicio de sesión, tokens y reactivación de cuentas")
+@Tag(name = "Authentication", description = "Sign-up, login, tokens and account reactivation")
 class AuthController {
 
     private final AuthenticationService authentication;
@@ -33,7 +33,7 @@ class AuthController {
 
     @PostMapping("/register")
     @SecurityRequirements
-    @Operation(summary = "Crea una cuenta USER activa")
+    @Operation(summary = "Creates an active USER account")
     ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         var user = authentication.register(request.email(), request.password(), request.displayName());
         return ResponseEntity.created(URI.create("/api/v1/me")).body(UserResponse.from(user));
@@ -41,21 +41,21 @@ class AuthController {
 
     @PostMapping("/login")
     @SecurityRequirements
-    @Operation(summary = "Inicia sesión y devuelve un access token y un refresh token")
+    @Operation(summary = "Logs in and returns an access token and a refresh token")
     TokenResponse login(@Valid @RequestBody CredentialsRequest request) {
         return TokenResponse.from(authentication.login(request.email(), request.password()));
     }
 
     @PostMapping("/refresh")
     @SecurityRequirements
-    @Operation(summary = "Cambia un refresh token por un par nuevo (con rotación)")
+    @Operation(summary = "Exchanges a refresh token for a new pair (with rotation)")
     TokenResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
         return TokenResponse.from(authentication.refresh(request.refreshToken()));
     }
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Revoca el refresh token enviado")
+    @Operation(summary = "Revokes the given refresh token")
     void logout(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody RefreshTokenRequest request) {
         authentication.logout(CurrentUser.id(jwt), request.refreshToken());
     }
@@ -64,8 +64,8 @@ class AuthController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @SecurityRequirements
     @Operation(
-            summary = "Solicita la reactivación de una cuenta inactiva",
-            description = "Crea una solicitud pendiente o devuelve la que ya existe. Un administrador la resuelve.")
+            summary = "Requests the reactivation of an inactive account",
+            description = "Creates a pending request or returns the existing one. An administrator resolves it.")
     ReactivationRequestResponse requestReactivation(@Valid @RequestBody CredentialsRequest request) {
         return ReactivationRequestResponse.from(reactivation.request(request.email(), request.password()));
     }

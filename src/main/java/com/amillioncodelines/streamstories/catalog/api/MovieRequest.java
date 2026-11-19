@@ -17,10 +17,10 @@ record MovieRequest(
         @NotNull @Min(1888) @Max(2100) Integer releaseYear,
         @NotNull @Positive Integer durationSeconds,
 
-        @NotBlank @Size(max = 2048) @URL(protocol = "https", message = "debe ser una URL https")
+        @NotBlank @Size(max = 2048) @URL(protocol = "https", message = "must be an https URL")
         String videoUrl,
 
-        @Size(max = 2048) @URL(protocol = "https", message = "debe ser una URL https")
+        @Size(max = 2048) @URL(protocol = "https", message = "must be an https URL")
         String coverImageUrl,
 
         Set<UUID> genreIds) {
