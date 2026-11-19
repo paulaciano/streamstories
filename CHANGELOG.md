@@ -6,10 +6,17 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-19
+
 ### Added
 
 - Lista de seguimiento (`/me/watchlist`): películas y series para ver después. Agregar y quitar son idempotentes, y un título retirado no se puede agregar, pero sigue en las listas donde ya estaba.
 - Sagas (`/franchises`): películas agrupadas en orden. Una película pertenece como máximo a una saga, y borrar la saga no borra sus películas.
+- Imagen de contenedor con Cloud Native Buildpacks (`./mvnw spring-boot:build-image`).
+
+### Changed
+
+- Las recomendaciones leen el catálogo y los promedios con consultas de filas simples: con 6.000 títulos y 300.000 puntuaciones, la respuesta baja de unos 390 ms a unos 150 ms ([ADR-0012](docs/adr/0012-rendimiento-sin-cache.md)).
 
 ### Security
 
@@ -117,7 +124,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
   - CI con GitHub Actions, formato automático con Spotless y cobertura con JaCoCo.
   - Dependabot, plantilla de pull request y EditorConfig.
 
-[Unreleased]: https://github.com/paulaciano/streamstories/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/paulaciano/streamstories/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/paulaciano/streamstories/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/paulaciano/streamstories/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/paulaciano/streamstories/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/paulaciano/streamstories/compare/v0.0.1...v0.1.0

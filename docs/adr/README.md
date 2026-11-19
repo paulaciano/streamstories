@@ -22,3 +22,4 @@ Un **ADR** ([*Architecture Decision Record*](https://adr.github.io/)) documenta 
 | [0009](0009-retiro-de-contenido.md) | El contenido se retira, no se borra | Reemplazado por ADR-0011 |
 | [0010](0010-reactivacion-aprobada-por-admin.md) | La reactivación de cuentas requiere aprobación de un admin | Aceptado |
 | [0011](0011-retiro-por-temporada.md) | El contenido se retira por película, serie o temporada completa | Aceptado |
+| [0012](0012-rendimiento-sin-cache.md) | Rendimiento medido, sin caché por ahora | Aceptado |

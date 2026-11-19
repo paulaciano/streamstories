@@ -5,7 +5,6 @@ import com.amillioncodelines.streamstories.activity.CommunityRating;
 import com.amillioncodelines.streamstories.activity.UserActivity;
 import com.amillioncodelines.streamstories.activity.domain.Rating;
 import com.amillioncodelines.streamstories.activity.domain.RatingRepository;
-import com.amillioncodelines.streamstories.activity.domain.RatingRepository.TitleStats;
 import com.amillioncodelines.streamstories.activity.domain.WatchProgressRepository;
 import com.amillioncodelines.streamstories.activity.domain.WatchProgressRepository.StartedTitle;
 import java.util.List;
@@ -46,7 +45,7 @@ class ActivityQueryService implements ActivityQueries {
     public Map<UUID, CommunityRating> communityRatings() {
         return ratings.statsByTitle().stream()
                 .collect(Collectors.toMap(
-                        TitleStats::getMediaItemId,
-                        stats -> new CommunityRating(stats.getAverage(), stats.getCount())));
+                        row -> (UUID) row[0],
+                        row -> new CommunityRating(((Number) row[1]).doubleValue(), ((Number) row[2]).longValue())));
     }
 }
