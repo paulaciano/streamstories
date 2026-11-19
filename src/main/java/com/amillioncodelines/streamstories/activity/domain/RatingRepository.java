@@ -1,6 +1,7 @@
 package com.amillioncodelines.streamstories.activity.domain;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ public interface RatingRepository extends JpaRepository<Rating, UUID> {
 
     Page<Rating> findByUserId(UUID userId, Pageable pageable);
 
-    boolean existsByMediaItemId(UUID mediaItemId);
+    boolean existsByMediaItemIdIn(Collection<UUID> mediaItemIds);
 
     /** Average and count over every rating of the title, including those of inactive accounts (rule A11). */
     @Query("select avg(r.score) as average, count(r) as count from Rating r where r.mediaItemId = :mediaItemId")

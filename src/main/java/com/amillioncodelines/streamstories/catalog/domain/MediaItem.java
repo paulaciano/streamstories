@@ -1,5 +1,6 @@
 package com.amillioncodelines.streamstories.catalog.domain;
 
+import com.amillioncodelines.streamstories.shared.error.PreconditionFailedException;
 import com.amillioncodelines.streamstories.shared.persistence.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -78,6 +79,23 @@ public abstract class MediaItem extends AuditableEntity {
     /** Retires the title or offers it again (rules C10 and C12). No related data is touched. */
     public void changeAvailability(Availability newAvailability) {
         this.availability = Objects.requireNonNull(newAvailability);
+    }
+
+    /**
+     * Optimistic locking for clients: a title is only changed if the client read its current version.
+     *
+     * @param expectedVersion {@code null} for an unconditional change
+     */
+    public void requireVersion(Long expectedVersion) {
+        if (expectedVersion != null && expectedVersion != version) {
+            throw new PreconditionFailedException(
+                    "The title changed since version %d (now %d): read it again before changing it."
+                            .formatted(expectedVersion, version));
+        }
+    }
+
+    public long getVersion() {
+        return version;
     }
 
     public boolean isAvailable() {

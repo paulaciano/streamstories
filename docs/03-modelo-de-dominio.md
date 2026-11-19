@@ -108,6 +108,7 @@ erDiagram
         uuid user_id FK
         uuid movie_id FK "exactamente uno de los dos"
         uuid episode_id FK "exactamente uno de los dos"
+        uuid series_id FK "la serie del episodio"
         int position_seconds
         boolean completed
         timestamptz last_watched_at
@@ -169,6 +170,8 @@ CHECK ((movie_id IS NOT NULL) <> (episode_id IS NOT NULL))
 ```
 
 Además hay dos índices únicos parciales: `(user_id, movie_id)` y `(user_id, episode_id)`. Con este diseño, la base de datos garantiza la integridad referencial, algo que una referencia polimórfica (`content_type` + `content_id`) no permite.
+
+El progreso de un episodio guarda también su serie (`series_id`). Es un dato derivado, porque un episodio nunca cambia de temporada. Sirve para que "Seguir viendo" encuentre el último episodio de cada serie con una sola consulta sobre la tabla del propio módulo `activity`, sin cargar todo lo que el usuario vio.
 
 ### Disponibilidad en lugar de borrado
 

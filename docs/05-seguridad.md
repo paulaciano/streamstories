@@ -48,6 +48,8 @@ sequenceDiagram
 
 Cada revocación guarda su motivo (`ROTATED`, `LOGOUT`, `ACCOUNT_DEACTIVATED`, `REUSE_DETECTED`), que es lo que permite distinguir estos casos.
 
+Una vez por día se borran los refresh tokens vencidos. Hasta que vencen se conservan aunque estén revocados, porque un token rotado es el que permite detectar la reutilización.
+
 ### Ciclo de vida de una cuenta
 
 ```mermaid

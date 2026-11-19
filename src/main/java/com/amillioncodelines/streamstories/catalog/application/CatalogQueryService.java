@@ -42,14 +42,19 @@ class CatalogQueryService implements CatalogQueries {
             case MOVIE ->
                 movies.findById(id)
                         .map(movie -> new PlayableContent(
-                                ContentKind.MOVIE, movie.getId(), movie.getDurationSeconds(), movie.isPlayable()));
+                                ContentKind.MOVIE,
+                                movie.getId(),
+                                movie.getDurationSeconds(),
+                                movie.isPlayable(),
+                                null));
             case EPISODE ->
                 episodes.findWithSeasonAndSeriesById(id)
                         .map(episode -> new PlayableContent(
                                 ContentKind.EPISODE,
                                 episode.getId(),
                                 episode.getDurationSeconds(),
-                                episode.isPlayable()));
+                                episode.isPlayable(),
+                                episode.getSeason().getSeries().getId()));
             case SERIES -> throw new IllegalArgumentException("A series is played through its episodes");
         };
     }

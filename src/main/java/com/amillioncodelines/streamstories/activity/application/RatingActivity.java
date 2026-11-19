@@ -3,6 +3,7 @@ package com.amillioncodelines.streamstories.activity.application;
 import com.amillioncodelines.streamstories.activity.domain.RatingRepository;
 import com.amillioncodelines.streamstories.catalog.ContentActivity;
 import com.amillioncodelines.streamstories.catalog.ContentKind;
+import java.util.Collection;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ class RatingActivity implements ContentActivity {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean exists(ContentKind kind, UUID contentId) {
-        return kind != ContentKind.EPISODE && ratings.existsByMediaItemId(contentId);
+    public boolean existsForAny(ContentKind kind, Collection<UUID> contentIds) {
+        return kind != ContentKind.EPISODE && ratings.existsByMediaItemIdIn(contentIds);
     }
 }

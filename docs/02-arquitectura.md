@@ -34,7 +34,7 @@ La API **no sirve video**. Guarda la URL y la duración de cada contenido reprod
 | Framework | [Spring Boot 4](https://docs.spring.io/spring-boot/) | Es el estándar del backend Java y su ecosistema es maduro. |
 | Web | [Spring Web MVC](https://docs.spring.io/spring-framework/reference/web/webmvc.html) | API REST síncrona. Con virtual threads no hace falta un stack reactivo. |
 | Persistencia | [Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/) + [Hibernate](https://hibernate.org/orm/documentation/) | Mapeo objeto-relacional y repositorios declarativos. |
-| Base de datos | [PostgreSQL](https://www.postgresql.org/docs/) | Base relacional robusta, con buen soporte de constraints e índices parciales. |
+| Base de datos | [PostgreSQL](https://www.postgresql.org/docs/) | Base relacional robusta, con buen soporte de constraints e índices parciales. La búsqueda usa la extensión [`unaccent`](https://www.postgresql.org/docs/current/unaccent.html), que una migración crea (el dueño de la base puede hacerlo sin ser superusuario). |
 | Migraciones | [Flyway](https://documentation.red-gate.com/flyway) | Esquema versionado en SQL y revisable en cada PR ([ADR-0006](adr/0006-migraciones-flyway.md)). |
 | Validación | [Jakarta Bean Validation](https://beanvalidation.org/) | Validación declarativa de los DTO de entrada. |
 | Seguridad | [Spring Security](https://docs.spring.io/spring-security/reference/) + [OAuth2 Resource Server (JWT)](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) | Validación estándar de JWT, sin librerías hechas a mano ([ADR-0005](adr/0005-autenticacion-jwt.md)). |

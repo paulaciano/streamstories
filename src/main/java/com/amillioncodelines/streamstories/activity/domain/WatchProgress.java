@@ -24,6 +24,10 @@ public class WatchProgress extends BaseEntity {
     @Column(updatable = false)
     private UUID episodeId;
 
+    /** The series of the episode, so "continue watching" can group episodes without the catalog. */
+    @Column(updatable = false)
+    private UUID seriesId;
+
     @Column(nullable = false)
     private int positionSeconds;
 
@@ -45,6 +49,10 @@ public class WatchProgress extends BaseEntity {
 
     public UUID getEpisodeId() {
         return episodeId;
+    }
+
+    public UUID getSeriesId() {
+        return seriesId;
     }
 
     public int getPositionSeconds() {

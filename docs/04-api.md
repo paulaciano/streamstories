@@ -56,6 +56,12 @@ GET /api/v1/catalog?genre=sci-fi&type=MOVIE&q=matrix&page=0&size=20&sort=title,a
 - `sort` solo acepta los campos de una lista permitida.
 - Los endpoints de catálogo aceptan el filtro `availability`, pero solo para `ADMIN`. Un `USER` siempre ve únicamente el contenido disponible.
 
+### Cambios concurrentes de títulos
+
+El detalle de una película o una serie, y las respuestas de sus `POST`, `PUT` y `PATCH`, incluyen un header `ETag` con la versión del título. Si el cliente lo reenvía en `If-Match` al cambiarlo, el cambio solo se aplica si nadie lo modificó desde que lo leyó; si no, responde `412` (`precondition-failed`). Sin `If-Match`, el cambio no es condicional.
+
+La versión cubre los datos del título, no sus temporadas ni episodios: agregar un episodio no cambia el `ETag` de la serie.
+
 ## 4.4 Mapa de endpoints
 
 Todas las rutas son relativas a `/api/v1`.
@@ -82,7 +88,7 @@ Todas las rutas son relativas a `/api/v1`.
 
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
-| `GET` | `/catalog` | 👤 | **Catálogo mixto** de películas y series. Filtros: `genre`, `type`, `q`. |
+| `GET` | `/catalog` | 👤 | **Catálogo mixto** de películas y series. Filtros: `genre`, `type`, `q` (busca en el título sin distinguir mayúsculas ni acentos). |
 | `GET` | `/genres`, `/genres/{id}` | 👤 | Lista y detalle de géneros. |
 | `POST` `PUT` `DELETE` | `/genres[/{id}]` | 🛠️ | ABM de géneros. El `slug` se genera a partir del nombre (`Ciencia Ficción` → `ciencia-ficcion`). |
 | `GET` | `/movies`, `/movies/{id}` | 👤 | Listar y ver películas. |
@@ -298,6 +304,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `not-acceptable` | 406 | El cliente pide en `Accept` un formato que la API no ofrece. |
 | `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso, violación de una constraint de la base o modificación concurrente del mismo recurso. |
 | `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
+| `precondition-failed` | 412 | El `If-Match` no coincide con la versión actual del título. |
 | `unsupported-media-type` | 415 | El cuerpo no se envía como `application/json`. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
 

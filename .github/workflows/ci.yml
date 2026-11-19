@@ -30,6 +30,17 @@ jobs:
           java-version: "25"
           cache: maven
 
+      # Maven Central sometimes fails for a moment ("could not find artifact"). Downloading the dependencies first,
+      # with a few retries, keeps such a glitch from failing the build. -U skips Maven's cache of failed lookups.
+      - name: Download dependencies
+        run: |
+          for attempt in 1 2 3; do
+            ./mvnw --batch-mode --no-transfer-progress --update-snapshots dependency:go-offline && exit 0
+            echo "Attempt $attempt to download the dependencies failed; retrying in 20 seconds."
+            sleep 20
+          done
+          exit 1
+
       # Runs formatting checks, unit/slice tests, Testcontainers integration tests and module verification.
       - name: Build and verify
         run: ./mvnw --batch-mode --no-transfer-progress verify

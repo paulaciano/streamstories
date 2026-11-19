@@ -27,8 +27,12 @@ public final class MediaItemSpecifications {
                 predicates.add(cb.equal(root.type(), subtype));
             }
             if (filter.text() != null && !filter.text().isBlank()) {
+                // Case and accents are ignored on both sides, with PostgreSQL's unaccent.
                 String pattern = "%" + escapeLike(filter.text().strip().toLowerCase(Locale.ROOT)) + "%";
-                predicates.add(cb.like(cb.lower(root.get("title")), pattern, LIKE_ESCAPE));
+                predicates.add(cb.like(
+                        cb.lower(cb.function("unaccent", String.class, root.get("title"))),
+                        cb.lower(cb.function("unaccent", String.class, cb.literal(pattern))),
+                        LIKE_ESCAPE));
             }
             if (filter.genreSlug() != null && !filter.genreSlug().isBlank()) {
                 // A subquery instead of a join, so a title never appears twice in a page.

@@ -45,11 +45,13 @@ Las consultas complejas que lleguen en fases siguientes (por ejemplo, "Seguir vi
 
 ```mermaid
 flowchart LR
-    A[checkout] --> B[JDK 25 + caché Maven] --> C[verificación de formato] --> D["build + tests<br/>(unitarios, integración, Modulith)"] --> E[reporte de cobertura]
+    A[checkout] --> B[JDK 25 + caché Maven] --> B2[descarga de dependencias<br/>con reintentos] --> C[verificación de formato] --> D["build + tests<br/>(unitarios, integración, Modulith)"] --> E[reporte de cobertura]
 ```
 
 - La rama `main` está protegida: solo acepta merges desde un PR con la CI en verde.
 - Las actions se fijan por SHA de commit (con la versión como comentario), y Dependabot las mantiene actualizadas. Así se evita que un tag modificado ejecute código inesperado ([referencia](https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)).
+- Las dependencias se descargan en un paso propio que reintenta hasta tres veces, para que una falla momentánea de Maven Central no haga fallar el build.
+- Los tests de integración usan la misma imagen de PostgreSQL que `compose.yaml`, que la lee de ahí. Así, cuando Dependabot la actualiza, cambia en los dos lugares.
 - Los tests de integración necesitan Docker. Si no está disponible en la máquina local, se omiten (`@Testcontainers(disabledWithoutDocker = true)`); en la CI siempre corren.
 
 ## 6.4 Flujo de trabajo con Git
