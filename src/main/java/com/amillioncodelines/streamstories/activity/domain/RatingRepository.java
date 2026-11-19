@@ -2,6 +2,7 @@ package com.amillioncodelines.streamstories.activity.domain;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,21 @@ public interface RatingRepository extends JpaRepository<Rating, UUID> {
 
         /** {@code null} without ratings. */
         Double getAverage();
+
+        long getCount();
+    }
+
+    List<Rating> findByUserId(UUID userId);
+
+    @Query("select r.mediaItemId as mediaItemId, avg(r.score) as average, count(r) as count"
+            + " from Rating r group by r.mediaItemId")
+    List<TitleStats> statsByTitle();
+
+    interface TitleStats {
+
+        UUID getMediaItemId();
+
+        double getAverage();
 
         long getCount();
     }

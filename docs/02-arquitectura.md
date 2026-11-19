@@ -62,6 +62,7 @@ flowchart TB
     activity -->|identifica al usuario actual| identity
     reco -->|lee historial y puntuaciones| activity
     reco -->|lee géneros y títulos disponibles| catalog
+    reco -->|identifica al usuario actual| identity
     identity -.-> shared
     catalog -.-> shared
     activity -.-> shared
@@ -73,7 +74,7 @@ flowchart TB
 | `identity` | Registro, login, tokens, roles, estado de cuenta, solicitudes de reactivación, configuración de seguridad | `shared` | 1 |
 | `catalog` | ABM del catálogo, retiro de contenido, búsqueda y filtros por género o tipo | `shared` | 1 |
 | `activity` | Progreso de reproducción, historial, "Seguir viendo", puntuaciones | `catalog`, `identity`, `shared` | 2 |
-| `recommendation` | Cálculo de recomendaciones personalizadas | `activity`, `catalog`, `shared` | 3 |
+| `recommendation` | Cálculo de recomendaciones personalizadas | `activity`, `catalog`, `identity`, `shared` | 3 |
 | `shared` | Manejo global de errores (`ProblemDetail`), auditoría y tipos comunes | — | 1 |
 
 **Reglas de dependencia:**
@@ -109,13 +110,16 @@ src/main/java/com/amillioncodelines/streamstories/
 │   ├── api/  application/  domain/  ← application también emite los tokens (TokenIssuer)
 │   └── security/                    ← SecurityFilterChain, validación del JWT, filtro de cuenta activa
 ├── activity/                        ← fase 2: implementa ContentActivity (C11) y TitleRatings
+│   ├── ActivityQueries.java         ← API pública: actividad del usuario y promedios, para recommendation
 │   └── api/  application/  domain/
 ├── recommendation/                  ← fase 3
+│   ├── api/  application/
+│   └── domain/                      ← RecommendationEngine: el algoritmo, sin Spring ni base de datos
 └── shared/
     ├── error/                       ← @RestControllerAdvice → ProblemDetail
     ├── openapi/                     ← metadatos de la especificación y esquema de seguridad
     ├── persistence/                 ← entidad base auditada, configuración JPA
-    ├── web/                         ← paginación (PageResponse, orden permitido)
+    ├── web/                         ← paginación (PageResponse, orden permitido, páginas en memoria)
     └── time/                        ← reloj de la aplicación (Clock), reemplazable en tests
 
 src/main/resources/
@@ -128,6 +132,7 @@ src/main/resources/
 src/test/java/com/amillioncodelines/streamstories/
 ├── ModularityTests.java             ← verificación de Spring Modulith
 ├── activity/ …                      ← misma estructura que main
+├── recommendation/ …
 ├── catalog/ …
 └── support/                         ← @IntegrationTest, Testcontainers y clientes de la API para tests
 ```

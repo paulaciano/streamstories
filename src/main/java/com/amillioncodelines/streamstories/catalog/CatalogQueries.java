@@ -1,6 +1,7 @@
 package com.amillioncodelines.streamstories.catalog;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,7 @@ public interface CatalogQueries {
 
     /** Titles by id. Ids that do not exist are left out. */
     Map<UUID, TitleSummary> findTitles(Collection<UUID> ids);
+
+    /** Every title with its genres, retired ones included and marked as such. */
+    List<CatalogTitle> findAllTitles();
 }

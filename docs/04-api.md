@@ -118,7 +118,7 @@ Para un `USER`, el contenido que no se puede reproducir (una película retirada,
 | `DELETE` | `/me/ratings/{titleId}` | 👤 | Quita la puntuación, aunque el título esté retirado. Si no había, responde `204` igual. |
 | `GET` | `/me/ratings` | 👤 | Las puntuaciones del usuario, de la más reciente a la más antigua. Un título retirado aparece con `available: false`. |
 
-Seguir viendo, el historial y las puntuaciones van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
+Seguir viendo, el historial y las puntuaciones van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Las recomendaciones también ignoran `sort`: siguen el orden del algoritmo. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
 
 El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratings`: el promedio con un decimal (`average`, `null` si nadie puntuó), la cantidad de puntuaciones (`count`) y la del usuario actual (`mine`, `null` si no puntuó). Los listados no lo incluyen.
 
@@ -126,7 +126,7 @@ El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratin
 
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
-| `GET` | `/me/recommendations` | 👤 | Títulos recomendados, cada uno con su `reason`. |
+| `GET` | `/me/recommendations` | 👤 | Títulos recomendados, cada uno con su `reason`, según el [algoritmo](03-modelo-de-dominio.md#35-motor-de-recomendaciones-fase-3). Paginado, con orden fijo. |
 
 ### Fase 4: evolución
 
@@ -235,6 +235,27 @@ GET /api/v1/me/continue-watching
       "completed": false,
       "playable": true,
       "lastWatchedAt": "2026-11-16T21:04:11Z"
+    }
+  ],
+  "page": { "number": 0, "size": 20, "totalElements": 1, "totalPages": 1 }
+}
+```
+
+**Recomendaciones**
+
+```http
+GET /api/v1/me/recommendations
+```
+
+```json
+{
+  "content": [
+    {
+      "titleId": "0193a6f2…",
+      "type": "SERIES",
+      "title": "Estación Austral",
+      "coverImageUrl": "https://cdn.example.com/covers/estacion-austral.jpg",
+      "reason": "Because you like Ciencia ficción and Drama"
     }
   ],
   "page": { "number": 0, "size": 20, "totalElements": 1, "totalPages": 1 }

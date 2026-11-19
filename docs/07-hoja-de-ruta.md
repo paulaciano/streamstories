@@ -67,7 +67,7 @@ flowchart LR
 
 | Historia | Criterio de aceptación |
 |----------|------------------------|
-| Como usuario, quiero recomendaciones | `/me/recommendations` devuelve títulos disponibles que no vi, ordenados según el [algoritmo](03-modelo-de-dominio.md#35-motor-de-recomendaciones-fase-3). |
+| Como usuario, quiero recomendaciones | `/me/recommendations` devuelve títulos disponibles que no empecé a ver ni califiqué, ordenados según el [algoritmo](03-modelo-de-dominio.md#35-motor-de-recomendaciones-fase-3). |
 | Como usuario, quiero entender por qué | Cada recomendación incluye su `reason`. |
 | Como usuario nuevo, quiero recomendaciones igual | Sin actividad previa, recibo los títulos disponibles mejor calificados. |
 | Como admin, quiero que no se recomiende lo retirado | El contenido retirado nunca aparece en las recomendaciones. |

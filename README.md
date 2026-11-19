@@ -18,7 +18,7 @@
 | 👤 **Cuentas** | Registro, inicio de sesión con JWT, roles `USER` y `ADMIN`. Las cuentas se pueden desactivar, y su reactivación la aprueba un administrador. |
 | ▶️ **Seguir viendo** | Guarda la posición exacta de reproducción de cada película o episodio, que cuenta como visto al llegar al 90 %. Muestra las películas sin terminar y cada serie con el último episodio visto. |
 | ⭐ **Puntuaciones** | Calificaciones de 1 a 5 para películas y series, con el promedio en el detalle de cada título. |
-| 💡 **Recomendaciones** *(fase 3)* | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
+| 💡 **Recomendaciones** | Sugerencias basadas en los géneros que el usuario mira y valora, con el motivo de cada una. |
 | 🗄️ **Retiro de contenido** | El contenido que deja de ofrecerse se retira sin borrarse, así no se pierde la actividad de los usuarios. |
 
 La API gestiona el catálogo y la actividad. La reproducción del video ocurre en el cliente, a partir de la URL de cada contenido ([ADR-0004](docs/adr/0004-video-como-metadato.md)).
@@ -94,7 +94,7 @@ El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
 | 0 · Cimientos | Configuración base, CI, manejo de errores, OpenAPI | ✅ Completada |
 | 1 · MVP | Catálogo, cuentas y autenticación | ✅ Completada |
 | 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ✅ Completada |
-| 3 · Inteligencia | Recomendaciones personalizadas | ⏳ |
+| 3 · Inteligencia | Recomendaciones personalizadas | ✅ Completada |
 | 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ⏳ |
 
 ## Licencia

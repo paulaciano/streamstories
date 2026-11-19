@@ -80,4 +80,20 @@ public interface WatchProgressRepository extends JpaRepository<WatchProgress, UU
             ORDER BY last_watched_at DESC, id DESC
             """)
     List<WatchProgress> findContinueWatchingCandidates(@Param("userId") UUID userId);
+
+    /** The titles a user started (movies, or series through their episodes), and whether any part is completed. */
+    @Query(nativeQuery = true, value = """
+            SELECT COALESCE(movie_id, series_id) AS titleId, bool_or(completed) AS completed
+            FROM watch_progress
+            WHERE user_id = :userId
+            GROUP BY COALESCE(movie_id, series_id)
+            """)
+    List<StartedTitle> findStartedTitles(@Param("userId") UUID userId);
+
+    interface StartedTitle {
+
+        UUID getTitleId();
+
+        boolean getCompleted();
+    }
 }
