@@ -24,24 +24,31 @@ class CredentialsVerifier {
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final LoginAttempts attempts;
     private final String dummyHash;
 
-    CredentialsVerifier(UserRepository users, PasswordEncoder passwordEncoder) {
+    CredentialsVerifier(UserRepository users, PasswordEncoder passwordEncoder, LoginAttempts attempts) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
+        this.attempts = attempts;
         this.dummyHash = passwordEncoder.encode("dummy-password-for-timing-safety");
     }
 
+    /** Blocked emails are rejected before the password is checked, whether the account exists or not. */
     User verify(String email, String password) {
+        attempts.ensureNotBlocked(email);
         if (exceedsMaxLength(password)) {
+            attempts.recordFailure(email);
             throw new UnauthorizedException(INVALID_CREDENTIALS);
         }
         Optional<User> user = users.findByEmail(User.normalizeEmail(email));
         String hash = user.map(User::getPasswordHash).orElse(dummyHash);
         boolean matches = passwordEncoder.matches(password, hash);
         if (user.isEmpty() || !matches) {
+            attempts.recordFailure(email);
             throw new UnauthorizedException(INVALID_CREDENTIALS);
         }
+        attempts.reset(email);
         return user.get();
     }
 

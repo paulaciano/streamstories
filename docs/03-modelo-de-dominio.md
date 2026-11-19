@@ -233,6 +233,7 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | I7 | Desactivar una cuenta **no borra** progreso ni puntuaciones. Al reactivarla, todo vuelve a estar disponible. |
 | I8 | El registro siempre crea un `USER`. Un `ADMIN` se crea al iniciar el sistema o por promoción de otro admin. |
 | I9 | No se puede desactivar ni degradar al último `ADMIN` activo. |
+| I10 | Después de 5 contraseñas incorrectas para un email en 15 minutos, el login y la reactivación de ese email se bloquean hasta que termine la ventana, exista o no la cuenta. |
 
 ### Actividad
 

@@ -25,7 +25,7 @@ class RefreshTokenCleanup {
         this.clock = clock;
     }
 
-    @Scheduled(cron = "${streamstories.security.refresh-token-cleanup-cron:0 30 4 * * *}")
+    @Scheduled(cron = "${streamstories.security.cleanup-cron:0 30 4 * * *}")
     @Transactional
     public int deleteExpired() {
         int deleted = refreshTokens.deleteExpiredBefore(clock.instant());

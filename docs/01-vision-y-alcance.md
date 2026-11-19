@@ -59,6 +59,7 @@ El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
 ### Usuarios y cuentas (`Identity`)
 
 - Cada usuario tiene un **estado de cuenta** (`AccountStatus`): `ACTIVE` o `INACTIVE`.
+- Tras varias contraseñas incorrectas seguidas, el inicio de sesión de ese email se bloquea por unos minutos, para frenar los intentos de adivinar contraseñas ([Seguridad](05-seguridad.md)).
 - Una cuenta inactiva **no puede usar la plataforma**, pero **conserva íntegros** su historial y sus puntuaciones.
 - La cuenta la puede desactivar su titular o un administrador. **Solo un administrador puede reactivarla.** El usuario puede pedir la reactivación con sus credenciales, y un admin la aprueba o la rechaza ([ADR-0010](adr/0010-reactivacion-aprobada-por-admin.md)).
 - Cada usuario tiene un rol: `USER` o `ADMIN`.
