@@ -118,7 +118,7 @@ Para un `USER`, el contenido que no se puede reproducir (una película retirada,
 | `DELETE` | `/me/ratings/{titleId}` | 👤 | Quita la puntuación, aunque el título esté retirado. Si no había, responde `204` igual. |
 | `GET` | `/me/ratings` | 👤 | Las puntuaciones del usuario, de la más reciente a la más antigua. Un título retirado aparece con `available: false`. |
 
-Seguir viendo, el historial y las puntuaciones van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Las recomendaciones también ignoran `sort`: siguen el orden del algoritmo. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
+Seguir viendo, el historial, las puntuaciones y la lista de seguimiento van siempre de lo más reciente a lo más antiguo, e ignoran `sort`. Las recomendaciones también ignoran `sort`: siguen el orden del algoritmo. Cada entrada es una película o una serie (`titleId`), y en las series incluye el episodio. `playable` en `false` marca el contenido retirado.
 
 El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratings`: el promedio con un decimal (`average`, `null` si nadie puntuó), la cantidad de puntuaciones (`count`) y la del usuario actual (`mine`, `null` si no puntuó). Los listados no lo incluyen.
 
@@ -132,7 +132,9 @@ El detalle de un título (`GET /movies/{id}`, `GET /series/{id}`) incluye `ratin
 
 | Método | Ruta | Acceso | Descripción |
 |--------|------|:------:|-------------|
-| `GET` `PUT` `DELETE` | `/me/watchlist[/{mediaItemId}]` | 👤 | Lista de seguimiento. |
+| `GET` | `/me/watchlist` | 👤 | La lista de seguimiento, de lo último agregado a lo primero. Un título retirado aparece con `available: false`. |
+| `PUT` | `/me/watchlist/{titleId}` | 👤 | Agrega una película o una serie. Responde `204` aunque ya estuviera, y `409` si el título está retirado. |
+| `DELETE` | `/me/watchlist/{titleId}` | 👤 | Quita un título, aunque esté retirado. Responde `204` aunque no estuviera. |
 | `GET` | `/franchises/{id}` | 👤 | Una saga con sus películas en orden. |
 | `POST` `PUT` `DELETE` | `/franchises[/{id}]` | 🛠️ | ABM de sagas. |
 
@@ -324,7 +326,7 @@ Todos los errores siguen [Problem Details (RFC 9457)](https://www.rfc-editor.org
 | `method-not-allowed` | 405 | El endpoint existe, pero no admite ese método HTTP. |
 | `not-acceptable` | 406 | El cliente pide en `Accept` un formato que la API no ofrece. |
 | `conflict` | 409 | Duplicado (email, número de temporada…), recurso en uso, violación de una constraint de la base o modificación concurrente del mismo recurso. |
-| `content-unavailable` | 409 | Se intenta reproducir o calificar contenido retirado. |
+| `content-unavailable` | 409 | Se intenta reproducir, calificar o agregar a la lista de seguimiento contenido retirado. |
 | `precondition-failed` | 412 | El `If-Match` no coincide con la versión actual del título. |
 | `unsupported-media-type` | 415 | El cuerpo no se envía como `application/json`. |
 | `internal-error` | 500 | Error inesperado. Nunca se expone el stack trace. |
@@ -333,4 +335,4 @@ La API está en inglés: `title`, `detail` y los mensajes de validación salen s
 
 Los mensajes de error **no revelan información sensible**. Por ejemplo, un login fallido siempre responde "Invalid credentials.", sin aclarar si el email existe. El estado `account-inactive` solo se informa cuando las credenciales son correctas.
 
-`content-unavailable` lo usan el progreso de reproducción y las puntuaciones.
+`content-unavailable` lo usan el progreso de reproducción, las puntuaciones y la lista de seguimiento.

@@ -73,7 +73,7 @@ flowchart TB
 |--------|-----------------|------------|------|
 | `identity` | Registro, login, tokens, roles, estado de cuenta, solicitudes de reactivación, configuración de seguridad | `shared` | 1 |
 | `catalog` | ABM del catálogo, retiro de contenido, búsqueda y filtros por género o tipo | `shared` | 1 |
-| `activity` | Progreso de reproducción, historial, "Seguir viendo", puntuaciones | `catalog`, `identity`, `shared` | 2 |
+| `activity` | Progreso de reproducción, historial, "Seguir viendo", puntuaciones, lista de seguimiento | `catalog`, `identity`, `shared` | 2 |
 | `recommendation` | Cálculo de recomendaciones personalizadas | `activity`, `catalog`, `identity`, `shared` | 3 |
 | `shared` | Manejo global de errores (`ProblemDetail`), auditoría y tipos comunes | — | 1 |
 

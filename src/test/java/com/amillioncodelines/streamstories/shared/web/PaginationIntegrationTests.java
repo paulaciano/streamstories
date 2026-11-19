@@ -21,7 +21,14 @@ class PaginationIntegrationTests {
     CatalogApi catalog;
 
     @ParameterizedTest
-    @ValueSource(strings = {"/api/v1/catalog", "/api/v1/genres", "/api/v1/me/history", "/api/v1/me/ratings"})
+    @ValueSource(
+            strings = {
+                "/api/v1/catalog",
+                "/api/v1/genres",
+                "/api/v1/me/history",
+                "/api/v1/me/ratings",
+                "/api/v1/me/watchlist"
+            })
     void shouldRejectPagesBeyondTheLargestOffset(String uri) {
         Session user = api.newUserSession();
 
