@@ -46,6 +46,8 @@ El catálogo reúne los títulos (`MediaItem`), que tienen dos formatos:
 
 **Géneros (`Genre`):** cada película o serie puede tener **varios** géneros a la vez (por ejemplo, *Action* + *Sci-Fi*). Al explorar un género aparecen películas y series juntas.
 
+**Sagas (`Franchise`):** agrupan películas relacionadas en un orden, por ejemplo una trilogía en el orden en que conviene verla. Una película pertenece como máximo a una saga. La saga solo ordena: borrarla no borra sus películas, y quien no es administrador no ve las películas retiradas dentro de ella.
+
 **Retiro de contenido:** el contenido no se borra cuando deja de ofrecerse. Se **retira**: ya no se puede reproducir ni se recomienda, pero se conservan todos sus datos y la actividad de los usuarios asociada a él. Se retiran películas, series o temporadas completas ([ADR-0011](adr/0011-retiro-por-temporada.md)).
 
 > **Dos conceptos de diseño.** El sistema distingue:

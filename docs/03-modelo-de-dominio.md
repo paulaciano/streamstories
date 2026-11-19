@@ -80,8 +80,8 @@ erDiagram
         uuid id PK, FK "= media_item.id"
         int duration_seconds
         varchar video_url
-        uuid franchise_id FK "opcional (fase 4)"
-        smallint franchise_order "opcional (fase 4)"
+        uuid franchise_id FK "opcional"
+        smallint franchise_order "posición en la saga"
     }
     SERIES {
         uuid id PK, FK "= media_item.id"
@@ -125,6 +125,8 @@ erDiagram
     FRANCHISE {
         uuid id PK
         varchar name UK
+        timestamptz created_at
+        timestamptz updated_at
     }
     WATCHLIST_ENTRY {
         uuid user_id PK, FK
@@ -150,7 +152,6 @@ erDiagram
     MEDIA_ITEM ||--o{ WATCHLIST_ENTRY : "guardado en"
 ```
 
-`FRANCHISE` se incorpora en la fase 4. El resto forma el núcleo de las fases 1 a 4.
 
 ## 3.3 Decisiones de modelado
 
@@ -215,6 +216,9 @@ Cada pedido de reactivación es un registro de `REACTIVATION_REQUEST` con su res
 | C10 | Retirar contenido no modifica ni borra ningún dato relacionado: progreso, puntuaciones ni listas de seguimiento. | Diseño (no hay cascadas) |
 | C11 | Solo se puede **borrar** un contenido que no tiene ninguna actividad asociada (progreso, puntuaciones o lista de seguimiento), por ejemplo uno cargado por error. Si tiene actividad, hay que retirarlo. Una temporada solo se borra si no tiene episodios. | Servicio → `409 Conflict`, consultando la interfaz `ContentActivity` |
 | C12 | Un contenido retirado puede volver a estar disponible. | — |
+| C13 | El nombre de una saga es único, sin distinguir mayúsculas. | Índice único sobre `lower(name)` |
+| C14 | Una saga agrupa solo películas, en el orden en que se cargan, y cada película pertenece como máximo a una saga. | FK en `movie` + `UNIQUE (franchise_id, franchise_order)` |
+| C15 | Borrar una saga no borra sus películas: solo las desvincula. Un `USER` no ve las películas retiradas de una saga; un `ADMIN` ve todas. | Servicio |
 
 ### Identidad
 
