@@ -51,16 +51,7 @@ public interface RatingRepository extends JpaRepository<Rating, UUID> {
 
     List<Rating> findByUserId(UUID userId);
 
-    @Query("select r.mediaItemId as mediaItemId, avg(r.score) as average, count(r) as count"
-            + " from Rating r group by r.mediaItemId")
-    List<TitleStats> statsByTitle();
-
-    interface TitleStats {
-
-        UUID getMediaItemId();
-
-        double getAverage();
-
-        long getCount();
-    }
+    /** Plain rows (title id, average, count): a projection would create a proxy per row (ADR-0012). */
+    @Query("select r.mediaItemId, avg(r.score), count(r) from Rating r group by r.mediaItemId")
+    List<Object[]> statsByTitle();
 }

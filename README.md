@@ -71,6 +71,14 @@ Con la aplicación en marcha:
 | Especificación OpenAPI | http://localhost:8080/v3/api-docs |
 | Estado de salud | http://localhost:8080/actuator/health |
 
+**Imagen de contenedor:** `./mvnw spring-boot:build-image` arma la imagen `streamstories:<versión>` con [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html), sin `Dockerfile`. Se ejecuta con las variables de [`.env.example`](.env.example), apuntando a un PostgreSQL propio:
+
+```bash
+docker run -p 8080:8080 --env-file .env streamstories:<versión>
+```
+
+La imagen no incluye el perfil `dev`: necesita la clave JWT y la conexión a la base.
+
 **Tests:** `./mvnw verify` ejecuta el formato, los tests unitarios y de integración (con [Testcontainers](https://testcontainers.com/)) y la verificación de módulos. Para formatear el código: `./mvnw spotless:apply`.
 
 ## Documentación
@@ -89,7 +97,7 @@ La documentación completa está en [`docs/`](docs/README.md):
 
 ## Estado del proyecto
 
-El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
+El desarrollo avanzó por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)), y con la versión `1.0.0` están todas completas:
 
 | Fase | Alcance | Estado |
 |------|---------|:------:|
@@ -97,7 +105,7 @@ El desarrollo avanza por fases ([hoja de ruta](docs/07-hoja-de-ruta.md)):
 | 1 · MVP | Catálogo, cuentas y autenticación | ✅ Completada |
 | 2 · Interacción | Progreso de reproducción, historial y puntuaciones | ✅ Completada |
 | 3 · Inteligencia | Recomendaciones personalizadas | ✅ Completada |
-| 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ⏳ |
+| 4 · Evolución | Lista de seguimiento, sagas y optimizaciones | ✅ Completada |
 
 ## Licencia
 

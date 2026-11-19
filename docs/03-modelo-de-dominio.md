@@ -272,4 +272,4 @@ Es un enfoque **basado en contenido**: simple, explicable y testeable.
    - con candidatos, los dos géneros del título que más le gustan al usuario: `"Because you like Drama and Comedia"`;
    - sin candidatos, `"Top rated by other viewers"`, o `"New on StreamStories"` si el título no tiene puntuaciones.
 
-El cálculo se hace al momento de la consulta. Si el volumen de datos lo requiere, se puede cachear o precalcular en la fase 4.
+El cálculo se hace al momento de la consulta, sin caché ([ADR-0012](adr/0012-rendimiento-sin-cache.md)).

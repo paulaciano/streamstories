@@ -8,6 +8,7 @@ import com.amillioncodelines.streamstories.catalog.EpisodeSummary;
 import com.amillioncodelines.streamstories.catalog.MovieSummary;
 import com.amillioncodelines.streamstories.catalog.PlayableContent;
 import com.amillioncodelines.streamstories.catalog.TitleSummary;
+import com.amillioncodelines.streamstories.catalog.domain.Availability;
 import com.amillioncodelines.streamstories.catalog.domain.Episode;
 import com.amillioncodelines.streamstories.catalog.domain.EpisodeRepository;
 import com.amillioncodelines.streamstories.catalog.domain.MediaItem;
@@ -16,7 +17,7 @@ import com.amillioncodelines.streamstories.catalog.domain.MediaType;
 import com.amillioncodelines.streamstories.catalog.domain.MovieRepository;
 import com.amillioncodelines.streamstories.catalog.domain.Series;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,21 +102,26 @@ class CatalogQueryService implements CatalogQueries {
     @Override
     @Transactional(readOnly = true)
     public List<CatalogTitle> findAllTitles() {
-        return titles.findAll().stream().map(CatalogQueryService::catalogTitle).toList();
+        Map<UUID, List<Object[]>> rowsByTitle = titles.findAllWithGenres().stream()
+                .collect(Collectors.groupingBy(row -> (UUID) row[0], LinkedHashMap::new, Collectors.toList()));
+        return rowsByTitle.values().stream()
+                .map(CatalogQueryService::catalogTitle)
+                .toList();
     }
 
-    private static CatalogTitle catalogTitle(MediaItem title) {
-        List<GenreRef> genres = title.getGenres().stream()
-                .map(genre -> new GenreRef(genre.getId(), genre.getName()))
-                .sorted(Comparator.comparing(GenreRef::name))
+    private static CatalogTitle catalogTitle(List<Object[]> rows) {
+        Object[] title = rows.getFirst();
+        List<GenreRef> genres = rows.stream()
+                .filter(row -> row[6] != null)
+                .map(row -> new GenreRef((UUID) row[6], (String) row[7]))
                 .toList();
         return new CatalogTitle(
-                title.getId(),
-                kind(title),
-                title.getTitle(),
-                title.getCoverImageUrl(),
-                title.getReleaseYear(),
-                title.isAvailable(),
+                (UUID) title[0],
+                MediaType.valueOf((String) title[1]) == MediaType.MOVIE ? ContentKind.MOVIE : ContentKind.SERIES,
+                (String) title[2],
+                (String) title[3],
+                ((Number) title[4]).intValue(),
+                Availability.valueOf((String) title[5]) == Availability.AVAILABLE,
                 genres);
     }
 

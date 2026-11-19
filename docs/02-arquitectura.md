@@ -44,6 +44,7 @@ La API **no sirve video**. Guarda la URL y la duración de cada contenido reprod
 | Testing | [JUnit 6](https://docs.junit.org/current/user-guide/), [AssertJ](https://assertj.github.io/doc/), [Mockito](https://site.mockito.org/), [Testcontainers](https://testcontainers.com/) | Tests de integración contra un PostgreSQL real. |
 | Build | [Maven Wrapper](https://maven.apache.org/tools/wrapper/) | Compila sin necesidad de instalar Maven. |
 | Entorno local | [Docker Compose](https://docs.docker.com/compose/) + [soporte de Spring Boot](https://docs.spring.io/spring-boot/reference/features/dev-services.html) | PostgreSQL se levanta solo al iniciar la aplicación. |
+| Imagen de contenedor | [Cloud Native Buildpacks](https://docs.spring.io/spring-boot/maven-plugin/build-image.html) (`./mvnw spring-boot:build-image`) | Imagen reproducible y mantenida, sin escribir ni mantener un `Dockerfile`. |
 | CI | [GitHub Actions](https://docs.github.com/actions) | Build, tests y verificaciones en cada push y PR. |
 
 ## 2.4 Módulos
