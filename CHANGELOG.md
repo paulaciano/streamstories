@@ -10,6 +10,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - The documentation in `docs/`, the ADRs and this changelog are now in English, with English file names. The README has an English version (`README.md`) and a Spanish one (`README.es.md`).
 - The README explains step by step how to run and try the project locally.
+- The AI-assisted development document tells how the project was built: the cycle of each phase, the independent reviews, the course corrections, the assistant's mistakes and how the knowledge was kept.
 
 ### Fixed
 

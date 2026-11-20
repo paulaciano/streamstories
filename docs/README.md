@@ -15,7 +15,7 @@ This folder describes **what** the system does, **how** it is organized and **wh
 | 5 | [Security](05-security.md) | How do users authenticate? Who can do what? |
 | 6 | [Quality and workflow](06-quality-and-workflow.md) | How is the code tested, integrated and delivered? |
 | 7 | [Roadmap](07-roadmap.md) | In which order is it built, and when is each phase done? |
-| 8 | [AI-assisted development](08-ai-assisted-development.md) | How is AI used in development without losing quality or control? |
+| 8 | [AI-assisted development](08-ai-assisted-development.md) | How was AI used to build the project, and how were its course and its mistakes corrected? |
 | — | [Architecture decision records (ADR)](adr/README.md) | Why X and not Y? |
 
 For a quick read, **Vision and scope** and **Architecture** are enough. Before contributing code, read everything in order.
